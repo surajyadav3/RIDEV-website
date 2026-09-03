@@ -1,0 +1,749 @@
+/* RIDEV — single source of truth for every number on this site.
+   Edit this file only; the pages read from it.
+   Plain JSON inside one assignment so it also works from file:// */
+window.RIDEV_DATA = {
+  "_meta": {
+    "source": "admin.ridev.in — live operations console",
+    "snapshot": "2026-08-25",
+    "snapshot_label": "25 August 2026",
+    "note": "Operating metrics only. No revenue, margin or P&L data is published on this site.",
+    "how_to_update": "Edit this file only. index.html and company.html read every number from here at load time."
+  },
+  "headline": {
+    "fleet": 6702,
+    "cities_live": 5,
+    "cities_provisioned": 7,
+    "hubs": 8,
+    "on_road": 5766,
+    "active_subscriptions": 5671,
+    "registered_riders": 45907,
+    "lifetime_bookings": 19878,
+    "oem_partners": 6,
+    "utilisation_pct": 86.0,
+    "vehicle_swaps_logged": 230
+  },
+  "cities": [
+    {
+      "city": "Delhi",
+      "state": "Delhi NCR",
+      "status": "live",
+      "since": "2025",
+      "fleet": 2333,
+      "on_road": 2034,
+      "active_subscriptions": 2014,
+      "lifetime_bookings": 5557,
+      "hubs": [
+        {
+          "name": "Lawrence Road",
+          "fleet": 873,
+          "area": "North West Delhi"
+        },
+        {
+          "name": "Uttam Nagar",
+          "fleet": 822,
+          "area": "West Delhi"
+        },
+        {
+          "name": "Lado Sarai",
+          "fleet": 638,
+          "area": "South Delhi"
+        }
+      ]
+    },
+    {
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "status": "live",
+      "since": "2024",
+      "fleet": 2002,
+      "on_road": 1634,
+      "active_subscriptions": 1565,
+      "lifetime_bookings": 9065,
+      "hubs": [
+        {
+          "name": "Nagole",
+          "fleet": 1201,
+          "area": "East Hyderabad"
+        },
+        {
+          "name": "Raidurg",
+          "fleet": 801,
+          "area": "HITEC City"
+        }
+      ]
+    },
+    {
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "status": "live",
+      "since": "2025",
+      "fleet": 1258,
+      "on_road": 1155,
+      "active_subscriptions": 1152,
+      "lifetime_bookings": 3554,
+      "hubs": [
+        {
+          "name": "KK Nagar",
+          "fleet": 1258,
+          "area": "West Chennai"
+        }
+      ]
+    },
+    {
+      "city": "Gurugram",
+      "state": "Haryana",
+      "status": "live",
+      "since": "2025",
+      "fleet": 699,
+      "on_road": 613,
+      "active_subscriptions": 611,
+      "lifetime_bookings": 1077,
+      "hubs": [
+        {
+          "name": "Sector 52, Wazirabad",
+          "fleet": 699,
+          "area": "Gurugram"
+        }
+      ]
+    },
+    {
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "status": "live",
+      "since": "2026",
+      "fleet": 410,
+      "on_road": 330,
+      "active_subscriptions": 329,
+      "lifetime_bookings": 625,
+      "hubs": [
+        {
+          "name": "Mira Road",
+          "fleet": 410,
+          "area": "Mumbai Metropolitan Region"
+        }
+      ]
+    },
+    {
+      "city": "Pune",
+      "state": "Maharashtra",
+      "status": "provisioned",
+      "since": "2026",
+      "fleet": 0,
+      "on_road": 0,
+      "active_subscriptions": 0,
+      "lifetime_bookings": 0,
+      "hubs": []
+    },
+    {
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "status": "provisioned",
+      "since": "2026",
+      "fleet": 0,
+      "on_road": 0,
+      "active_subscriptions": 0,
+      "lifetime_bookings": 0,
+      "hubs": []
+    }
+  ],
+  "fleet_status": [
+    {
+      "label": "On road with riders",
+      "key": "allocated",
+      "count": 5757,
+      "tone": "good"
+    },
+    {
+      "label": "In repair",
+      "key": "repair",
+      "count": 436,
+      "tone": "warn"
+    },
+    {
+      "label": "At OEM service centre",
+      "key": "service",
+      "count": 250,
+      "tone": "warn"
+    },
+    {
+      "label": "Insurance claim",
+      "key": "insurance",
+      "count": 52,
+      "tone": "warn"
+    },
+    {
+      "label": "Ready to allocate",
+      "key": "unallocated",
+      "count": 89,
+      "tone": "idle"
+    },
+    {
+      "label": "B2B contracts",
+      "key": "b2b",
+      "count": 64,
+      "tone": "good"
+    },
+    {
+      "label": "Internal / ops",
+      "key": "employee",
+      "count": 37,
+      "tone": "idle"
+    },
+    {
+      "label": "Pre-booked",
+      "key": "prebooked",
+      "count": 9,
+      "tone": "good"
+    },
+    {
+      "label": "Impound / recovery",
+      "key": "police",
+      "count": 8,
+      "tone": "idle"
+    }
+  ],
+  "brands": [
+    {
+      "brand": "BGauss",
+      "count": 4612,
+      "cities": [
+        "Delhi",
+        "Chennai",
+        "Hyderabad",
+        "Mumbai",
+        "Gurugram"
+      ]
+    },
+    {
+      "brand": "Ather",
+      "count": 806,
+      "cities": [
+        "Hyderabad",
+        "Chennai"
+      ]
+    },
+    {
+      "brand": "Ampere",
+      "count": 552,
+      "cities": [
+        "Chennai",
+        "Delhi",
+        "Mumbai",
+        "Gurugram"
+      ]
+    },
+    {
+      "brand": "e-Sprinto",
+      "count": 433,
+      "cities": [
+        "Hyderabad"
+      ]
+    },
+    {
+      "brand": "TVS",
+      "count": 297,
+      "cities": [
+        "Hyderabad",
+        "Mumbai"
+      ]
+    },
+    {
+      "brand": "Motovolt",
+      "count": 2,
+      "cities": [
+        "Delhi"
+      ]
+    }
+  ],
+  "models": [
+    {
+      "brand": "BGauss",
+      "model": "Oowah Zomato",
+      "count": 2512,
+      "batteries": 2,
+      "range_km": 70
+    },
+    {
+      "brand": "BGauss",
+      "model": "Oowah Unlimited",
+      "count": 2044,
+      "batteries": 2,
+      "range_km": 70
+    },
+    {
+      "brand": "Ather",
+      "model": "Rizta",
+      "count": 806,
+      "batteries": 4,
+      "range_km": 125
+    },
+    {
+      "brand": "Ampere",
+      "model": "Magnus",
+      "count": 552,
+      "batteries": 2,
+      "range_km": 60
+    },
+    {
+      "brand": "e-Sprinto",
+      "model": "Roamy SL",
+      "count": 433,
+      "batteries": 2,
+      "range_km": 70
+    },
+    {
+      "brand": "TVS",
+      "model": "iQube",
+      "count": 136,
+      "batteries": 3,
+      "range_km": 105
+    },
+    {
+      "brand": "TVS",
+      "model": "iQube 75",
+      "count": 131,
+      "batteries": 2,
+      "range_km": 75
+    },
+    {
+      "brand": "BGauss",
+      "model": "Oowah Max",
+      "count": 50,
+      "batteries": 2,
+      "range_km": 70
+    },
+    {
+      "brand": "TVS",
+      "model": "iQube 105",
+      "count": 30,
+      "batteries": 3,
+      "range_km": 105
+    },
+    {
+      "brand": "BGauss",
+      "model": "RUV Zomato",
+      "count": 4,
+      "batteries": 2,
+      "range_km": 100
+    },
+    {
+      "brand": "Ampere",
+      "model": "C12i Max",
+      "count": 2,
+      "batteries": 2,
+      "range_km": 60
+    },
+    {
+      "brand": "Motovolt",
+      "model": "M7",
+      "count": 2,
+      "batteries": 2,
+      "range_km": 70
+    }
+  ],
+  "plans": {
+    "Hyderabad": [
+      {
+        "brand": "TVS",
+        "model": "iQube 75",
+        "batteries": 2,
+        "range_km": 75,
+        "week": 1400,
+        "month": 6000
+      },
+      {
+        "brand": "TVS",
+        "model": "iQube",
+        "batteries": 3,
+        "range_km": 105,
+        "week": 1800,
+        "month": 7200
+      },
+      {
+        "brand": "Ather",
+        "model": "Rizta",
+        "batteries": 4,
+        "range_km": 125,
+        "week": 2200,
+        "month": 8800
+      },
+      {
+        "brand": "BGauss",
+        "model": "Oowah Unlimited",
+        "batteries": 2,
+        "range_km": 50,
+        "week": 2200,
+        "month": 8800
+      },
+      {
+        "brand": "e-Sprinto",
+        "model": "Roamy SL",
+        "batteries": 2,
+        "range_km": 70,
+        "week": 2200,
+        "month": 8800
+      },
+      {
+        "brand": "RIDEV",
+        "model": "LS",
+        "batteries": 2,
+        "range_km": 70,
+        "week": 2200,
+        "month": 8800
+      }
+    ],
+    "Chennai": [
+      {
+        "brand": "BGauss",
+        "model": "Oowah Zomato",
+        "batteries": 2,
+        "range_km": 70,
+        "week": 1800,
+        "month": 7200
+      },
+      {
+        "brand": "Ampere",
+        "model": "Magnus",
+        "batteries": 2,
+        "range_km": 60,
+        "week": 2200,
+        "month": 8800
+      },
+      {
+        "brand": "BGauss",
+        "model": "Oowah Unlimited",
+        "batteries": 2,
+        "range_km": 70,
+        "week": 2200,
+        "month": 8800
+      },
+      {
+        "brand": "Ather",
+        "model": "Rizta",
+        "batteries": 4,
+        "range_km": 125,
+        "week": 2200,
+        "month": 8800
+      }
+    ],
+    "Gurugram": [
+      {
+        "brand": "BGauss",
+        "model": "RUV Zomato",
+        "batteries": 2,
+        "range_km": 100,
+        "week": 1400,
+        "month": 5600
+      },
+      {
+        "brand": "BGauss",
+        "model": "Oowah Unlimited",
+        "batteries": 2,
+        "range_km": 70,
+        "week": 2000,
+        "month": 8000
+      },
+      {
+        "brand": "Ampere",
+        "model": "Magnus",
+        "batteries": 2,
+        "range_km": 60,
+        "week": 2000,
+        "month": 8000
+      }
+    ]
+  },
+  "plans_note": "Live rate card from the RIDEV operations console, 25 Aug 2026. Delhi and Mumbai are served from the same model catalogue — rates confirmed at the hub. All rates include maintenance, battery swaps, replacement vehicle and insurance cover.",
+  "growth": [
+    {
+      "date": "2024-04",
+      "label": "Apr 2024",
+      "fleet": 0,
+      "event": "ANV Web Ventures Pvt Ltd incorporated"
+    },
+    {
+      "date": "2024-07",
+      "label": "Jul 2024",
+      "fleet": 10,
+      "event": "First 10 EVs on road in Hyderabad"
+    },
+    {
+      "date": "2024-12",
+      "label": "Dec 2024",
+      "fleet": 320,
+      "event": "Hyderabad scaled to two hubs",
+      "estimated": true
+    },
+    {
+      "date": "2025-04",
+      "label": "Apr 2025",
+      "fleet": 700,
+      "event": "Delhi NCR launched",
+      "estimated": true
+    },
+    {
+      "date": "2025-10",
+      "label": "Oct 2025",
+      "fleet": 1400,
+      "event": "1,400+ scooters, 60% renewal rate (reported at Shark Tank India)"
+    },
+    {
+      "date": "2026-01",
+      "label": "Jan 2026",
+      "fleet": 2600,
+      "event": "Shark Tank India S5 — backed by Kunal Bahl",
+      "estimated": true
+    },
+    {
+      "date": "2026-02",
+      "label": "Feb 2026",
+      "fleet": 3400,
+      "event": "Delhivery partnership — 150 EVs for last-mile",
+      "estimated": true
+    },
+    {
+      "date": "2026-05",
+      "label": "May 2026",
+      "fleet": 5100,
+      "event": "Chennai and Mumbai live",
+      "estimated": true
+    },
+    {
+      "date": "2026-08",
+      "label": "Aug 2026",
+      "fleet": 6702,
+      "event": "6,702 EVs, 5 cities, 8 hubs"
+    }
+  ],
+  "growth_note": "Points marked as interpolated are directional ramp estimates between two verified data points. Verified points: Jul 2024 (10 vehicles) and Oct 2025 (1,400+) as presented by the founders on Shark Tank India Season 5; Aug 2026 (6,702) from the live RIDEV operations console on 25 Aug 2026.",
+  "milestones": [
+    {
+      "date": "Apr 2024",
+      "title": "Company incorporated",
+      "body": "ANV Web Ventures Private Limited registered on 26 April 2024.",
+      "source": "Tracxn"
+    },
+    {
+      "date": "Jul 2024",
+      "title": "First 10 EVs on road",
+      "body": "Pilot fleet of 10 electric scooters deployed with gig riders in Hyderabad.",
+      "source": "Shark Tank India S5"
+    },
+    {
+      "date": "Oct 2025",
+      "title": "1,400+ scooters",
+      "body": "Fleet crosses 1,400 vehicles with a 60% renewal rate on weekly subscriptions.",
+      "source": "Shark Tank India S5"
+    },
+    {
+      "date": "Jan 2026",
+      "title": "Backed by Kunal Bahl",
+      "body": "Founders Manish Kumar Jain and Siddharth Jain pitch on Shark Tank India Season 5, Episode 10. Deal closed with Kunal Bahl: ₹1 Cr for 3% equity plus ₹5 Cr debt.",
+      "source": "Shark Tank India S5 / Startup Article"
+    },
+    {
+      "date": "Feb 2026",
+      "title": "Delhivery partnership",
+      "body": "Delhivery partners with RIDEV to deploy 150 electric vehicles for last-mile delivery over three months, with pilots in Delhi NCR and Bengaluru cutting 4,260 kg of CO₂ and over 50% of riders' daily running cost.",
+      "source": "ET Auto / GoodReturns"
+    },
+    {
+      "date": "Aug 2026",
+      "title": "6,702 EVs across 5 cities",
+      "body": "Fleet operating from 8 hubs in Delhi, Gurugram, Hyderabad, Chennai and Mumbai. Pune and Bengaluru provisioned on the platform.",
+      "source": "RIDEV operations console"
+    }
+  ],
+  "backing": {
+    "note": "Publicly reported figures only. RIDEV does not publish financial statements on this site.",
+    "items": [
+      {
+        "label": "Lead investor",
+        "value": "Kunal Bahl",
+        "detail": "Co-founder, Snapdeal / Titan Capital"
+      },
+      {
+        "label": "Shark Tank India S5",
+        "value": "₹1 Cr equity + ₹5 Cr debt",
+        "detail": "Aired January 2026, Episode 10"
+      },
+      {
+        "label": "Reported valuation",
+        "value": "₹33.33 Cr",
+        "detail": "Post-deal, as reported January 2026"
+      },
+      {
+        "label": "Legal entity",
+        "value": "ANV Web Ventures Pvt Ltd",
+        "detail": "Incorporated 26 April 2024"
+      }
+    ]
+  },
+  "partners": {
+    "oem": [
+      "BGauss",
+      "Ather Energy",
+      "TVS Motor",
+      "Ampere",
+      "e-Sprinto",
+      "Motovolt"
+    ],
+    "enterprise": [
+      "Delhivery",
+      "Zomato"
+    ],
+    "enterprise_note": "Named enterprise relationships are those already reflected in RIDEV's live fleet configuration and public announcements."
+  },
+  "founders": [
+    {
+      "name": "Manish Kumar Jain",
+      "role": "Founder",
+      "bio": "Leads RIDEV's fleet, capital and OEM strategy. Took the company from 10 vehicles in July 2024 to a multi-city fleet in under two years."
+    },
+    {
+      "name": "Siddharth Jain",
+      "role": "Co-founder",
+      "bio": "Leads technology and city operations, including the in-house fleet console and maintenance partner network."
+    }
+  ],
+  "calculator_assumptions": {
+    "petrol_mileage_kmpl": 45,
+    "petrol_price_per_l": 105,
+    "petrol_service_per_month": 500,
+    "petrol_insurance_per_month": 250,
+    "petrol_emi_per_month": 2750,
+    "petrol_downpayment": 20000,
+    "co2_petrol_kg_per_km": 0.0513,
+    "co2_ev_kg_per_km": 0.0213,
+    "note": "Petrol figures use a 110cc scooter at 45 km/l and ₹105/l, a typical ₹85,000 on-road price financed over 36 months, and routine service and insurance. EV emissions use 0.03 kWh/km on the Indian grid at 0.71 kg CO₂/kWh. Change any input to see your own numbers."
+  },
+  "social": {
+    "linkedin": "https://www.linkedin.com/company/ridev-official/",
+    "instagram": "https://www.instagram.com/ridevofficial/",
+    "facebook": "https://www.facebook.com/RIDEVOfficial",
+    "youtube": "https://www.youtube.com/@RIDEVOfficial",
+    "x": "https://x.com/RIDEVOfficial"
+  },
+  "video": {
+    "url": "https://www.youtube.com/watch?v=tp4bcH19VEg",
+    "embed": "https://www.youtube-nocookie.com/embed/tp4bcH19VEg",
+    "title": "RIDEV on Shark Tank India, Season 5",
+    "caption": "Founders Manish Kumar Jain and Siddharth Jain present the RIDEV model to the Sharks — and close a deal with Kunal Bahl."
+  },
+  "tagline_hi": "एक सवारी, सब पे भारी",
+  "tagline_hi_note": "The founders' own line, used on Shark Tank India.",
+  "app": {
+    "name": "RIDEV — rider app",
+    "play_url": "https://play.google.com/store/apps/details?id=com.ride.ev",
+    "blurb": "Book a bike, track your subscription, pay your weekly rent, raise a service request and find your nearest hub — from your phone.",
+    "features": [
+      "Book and renew your weekly plan",
+      "See your due date and pay in-app",
+      "Raise a repair or swap request",
+      "Locate your hub and swap points"
+    ],
+    "note": "Android. iOS in progress."
+  },
+  "partner_types": [
+    {
+      "key": "fleet",
+      "title": "Logistics & q-commerce",
+      "body": "Capacity without capex. Dedicated vehicles for your rider pool, hub-side battery swapping and maintenance SLAs — scaled up or down with your volume. This is the Delhivery model.",
+      "cta": "Fleet enquiry",
+      "mail": "Fleet%20partnership"
+    },
+    {
+      "key": "oem",
+      "title": "Vehicle manufacturers",
+      "body": "Six OEMs already supply RIDEV. We buy in fleet volume, run the vehicles hard in real duty cycles, and send back failure data no showroom ever sees.",
+      "cta": "OEM partnership",
+      "mail": "OEM%20partnership"
+    },
+    {
+      "key": "service",
+      "title": "Service & repair workshops",
+      "body": "Join the maintenance partner network. Raise a parts estimate against a vehicle, get it approved in the portal, do the job, upload the invoice, close it out. Every line item tracked.",
+      "cta": "Become a partner",
+      "mail": "Maintenance%20partner"
+    },
+    {
+      "key": "hub",
+      "title": "Hub & real-estate partners",
+      "body": "A RIDEV hub needs secure parking, power and road access. If you have space in a delivery-dense corridor in one of our cities — or in Pune or Bengaluru — we want to talk.",
+      "cta": "Offer a site",
+      "mail": "Hub%20site%20offer"
+    }
+  ],
+  "safety": [
+    {
+      "title": "Insured from day one",
+      "body": "Every vehicle carries insurance for the whole subscription, and RIDEV runs the claim. A crash does not become the rider's paperwork problem."
+    },
+    {
+      "title": "Roadside support",
+      "body": "Break down mid-shift and the hub arranges recovery. You do not push a dead scooter across the city."
+    },
+    {
+      "title": "Serviced, not just rented",
+      "body": "Brakes, tyres and electricals are checked on a schedule, not when they fail. Every job is closed against a ready-for-delivery date."
+    },
+    {
+      "title": "A real human at the hub",
+      "body": "Eight hubs, each staffed. Riding for a living means problems happen at 11pm — there is a place to take them."
+    }
+  ],
+  "press": [
+    {
+      "outlet": "ET Auto",
+      "date": "Feb 2026",
+      "title": "Delhivery partners with RIDEV to launch 150 electric vehicles for sustainable last-mile delivery",
+      "url": "https://auto.economictimes.indiatimes.com/news/industry/delhivery-partners-with-ridev-to-launch-150-electric-vehicles-for-sustainable-last-mile-delivery/128421542"
+    },
+    {
+      "outlet": "GoodReturns",
+      "date": "Feb 2026",
+      "title": "Delhivery partners RIDEV to deploy 150 EVs for last-mile delivery",
+      "url": "https://www.goodreturns.in/news/delhivery-partners-ridev-deploy-150-evs-011-1489799.html"
+    },
+    {
+      "outlet": "Shark Tank India",
+      "date": "Jan 2026",
+      "title": "Season 5, Episode 10 — the full RIDEV pitch",
+      "url": "https://www.youtube.com/watch?v=tp4bcH19VEg"
+    },
+    {
+      "outlet": "Startup Article",
+      "date": "Jan 2026",
+      "title": "Ridev secures ₹1 Cr deal on Shark Tank India Season 5",
+      "url": "https://startuparticle.com/shark-tank-india/2026/01/ridev-secures-inr-1-cr-deal-on-shark-tank-india-season-5/"
+    },
+    {
+      "outlet": "Tracxn",
+      "date": "2026",
+      "title": "RIDEV company profile, team, funding and competitors",
+      "url": "https://tracxn.com/d/companies/ridev/__oJj_Mk475cqjX_aDWTmUDI8oVTdTbYI-656Nb7w9wlI"
+    }
+  ],
+  "principles": [
+    {
+      "k": "Uptime",
+      "v": "A vehicle that is not moving is not earning — for the rider or for us. Downtime is the number we manage."
+    },
+    {
+      "k": "Predictability",
+      "v": "One weekly number, no surprises. Energy, repairs and insurance are ours to absorb, not the rider's to gamble on."
+    },
+    {
+      "k": "Ownership",
+      "v": "We own the vehicles and staff the hubs. Nothing important about the rider's day is outsourced to a marketplace."
+    },
+    {
+      "k": "Evidence",
+      "v": "We publish operating data with its date and source, and we do not publish numbers we cannot stand behind."
+    }
+  ],
+  "careers": {
+    "body": "RIDEV grows one hub at a time. We hire hub managers, EV technicians, fleet supervisors and city leads in every market we open — and engineers for the fleet platform behind it.",
+    "mail": "Careers"
+  }
+};

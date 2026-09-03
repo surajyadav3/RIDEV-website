@@ -1,0 +1,821 @@
+/* ============================================================
+   RIDEV — site runtime
+   Every number rendered here comes from data/metrics.js.
+   Render targets use [data-r="name"], never ids, so a section can
+   appear on both pages (and twice in the single-file build).
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var D = window.RIDEV_DATA;
+  if (!D) { console.error('RIDEV: data/metrics.js did not load.'); return; }
+  var H = D.headline;
+
+  /* ---------- helpers ---------- */
+  var $  = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var n  = function (v) { return Number(v).toLocaleString('en-IN'); };
+  var inr = function (v) { return '₹' + Number(Math.round(v)).toLocaleString('en-IN'); };
+  function each(name, fn) { $$('[data-r="' + name + '"]').forEach(fn); }
+  function fill(name, html) { each(name, function (el) { el.innerHTML = html; }); }
+
+  /* Product shots: the line mark shows by default and is only hidden once a real
+     image actually loads, so there is never an empty box. A few extensions are
+     tried in turn, so whatever the team exports (.png / .webp / .jpg) just works. */
+  function shot(base, cls, alt, host, eager) {
+    if (!base) return '';
+    var stem = base.replace(/\.(png|jpe?g|webp)$/i, '');
+    var exts = ['png', 'webp', 'jpg', 'jpeg'];
+    var onload = "var h=this.closest('" + host + "');if(h)h.classList.add('is-loaded');";
+    var onerror = "var e=(this.dataset.exts||'').split(',').filter(Boolean);" +
+                  "if(e.length){this.dataset.exts=e.slice(1).join(',');this.src=this.dataset.stem+'.'+e[0];}" +
+                  "else{this.remove();}";
+    return '<img class="' + cls + '" src="' + stem + '.' + exts[0] + '" alt="' + alt + '" ' +
+           'loading="' + (eager ? 'eager' : 'lazy') + '" data-stem="' + stem + '" ' +
+           'data-exts="' + exts.slice(1).join(',') + '" onload="' + onload + '" onerror="' + onerror + '">';
+  }
+
+  /* RIDEV delivery scooter, drawn to real side-view proportions
+     (1250mm wheelbase, 10in wheels, 780mm seat height) in the brand palette:
+     mint body, charcoal lower, black seat and rail, green plate, RIDEV wordmark.
+     Shown until real product photography lands in assets/img/vehicles/. */
+  var RIDEV_BIKE =
+    '<svg class="bikeart" viewBox="0 0 560 380" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      '<defs>' +
+        '<linearGradient id="bMint" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="#E4F1E6"/><stop offset="100%" stop-color="#BFDCC7"/></linearGradient>' +
+        '<linearGradient id="bDark" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="#3C433D"/><stop offset="100%" stop-color="#20251F"/></linearGradient>' +
+        '<radialGradient id="bShadow"><stop offset="0%" stop-color="#0C110D" stop-opacity=".2"/>' +
+          '<stop offset="100%" stop-color="#0C110D" stop-opacity="0"/></radialGradient>' +
+      '</defs>' +
+
+      '<ellipse cx="290" cy="336" rx="215" ry="16" fill="url(#bShadow)"/>' +
+
+      /* rear grab rail (behind the body) */
+      '<path d="M96 186h96c11 0 18 6 18 16" stroke="#20251F" stroke-width="8" stroke-linecap="round"/>' +
+
+      /* rear body: mint shoulder over a charcoal skirt */
+      '<path d="M92 226c0-20 13-32 34-34l128-10v72H116c-15 0-24-11-24-28z" fill="url(#bMint)"/>' +
+      '<path d="M92 246h162v34H120c-17 0-28-12-28-34z" fill="url(#bDark)"/>' +
+      '<path d="M108 208l-10 34h15l10-34z" fill="#E0362B" opacity=".9"/>' +
+      '<text x="166" y="212" font-family="Sora,Inter,sans-serif" font-size="21" font-weight="800" ' +
+        'letter-spacing="-.6" fill="#12160F">RID<tspan fill="#5FBB2E">EV</tspan></text>' +
+
+      /* seat */
+      '<path d="M150 196c0-14 10-22 26-22h112c17 0 26 8 26 19 0 10-8 16-22 16H172c-13 0-22-5-22-13z" fill="#1B1F1C"/>' +
+      '<path d="M162 186h132" stroke="#3E453F" stroke-width="3" stroke-linecap="round"/>' +
+
+      /* floorboard */
+      '<path d="M232 262h116l8 22H226z" fill="url(#bDark)"/>' +
+      '<path d="M250 271h80" stroke="#4E564F" stroke-width="3" stroke-linecap="round"/>' +
+
+      /* leg shield sweeping up to the bars */
+      '<path d="M340 284l10-128c2-25 16-40 40-42l24-2c12-1 19 7 18 19l-12 145c-1 11-9 18-20 18h-42c-12 0-19-7-18-19z" fill="url(#bMint)"/>' +
+      '<path d="M341 266h64l-2 30c-1 11-9 18-20 18h-42z" fill="url(#bDark)"/>' +
+      '<path d="M420 146l-18 40h17l-5 26 23-46h-17z" fill="#E0362B" opacity=".88"/>' +
+      '<text x="352" y="228" font-family="Sora,Inter,sans-serif" font-size="21" font-weight="800" ' +
+        'letter-spacing="-.6" fill="#12160F">RID<tspan fill="#5FBB2E">EV</tspan></text>' +
+
+      /* headlight cluster */
+      '<path d="M334 196c0-9 6-15 15-15h18v38h-18c-9 0-15-6-15-14z" fill="#1B1F1C"/>' +
+      '<circle cx="352" cy="200" r="11" fill="#DCE1DD"/><circle cx="352" cy="200" r="5.5" fill="#8B948E"/>' +
+      '<rect x="334" y="168" width="28" height="8" rx="4" fill="#F1F5F1"/>' +
+
+      /* number plate */
+      '<rect x="330" y="246" width="66" height="28" rx="6" fill="#1F7A34"/>' +
+      '<rect x="333" y="249" width="60" height="22" rx="4" fill="none" stroke="#fff" stroke-width="1.6" opacity=".85"/>' +
+      '<text x="363" y="265" text-anchor="middle" font-family="Sora,Inter,sans-serif" font-size="13" ' +
+        'font-weight="800" fill="#fff" letter-spacing=".6">RIDEV</text>' +
+
+      /* fork, mudguard, bars, mirror */
+      '<path d="M432 168l22 108" stroke="#20251F" stroke-width="12" stroke-linecap="round"/>' +
+      '<path d="M400 136h66" stroke="#1B1F1C" stroke-width="13" stroke-linecap="round"/>' +
+      '<path d="M456 132l16-34" stroke="#20251F" stroke-width="7" stroke-linecap="round"/>' +
+      '<ellipse cx="477" cy="90" rx="17" ry="12" transform="rotate(-18 477 90)" fill="#1B1F1C"/>' +
+
+      /* wheels */
+      '<circle cx="150" cy="276" r="58" fill="#181C19"/><circle cx="150" cy="276" r="33" fill="#2E342F"/>' +
+      '<circle cx="150" cy="276" r="13" fill="#4E564F"/>' +
+      '<circle cx="454" cy="276" r="58" fill="#181C19"/><circle cx="454" cy="276" r="33" fill="#2E342F"/>' +
+      '<circle cx="454" cy="276" r="13" fill="#4E564F"/>' +
+
+      /* front mudguard, over the wheel */
+      '<path d="M400 250c18-30 56-37 86-17" stroke="#CFE3D4" stroke-width="15" stroke-linecap="round"/>' +
+
+      /* side stand */
+      '<path d="M268 288l-18 38h32" stroke="#20251F" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '</svg>';
+
+  var CHK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  var PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+
+  var ICO = {
+    cal:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    bolt:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+    swap:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>'
+  };
+
+  var SOCIAL_ICO = {
+    linkedin: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05C20.5 8.65 21 11 21 14.1V21h-4v-6.1c0-1.45-.03-3.3-2-3.3-2.01 0-2.32 1.57-2.32 3.2V21H9z"/></svg>',
+    instagram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>',
+    facebook: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>',
+    youtube:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.9a3 3 0 0 0-2.11-2.12C19.5 4.25 12 4.25 12 4.25s-7.5 0-9.39.53A3 3 0 0 0 .5 6.9 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.1 3 3 0 0 0 2.11 2.12c1.89.53 9.39.53 9.39.53s7.5 0 9.39-.53a3 3 0 0 0 2.11-2.12A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.1zM9.6 15.6V8.4l6.25 3.6z"/></svg>',
+    x:        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.24 2H21.5l-7.13 8.15L22.75 22h-6.56l-5.14-6.72L5.17 22H1.9l7.62-8.71L1.25 2h6.73l4.64 6.14zm-1.15 18h1.81L7.01 3.88H5.07z"/></svg>'
+  };
+
+  /* ============================================================
+     nav + reveal
+     ============================================================ */
+  function wireNav() {
+    $$('.nav').forEach(function (nav) {
+      if (nav.dataset.wired) return; nav.dataset.wired = '1';
+      var onScroll = function () {
+        if (nav.offsetParent === null) return;
+        nav.classList.toggle('is-stuck', window.scrollY > 12);
+      };
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('ridev:view', onScroll);
+      var burger = nav.querySelector('.nav__burger');
+      if (burger) burger.addEventListener('click', function () { nav.classList.toggle('open'); });
+      $$('.nav__links a', nav).forEach(function (a) {
+        a.addEventListener('click', function () { nav.classList.remove('open'); });
+      });
+    });
+  }
+
+  var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      en.target.classList.add('in');
+      io.unobserve(en.target);
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }) : null;
+
+  function observeAll() {
+    if (!io) { $$('.rv,.step').forEach(function (e) { e.classList.add('in'); }); return; }
+    $$('.rv,.step').forEach(function (e) { if (!e.classList.contains('in')) io.observe(e); });
+  }
+
+  /* ============================================================
+     hero — stat strip, art, OEM names
+     ============================================================ */
+  function stat(v, l) {
+    return '<div class="hstat"><i class="hstat__rule"></i>' +
+           '<b>' + v + '</b><span>' + l + '</span></div>';
+  }
+
+  fill('heroStrip',
+    stat(n(H.fleet), 'Electric vehicles') +
+    stat(H.cities_live + '<em>+2 opening</em>', 'Cities live') +
+    stat(H.hubs, 'Operating hubs') +
+    stat(n(H.registered_riders), 'Riders registered')
+  );
+
+  fill('invStrip',
+    stat(n(H.fleet), 'Vehicles owned') +
+    stat(H.utilisation_pct + '%', 'Fleet utilisation') +
+    stat(n(H.active_subscriptions), 'Active subscriptions') +
+    stat(H.cities_live + '<em>+2 opening</em>', 'Cities live') +
+    stat(H.hubs, 'Operating hubs') +
+    stat(H.oem_partners, 'OEM partners')
+  );
+
+  fill('oemChips', D.partners.oem.map(function (b) {
+    return '<span class="oemchip">' + b + '</span>';
+  }).join(''));
+
+  (function () {
+    var src = (D.vehicle_images || {})._default;
+    fill('heroArt', '<div class="herofig__glow"></div>' +
+      shot(src, 'herofig__img', 'A RIDEV electric scooter', '.herofig', true) +
+      RIDEV_BIKE.replace('class="bikeart"', 'class="bikeart herofig__mark"'));
+  })();
+
+  /* ============================================================
+     what's included
+     ============================================================ */
+  fill('includedCards', (D.included || []).map(function (c) {
+    return '<article class="card card--hover pillar rv">' +
+      (c.free ? '<div class="pillar__tag">Free</div>' : '') +
+      '<div class="card__ico">' + (ICO[c.ico] || ICO.cal) + '</div>' +
+      '<h3 class="h-sm">' + c.t + '</h3><p class="mt-s">' + c.b + '</p></article>';
+  }).join(''));
+
+  /* ============================================================
+     pricing — city tabs
+     ============================================================ */
+  each('planGrid', function (planWrap) {
+    var tabsBox = (planWrap.closest('.wrap') || document).querySelector('[data-r="planTabs"]');
+    var cityKeys = Object.keys(D.plans);
+    if (tabsBox) tabsBox.innerHTML = cityKeys.map(function (c, i) {
+      return '<button class="tab" role="tab" data-city="' + c + '" aria-selected="' + (i === 0) + '">' + c + '</button>';
+    }).join('');
+
+    function render(city) {
+      // one card per distinct weekly price; the longest-range model leads,
+      // the rest are listed inside. Keeps the grid to a single row.
+      var groups = {};
+      D.plans[city].forEach(function (p) {
+        (groups[p.week] = groups[p.week] || []).push(p);
+      });
+      var prices = Object.keys(groups).map(Number).sort(function (a, b) { return a - b; });
+
+      var IMG = D.vehicle_images || {};
+      var MARK = RIDEV_BIKE.replace('class="bikeart"', 'class="bikeart plan__mark"');
+
+      // the highlighted card is chosen objectively — most range per rupee of weekly rent
+      var value = prices.map(function (wk) {
+        var best = groups[wk].slice().sort(function (a, b) { return b.range_km - a.range_km; })[0];
+        return best.range_km / wk;
+      });
+      var star = value.indexOf(Math.max.apply(null, value));
+
+      planWrap.innerHTML = prices.map(function (wk, i) {
+        var set  = groups[wk].slice().sort(function (a, b) { return b.range_km - a.range_km; });
+        var lead = set[0];
+        var rest = set.slice(1);
+        var src = IMG[lead.model] || IMG._default;
+        var pic = shot(src, 'plan__img', lead.brand + ' ' + lead.model, '.plan__ph');
+        return '<article class="plan' + (i === star ? ' plan--best' : '') + '" data-badge="Best range per ₹">' +
+          '<div class="plan__ph">' + pic + MARK + '</div>' +
+          (lead.rate_from ? '<span class="plan__ind" title="Not yet configured in EV Master for this city">Indicative</span>' : '') +
+          '<div class="plan__brand">' + lead.brand + '</div>' +
+          '<div class="plan__model">' + lead.model + '</div>' +
+          '<div class="plan__price"><b>₹' + n(wk) + '</b><span>/ week</span></div>' +
+          '<div class="plan__mo">' + inr(lead.month) + ' for 4 weeks</div>' +
+          '<div class="plan__specs">' +
+            '<div><b>' + lead.range_km + ' km</b>range</div>' +
+            '<div><b>' + lead.batteries + '</b>batteries</div>' +
+          '</div>' +
+          '<ul class="plan__inc">' +
+            '<li>' + CHK + 'Free unlimited battery swaps</li>' +
+            '<li>' + CHK + 'Repairs &amp; maintenance covered</li>' +
+            '<li>' + CHK + 'Replacement bike + insurance</li>' +
+          '</ul>' +
+          (rest.length
+            ? '<p class="plan__also">Also at this price: ' +
+                rest.map(function (r) { return r.brand + ' ' + r.model; }).join(', ') + '</p>'
+            : '') +
+          '<a class="btn ' + (i === star ? 'btn--primary' : 'btn--ghost') + '" href="#get">Reserve</a>' +
+        '</article>';
+      }).join('');
+      observeAll();
+    }
+
+    render(cityKeys[0]);
+    if (tabsBox) $$('.tab', tabsBox).forEach(function (t) {
+      t.addEventListener('click', function () {
+        $$('.tab', tabsBox).forEach(function (x) { x.setAttribute('aria-selected', 'false'); });
+        t.setAttribute('aria-selected', 'true');
+        render(t.dataset.city);
+      });
+    });
+  });
+
+  /* ============================================================
+     cities — one compact row per city
+     ============================================================ */
+  (function () {
+    var live = D.cities.filter(function (c) { return c.status === 'live'; });
+    var soon = D.cities.filter(function (c) { return c.status !== 'live'; });
+    var rows = live.map(function (c) {
+      return '<div class="cityrow rv" data-city="' + c.city + '">' +
+        '<div class="cityrow__city"><b>' + c.city + '</b><span>' + c.state + '</span></div>' +
+        '<div class="cityrow__hubs">' + c.hubs.map(function (h) {
+            return '<span class="hubtag">' + PIN + h.name + '</span>';
+          }).join('') + '</div>' +
+        '<div class="cityrow__tag"><span class="pill">' + c.hubs.length +
+          (c.hubs.length === 1 ? ' hub' : ' hubs') + '</span></div>' +
+      '</div>';
+    });
+    if (soon.length) {
+      rows.push('<div class="cityrow cityrow--soon rv" data-city="' + soon[0].city + '">' +
+        '<div class="cityrow__city"><b>' +
+          soon.map(function (c) { return c.city; }).join(' &amp; ') +
+        '</b><span>Opening next</span></div>' +
+        '<div class="cityrow__hubs"><span class="muted">' +
+          'Configured on the platform — riders can register now and are allocated as vehicles land.' +
+        '</span></div>' +
+        '<div class="cityrow__tag"><span class="pill pill--soon">Opening</span></div>' +
+      '</div>');
+    }
+    fill('cityList', rows.join(''));
+  })();
+
+  fill('footerCities', D.cities.map(function (c) {
+    var live = c.status === 'live';
+    return '<li><a href="index.html#cities">' + c.city +
+      (live ? ' — ' + c.hubs.length + (c.hubs.length === 1 ? ' hub' : ' hubs') : ' — opening') + '</a></li>';
+  }).join(''));
+
+  /* ============================================================
+     India map — real boundary geometry from assets/js/india-map.js
+     ============================================================ */
+  (function () {
+    if (!$$('[data-r="cityMap"]').length) return;
+    var M = window.RIDEV_INDIA;
+    if (!M) { console.warn('RIDEV: india-map.js did not load.'); return; }
+
+    var pr = M.proj;
+    var PX = function (lon) { return pr.padx + (lon - pr.lon0) * pr.sx; };
+    var PY = function (lat) { return pr.pady + (pr.latTop - lat) * pr.sy; };
+
+    var pins = D.cities.filter(function (c) { return c.lat; }).map(function (c) {
+      var live = c.status === 'live';
+      var x = PX(c.lon) + (c.dx || 0), y = PY(c.lat) + (c.dy || 0);
+      var hubs = live ? c.hubs.map(function (h) { return h.name; }).join(' · ') : 'Opening next';
+      var w = Math.max(96, hubs.length * 5.4 + 26);
+      var flip = y > M.h * 0.66;
+      var ty = flip ? -(live ? 52 : 40) : 16;
+      return '<g class="pin' + (live ? '' : ' pin--soon') + '" data-city="' + c.city +
+             '" transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')" tabindex="0" role="button" ' +
+             'aria-label="' + c.city + ' — ' + hubs + '">' +
+        (live ? '<circle class="pin__pulse" r="14"/>' : '') +
+        '<circle class="pin__hit" r="20" fill="transparent"/>' +
+        '<circle class="pin__dot" r="' + (live ? 5.5 : 4.5) + '"/>' +
+        '<g class="pin__tip" transform="translate(0,' + ty + ')">' +
+          '<rect x="' + (-w / 2) + '" y="0" width="' + w + '" height="' + (live ? 44 : 32) + '" rx="10"/>' +
+          '<text class="pin__tipname" y="19" text-anchor="middle">' + c.city + '</text>' +
+          (live ? '<text class="pin__tiphub" y="34" text-anchor="middle">' + hubs + '</text>' : '') +
+        '</g>' +
+      '</g>';
+    }).join('');
+
+    fill('cityMap',
+      '<svg class="indiamap" viewBox="0 0 ' + M.w + ' ' + M.h + '" role="img" ' +
+        'aria-label="RIDEV operating cities across India">' +
+        '<g class="indiamap__fill">' +
+          '<path d="' + M.country + '"/>' +
+          M.extra.map(function (d) { return '<path d="' + d + '"/>'; }).join('') +
+        '</g>' +
+        '<g class="indiamap__states">' +
+          M.states.map(function (d) { return '<path d="' + d + '"/>'; }).join('') +
+        '</g>' +
+        '<path class="indiamap__edge" d="' + M.country + '"/>' +
+        pins +
+      '</svg>');
+
+    function hot(city, on) {
+      $$('.pin').forEach(function (p) { if (p.dataset.city === city) p.classList.toggle('is-hot', on); });
+      $$('.cityrow').forEach(function (r) { if (r.dataset.city === city) r.classList.toggle('is-hot', on); });
+    }
+    function wire(el, city) {
+      el.addEventListener('mouseenter', function () { hot(city, true); });
+      el.addEventListener('mouseleave', function () { hot(city, false); });
+      el.addEventListener('focus', function () { hot(city, true); });
+      el.addEventListener('blur', function () { hot(city, false); });
+    }
+    $$('.pin').forEach(function (p) {
+      wire(p, p.dataset.city);
+      p.addEventListener('click', function () {
+        var row = $$('.cityrow').filter(function (r) { return r.dataset.city === p.dataset.city; })[0];
+        if (row) row.scrollIntoView({ block: 'center' });
+      });
+    });
+    $$('.cityrow').forEach(function (r) { if (r.dataset.city) wire(r, r.dataset.city); });
+  })();
+
+  /* ============================================================
+     trust · model · partners · press
+     ============================================================ */
+  function railCard(t, b) {
+    return '<article class="card card--hover rv" style="border-top:3px solid var(--brand)">' +
+      '<h3 class="h-sm">' + t + '</h3><p class="mt-s">' + b + '</p></article>';
+  }
+  fill('trustCards', (D.trust || []).map(function (t) { return railCard(t.t, t.b); }).join(''));
+  fill('modelCards', (D.model_cards || []).map(function (t) { return railCard(t.t, t.b); }).join(''));
+
+  fill('partnerCards', (D.partner_types || []).map(function (p) {
+    return '<article class="card card--hover rv partnercard">' +
+      '<h3 class="h-sm">' + p.title + '</h3><p class="mt-s">' + p.body + '</p>' +
+      '<a class="partnercard__cta" href="mailto:info@ridev.in?subject=' + p.mail + '">' + p.cta +
+      ' <span aria-hidden="true">→</span></a></article>';
+  }).join(''));
+
+  fill('pressStrip', (D.press || []).map(function (a) {
+    return '<a class="presstag" href="' + a.url + '" target="_blank" rel="noopener noreferrer" title="' +
+      a.title.replace(/"/g, '&quot;') + '">' + a.outlet + ' <span aria-hidden="true">↗</span></a>';
+  }).join(''));
+
+  /* ============================================================
+     growth chart + stats (investor)
+     ============================================================ */
+  each('growthChart', function (box) {
+    var g = D.growth, W = 960, Hh = 360, pl = 58, pr = 26, pt = 34, pb = 52;
+    var maxF = Math.max.apply(null, g.map(function (p) { return p.fleet; }));
+    var step = Math.ceil(maxF / 4 / 500) * 500, top = step * 4;
+    var X = function (i) { return pl + i * (W - pl - pr) / (g.length - 1); };
+    var Y = function (v) { return pt + (1 - v / top) * (Hh - pt - pb); };
+
+    var line = 'M' + g.map(function (p, i) { return X(i) + ',' + Y(p.fleet); }).join(' L');
+    var area = line + ' L' + X(g.length - 1) + ',' + Y(0) + ' L' + X(0) + ',' + Y(0) + ' Z';
+    var grid = '', ylab = '';
+    for (var k = 0; k <= 4; k++) {
+      var yv = step * k, yy = Y(yv);
+      grid += '<line x1="' + pl + '" y1="' + yy + '" x2="' + (W - pr) + '" y2="' + yy + '"/>';
+      ylab += '<text class="lbl" x="' + (pl - 13) + '" y="' + (yy + 4) + '" text-anchor="end">' + n(yv) + '</text>';
+    }
+    var dots = g.map(function (p, i) {
+      return '<circle class="dot' + (p.estimated ? ' dot--est' : '') + '" cx="' + X(i) + '" cy="' + Y(p.fleet) +
+        '" r="' + (p.estimated ? 4 : 5.5) + '"><title>' + p.label + ' — ' + n(p.fleet) + ' vehicles. ' + p.event + '</title></circle>';
+    }).join('');
+    var xlab = g.map(function (p, i) {
+      return '<text class="lbl" x="' + X(i) + '" y="' + (Hh - pb + 25) + '" text-anchor="middle">' + p.label + '</text>';
+    }).join('');
+    var callouts = g.filter(function (p) { return !p.estimated && p.fleet > 0; }).map(function (p) {
+      var i = g.indexOf(p);
+      var anchor = i === g.length - 1 ? 'end' : (i === 0 ? 'start' : 'middle');
+      return '<text class="val" x="' + X(i) + '" y="' + (Y(p.fleet) - 15) + '" text-anchor="' + anchor + '">' + n(p.fleet) + '</text>';
+    }).join('');
+
+    box.innerHTML =
+      '<svg class="chart" viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="RIDEV fleet growth from 10 vehicles in July 2024 to ' + n(H.fleet) + ' in August 2026">' +
+      '<defs><linearGradient id="gGrad" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#95DB67" stop-opacity=".38"/>' +
+      '<stop offset="100%" stop-color="#95DB67" stop-opacity="0"/></linearGradient></defs>' +
+      '<g class="grid">' + grid + '</g>' + ylab +
+      '<path class="area" d="' + area + '"/><path class="line" d="' + line + '"/>' + dots + callouts + xlab +
+      '</svg>';
+  });
+
+  fill('growthStats', (D.growth_stats || []).map(function (s) {
+    return '<article class="card rv" style="border-top:3px solid var(--brand)">' +
+      '<div class="h-md" style="color:var(--brand-deep)">' + s.n + '</div>' +
+      '<p class="mt-s">' + s.b + '</p></article>';
+  }).join(''));
+
+  /* ============================================================
+     milestones · backing · founders
+     ============================================================ */
+  fill('timeline', D.milestones.map(function (m) {
+    return '<li class="rv"><div class="d">' + m.date + '</div><h3>' + m.title + '</h3>' +
+      '<p>' + m.body + '</p><div class="src">Source: ' + m.source + '</div></li>';
+  }).join(''));
+
+  fill('backingGrid', D.backing.items.map(function (b) {
+    return '<div class="card card--dark rv" style="padding:20px">' +
+      '<div class="muted" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase">' + b.label + '</div>' +
+      '<div class="h-sm" style="color:#fff;margin:7px 0 5px">' + b.value + '</div>' +
+      '<p style="font-size:13.5px">' + b.detail + '</p></div>';
+  }).join(''));
+
+  fill('founders', D.founders.map(function (f) {
+    var parts = f.name.split(' ');
+    var initials = parts[0][0] + parts[parts.length - 1][0];
+    return '<div class="founder rv">' +
+      '<div class="founder__ph">' +
+        shot(f.photo, 'founder__img', f.name, '.founder__ph', true) +
+        '<span class="founder__ini">' + initials + '</span>' +
+      '</div>' +
+      '<div class="founder__txt">' +
+        '<h3 class="h-sm">' + f.name + '</h3>' +
+        '<div class="muted" style="margin:2px 0 9px">' + f.role + '</div>' +
+        '<p style="font-size:14px">' + f.bio + '</p>' +
+      '</div>' +
+    '</div>';
+  }).join(''));
+
+  /* ============================================================
+     savings calculator
+     ============================================================ */
+  each('calc', function (calc) {
+    var A = D.calculator_assumptions;
+    var kmEl = $('#cKm', calc), dayEl = $('#cDays', calc), rentEl = $('#cRent', calc);
+    if (!kmEl) return;
+
+    function run() {
+      var km = +kmEl.value, days = +dayEl.value, rent = +rentEl.value;
+      var monthKm = km * days;
+      var fuel   = monthKm / A.petrol_mileage_kmpl * A.petrol_price_per_l;
+      var petrol = fuel + A.petrol_service_per_month + A.petrol_insurance_per_month + A.petrol_emi_per_month;
+      var ridev  = rent * 52 / 12;
+      var save   = petrol - ridev;
+      var co2    = monthKm * (A.co2_petrol_kg_per_km - A.co2_ev_kg_per_km);
+
+      $('#cKmOut', calc).textContent   = km + ' km';
+      $('#cDaysOut', calc).textContent = days + ' days';
+      $('#cRentOut', calc).textContent = '₹' + n(rent);
+      $('#oPetrol', calc).textContent  = inr(petrol);
+      $('#oRidev', calc).textContent   = inr(ridev);
+      $('#oSave', calc).textContent    = (save >= 0 ? inr(save) : '−' + inr(-save));
+      $('#oCap', calc).textContent     = inr(A.petrol_downpayment);
+      $('#oCo2', calc).textContent     = (co2 / 1000).toFixed(2) + ' t';
+      $('#oKm', calc).textContent      = n(monthKm) + ' km';
+      var lbl = $('#oSaveLbl', calc);
+      if (lbl) lbl.textContent = save >= 0
+        ? 'You keep this every month'
+        : 'RIDEV costs more in cash — but with zero capital and zero downtime risk';
+    }
+    [kmEl, dayEl, rentEl].forEach(function (i) { i.addEventListener('input', run); });
+    run();
+
+    var an = $('#calcAssump', calc);
+    if (an) an.innerHTML = '<b>How this is worked out.</b> ' + A.note +
+      ' Rent is converted to a month as weekly&nbsp;×&nbsp;52&nbsp;÷&nbsp;12. Illustrative, not a quotation.';
+  });
+
+  /* ============================================================
+     app block
+     ============================================================ */
+  (function () {
+    var A = D.app; if (!A) return;
+    fill('appFeatures', A.features.map(function (f) { return '<li>' + CHK + f + '</li>'; }).join(''));
+
+    var PLAY = '<svg viewBox="0 0 24 24" style="width:19px;height:19px" aria-hidden="true">' +
+      '<path fill="#34A853" d="M3.6 2.3 14 12 3.6 21.7A2 2 0 0 1 3 20.3V3.7a2 2 0 0 1 .6-1.4z"/>' +
+      '<path fill="#FBBC04" d="m14 12 3.1-3.1 3.4 2a1.9 1.9 0 0 1 0 3.3l-3.4 2z"/>' +
+      '<path fill="#EA4335" d="M3.6 21.7 14 12l3.1 3.1-10.5 6.1a1.9 1.9 0 0 1-3-.5z"/>' +
+      '<path fill="#4285F4" d="M3.6 2.3 14 12l3.1-3.1L6.6 2.8a1.9 1.9 0 0 0-3-.5z"/></svg>';
+    fill('appCta',
+      '<a class="btn btn--dark" href="' + A.play_url + '" target="_blank" rel="noopener noreferrer">' +
+      PLAY + 'Get it on Google Play</a>' +
+      '<span class="muted" style="align-self:center">' + A.note + '</span>');
+
+    var planCity = Object.keys(D.plans)[0];
+    var plan = D.plans[planCity][0];
+    var city = D.cities.filter(function (c) { return c.city === planCity; })[0] || D.cities[0];
+    var hub = city.hubs[0] || { name: city.city, area: city.state };
+    fill('phoneBody',
+      '<div class="pb__hd"><span class="pb__logo"></span><span class="pb__dot"></span></div>' +
+      '<div class="pb__card">' +
+        '<div class="pb__lbl">Your plan</div>' +
+        '<div class="pb__model">' + plan.brand + ' ' + plan.model + '</div>' +
+        '<div class="pb__row"><span>Weekly rent</span><b>₹' + n(plan.week) + '</b></div>' +
+        '<div class="pb__row"><span>Next due</span><b>in 3 days</b></div>' +
+        '<div class="pb__pay">Pay this week</div>' +
+      '</div>' +
+      '<div class="pb__tiles">' +
+        '<div class="pb__tile"><b>Swap</b><span>battery</span></div>' +
+        '<div class="pb__tile"><b>Service</b><span>request</span></div>' +
+      '</div>' +
+      '<div class="pb__hub"><span class="pb__pin"></span><div><b>' + hub.name + '</b>' +
+        '<span>' + hub.area + ' · open now</span></div></div>' +
+      '<div class="pb__note">Illustrative — not a screenshot of the live app.</div>');
+  })();
+
+  /* ============================================================
+     social · text fills · video
+     ============================================================ */
+  $$('[data-social]').forEach(function (box) {
+    box.innerHTML = Object.keys(D.social).map(function (k) {
+      var label = k === 'x' ? 'X (Twitter)' : k.charAt(0).toUpperCase() + k.slice(1);
+      return '<a href="' + D.social[k] + '" target="_blank" rel="noopener noreferrer" aria-label="RIDEV on ' +
+        label + '" title="' + label + '">' + SOCIAL_ICO[k] + '</a>';
+    }).join('');
+  });
+
+  $$('[data-fill]').forEach(function (e) {
+    var path = e.dataset.fill.split('.'), v = D;
+    for (var i = 0; i < path.length; i++) { v = v ? v[path[i]] : undefined; }
+    if (v == null) return;
+    e.textContent = (typeof v === 'number' && e.dataset.raw == null) ? n(v) : v;
+  });
+
+  $$('[data-year]').forEach(function (e) { e.textContent = new Date().getFullYear(); });
+
+  each('videoBox', function (vb) {
+    var go = function () {
+      if (vb.dataset.loaded) return;
+      vb.dataset.loaded = '1';
+      vb.innerHTML = '<iframe src="' + D.video.embed + '?autoplay=1&rel=0" title="' + D.video.title +
+        '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+    };
+    vb.addEventListener('click', go);
+    vb.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+
+  /* ============================================================
+     router — only active in the single-file build
+     ============================================================ */
+  (function () {
+    var pages = $$('.page');
+    if (pages.length < 2) return;
+    function show(id, hash) {
+      pages.forEach(function (p) { p.hidden = (p.id !== id); });
+      window.scrollTo(0, 0);
+      observeAll();
+      window.dispatchEvent(new Event('ridev:view'));
+      if (hash) {
+        var t = document.getElementById(hash) || document.getElementById('c-' + hash);
+        if (t) setTimeout(function () { t.scrollIntoView(); }, 0);
+      }
+    }
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      var href = a.getAttribute('href') || '';
+      var hash = href.split('#')[1];
+      if (href.indexOf('investors.html') === 0) { e.preventDefault(); show('page-investors', hash); }
+      else if (href.indexOf('index.html') === 0) { e.preventDefault(); show('page-rent', hash); }
+    });
+    show('page-rent');
+  })();
+
+  /* ============================================================
+     Theme — explicit choice wins, otherwise follow the OS
+     ============================================================ */
+  (function () {
+    var root = document.documentElement;
+    function set(t) {
+      root.setAttribute('data-theme', t);
+      try { localStorage.setItem('ridev-theme', t); } catch (e) {}
+      var m = $('meta[name="theme-color"]');
+      if (m) m.setAttribute('content', t === 'dark' ? '#0B0F0C' : '#FFFFFF');
+    }
+    $$('[data-theme-toggle]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        set(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      });
+    });
+    if (window.matchMedia) {
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        try { if (!localStorage.getItem('ridev-theme')) set(e.matches ? 'dark' : 'light'); } catch (x) {}
+      });
+    }
+  })();
+
+  /* ============================================================
+     Onboarding → payment flow
+     ============================================================ */
+  (function () {
+    if (!$$('[data-r="flowSteps"]').length) return;
+    var steps = D.onboarding || [];
+    var planCity = Object.keys(D.plans)[0];
+    var plan = D.plans[planCity][0];
+    var city = D.cities.filter(function (c) { return c.city === planCity; })[0] || D.cities[0];
+    var hub = (city.hubs || [])[0] || { name: city.city, area: city.state };
+    var wk = n(plan.week), dep = n(2000);
+
+    function head() { return '<div class="pb__hd"><span class="pb__logo"></span><span class="pb__dot"></span></div>'; }
+    function row(k, v) { return '<div class="pb__row"><span>' + k + '</span><b>' + v + '</b></div>'; }
+
+    var SCREENS = {
+      app: head() +
+        '<div class="pb__card" style="text-align:center">' +
+          '<div class="pb__lbl">Google Play</div>' +
+          '<div class="pb__model" style="margin-top:8px">RIDEV</div>' +
+          '<p style="font-size:11px;color:var(--text-3);margin-bottom:12px">Rent an electric two-wheeler</p>' +
+          '<div class="pb__pay">Install</div>' +
+        '</div>' +
+        '<div class="pb__tiles"><div class="pb__tile"><b>4.5&#9733;</b><span>rated</span></div>' +
+          '<div class="pb__tile"><b>Free</b><span>to download</span></div></div>',
+
+      kyc: head() +
+        '<div class="pb__card">' +
+          '<div class="pb__lbl">Verify your number</div>' +
+          '<div class="pb__model">+91 98••• •••21</div>' +
+          '<div class="pb__otp"><i>4</i><i>1</i><i>9</i><i class="on"></i></div>' +
+          '<div class="pb__pay">Verify</div>' +
+        '</div>' +
+        '<div class="pb__doc">' + CHK + 'Driving licence</div>' +
+        '<div class="pb__doc">' + CHK + 'Aadhaar</div>',
+
+      pick: head() +
+        '<div class="pb__lbl" style="margin:2px 0 6px">' + planCity + ' · ' + hub.name + '</div>' +
+        D.plans[planCity].slice(0, 3).map(function (p, i) {
+          return '<div class="pb__pick' + (i === 0 ? ' on' : '') + '">' +
+            '<div><b>' + p.model + '</b><span>' + p.range_km + ' km · ' + p.batteries + ' batteries</span></div>' +
+            '<em>₹' + n(p.week) + '</em></div>';
+        }).join(''),
+
+      book: head() +
+        '<div class="pb__card">' +
+          '<div class="pb__lbl">Reserved for you</div>' +
+          '<div class="pb__model">' + plan.brand + ' ' + plan.model + '</div>' +
+          row('Hub', hub.name) + row('Held until', 'tomorrow, 6 pm') +
+          '<div class="pb__pay">Confirm booking</div>' +
+        '</div>' +
+        '<div class="pb__hub"><span class="pb__pin"></span><div><b>' + hub.name + '</b>' +
+          '<span>' + hub.area + ' · open now</span></div></div>',
+
+      pay: head() +
+        '<div class="pb__card">' +
+          '<div class="pb__lbl">Pay to start</div>' +
+          row('Week 1 rent', '₹' + wk) + row('Refundable deposit', '₹' + dep) +
+          '<div class="pb__tot"><span>Total today</span><b>₹' + n(plan.week + 2000) + '</b></div>' +
+          '<div class="pb__pay">Pay ₹' + n(plan.week + 2000) + '</div>' +
+        '</div>' +
+        '<div class="pb__tiles"><div class="pb__tile"><b>UPI</b><span>instant</span></div>' +
+          '<div class="pb__tile"><b>Card</b><span>or netbanking</span></div></div>',
+
+      ride: head() +
+        '<div class="pb__card">' +
+          '<div class="pb__lbl">Your plan · active</div>' +
+          '<div class="pb__model">' + plan.brand + ' ' + plan.model + '</div>' +
+          row('Weekly rent', '₹' + wk) + row('Next due', 'in 7 days') +
+          '<div class="pb__pay">Pay next week</div>' +
+        '</div>' +
+        '<div class="pb__tiles"><div class="pb__tile"><b>Swap</b><span>battery</span></div>' +
+          '<div class="pb__tile"><b>Service</b><span>request</span></div></div>' +
+        '<div class="pb__hub"><span class="pb__pin"></span><div><b>' + hub.name + '</b>' +
+          '<span>' + hub.area + ' · open now</span></div></div>'
+    };
+
+    fill('flowSteps', steps.map(function (s, i) {
+      return '<li class="flowstep' + (i === 0 ? ' on' : '') + '" data-screen="' + s.screen + '" tabindex="0" role="button">' +
+        '<span class="flowstep__n">' + (i + 1) + '</span>' +
+        '<div><b>' + s.t + '</b><p>' + s.b + '</p></div>' +
+      '</li>';
+    }).join(''));
+
+    function show(key) {
+      fill('flowScreen', SCREENS[key] || SCREENS.app);
+      $$('.flowstep').forEach(function (el) { el.classList.toggle('on', el.dataset.screen === key); });
+    }
+    show(steps.length ? steps[0].screen : 'app');
+
+    $$('.flowstep').forEach(function (el) {
+      var go = function () { show(el.dataset.screen); };
+      el.addEventListener('click', go);
+      el.addEventListener('mouseenter', go);
+      el.addEventListener('focus', go);
+      el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    });
+  })();
+
+  /* ============================================================
+     ESG
+     ============================================================ */
+  (function () {
+    var E = D.esg; if (!E) return;
+    fill('esgPillars', E.pillars.map(function (p) {
+      return '<article class="esgcard rv">' +
+        '<div class="esgcard__k">' + p.k + '</div>' +
+        '<h3 class="h-sm">' + p.title + '</h3>' +
+        '<p class="esgcard__lead">' + p.lead + '</p>' +
+        '<ul>' + p.points.map(function (x) { return '<li>' + CHK + x + '</li>'; }).join('') + '</ul>' +
+      '</article>';
+    }).join(''));
+  })();
+
+  /* ============================================================
+     Motion: count-up stats, scroll progress, active nav link
+     ============================================================ */
+  (function () {
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* numbers count up once, when the strip first arrives */
+    if (!reduce && 'IntersectionObserver' in window) {
+      var seen = new WeakSet();
+      var cio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting || seen.has(e.target)) return;
+          seen.add(e.target);
+          $$('b', e.target).forEach(function (b) {
+            var m = b.textContent.replace(/,/g, '').match(/^([\d.]+)/);
+            if (!m) return;
+            var end = parseFloat(m[1]), dec = (m[1].split('.')[1] || '').length;
+            var rest = b.innerHTML.slice(b.textContent.indexOf(m[1]) + m[1].length);
+            var t0 = null, dur = 1100;
+            function tick(t) {
+              if (!t0) t0 = t;
+              var k = Math.min(1, (t - t0) / dur);
+              var v = end * (1 - Math.pow(1 - k, 3));
+              b.innerHTML = (dec ? v.toFixed(dec) : Math.round(v)).toLocaleString('en-IN') + rest;
+              if (k < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+          });
+        });
+      }, { threshold: 0.4 });
+      $$('.hstrip').forEach(function (el) { cio.observe(el); });
+    }
+
+    /* thin brand-green progress line at the very top */
+    var bar = document.createElement('div');
+    bar.className = 'scrollbar'; bar.innerHTML = '<i></i>';
+    document.body.appendChild(bar);
+    var fillEl = bar.firstChild;
+    function onScroll() {
+      var h = document.documentElement.scrollHeight - window.innerHeight;
+      fillEl.style.transform = 'scaleX(' + (h > 0 ? window.scrollY / h : 0) + ')';
+    }
+    onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('ridev:view', onScroll);
+
+    /* nav highlights the section you are actually in */
+    var links = $$('.nav__links a[href^="#"]');
+    if (links.length && 'IntersectionObserver' in window) {
+      var map = {};
+      links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+      var sio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          var a = map[e.target.id];
+          if (a && e.isIntersecting) {
+            links.forEach(function (x) { x.classList.remove('is-here'); });
+            a.classList.add('is-here');
+          }
+        });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      Object.keys(map).forEach(function (id) {
+        var el = document.getElementById(id); if (el) sio.observe(el);
+      });
+    }
+  })();
+
+  wireNav();
+  observeAll();
+})();

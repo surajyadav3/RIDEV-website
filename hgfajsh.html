@@ -1,0 +1,968 @@
+{%- comment -%}
+  Only render Combo Selector if metafield `custom.combo_config` is attached
+{%- endcomment -%}
+
+{% assign combo_ref = product.metafields.custom.combo_config %}
+
+{% if combo_ref and combo_ref.value %}
+
+<!-- ================== COMBO SELECTOR ================== -->
+<div
+  class="combo"
+  id="comboRoot"
+  role="group"
+  aria-labelledby="comboTitle"
+>
+  <div class="combo-header">
+    <h3 id="comboTitle">Select Combo</h3>
+
+    <div
+      id="KiwiSizingChart"
+      data-display-mode="2"
+      style="margin-top: -1px;"
+    ></div>
+  </div>
+
+  <!-- ROW 1 -->
+  <div class="row" data-index="1">
+    <div class="field">
+      <label for="comboColor1">Color 1</label>
+
+      <select
+        id="comboColor1"
+        class="color"
+        required
+        aria-label="Color 1"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="comboSize1">Size 1</label>
+
+      <select
+        id="comboSize1"
+        class="size"
+        required
+        disabled
+        aria-label="Size 1"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="row" data-index="2">
+    <div class="field">
+      <label for="comboColor2">Color 2</label>
+
+      <select
+        id="comboColor2"
+        class="color"
+        required
+        aria-label="Color 2"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="comboSize2">Size 2</label>
+
+      <select
+        id="comboSize2"
+        class="size"
+        required
+        disabled
+        aria-label="Size 2"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ROW 3 -->
+  <div class="row" data-index="3">
+    <div class="field">
+      <label for="comboColor3">Color 3</label>
+
+      <select
+        id="comboColor3"
+        class="color"
+        required
+        aria-label="Color 3"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="comboSize3">Size 3</label>
+
+      <select
+        id="comboSize3"
+        class="size"
+        required
+        disabled
+        aria-label="Size 3"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ROW 4 -->
+  <div class="row" data-index="4">
+    <div class="field">
+      <label for="comboColor4">Color 4</label>
+
+      <select
+        id="comboColor4"
+        class="color"
+        required
+        aria-label="Color 4"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="comboSize4">Size 4</label>
+
+      <select
+        id="comboSize4"
+        class="size"
+        required
+        disabled
+        aria-label="Size 4"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ROW 5 -->
+  <div class="row" data-index="5">
+    <div class="field">
+      <label for="comboColor5">Color 5</label>
+
+      <select
+        id="comboColor5"
+        class="color"
+        required
+        aria-label="Color 5"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="comboSize5">Size 5</label>
+
+      <select
+        id="comboSize5"
+        class="size"
+        required
+        disabled
+        aria-label="Size 5"
+      >
+        <option value="">Select</option>
+      </select>
+    </div>
+  </div>
+
+  <button id="comboAdd" class="btn" type="button">
+    ADD TO CART
+  </button>
+
+  <p id="comboMsg" class="msg" aria-live="polite"></p>
+</div>
+
+<style>
+  .combo {
+    border: 1px solid #ececec;
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .combo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .combo-header h3 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field label {
+    font-size: 14px;
+  }
+
+  .combo select {
+    width: 100%;
+    height: 44px;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    padding: 0 10px;
+    background: #fff;
+  }
+
+  .combo .btn {
+    width: 100%;
+    height: 48px;
+    margin-top: 20px;
+    border: 0;
+    border-radius: 10px;
+    padding: 0 18px;
+    background: #111;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .combo .btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .combo .msg {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+
+  .combo .msg.error {
+    color: #c62828;
+  }
+
+  .combo .msg.success {
+    color: #2e7d32;
+  }
+
+  .btn.ks-chart-modal-button {
+    position: relative;
+    bottom: 15px;
+    border: none;
+    background-color: #fff !important;
+  }
+
+  @media screen and (max-width: 480px) {
+    .row {
+      gap: 8px;
+    }
+  }
+</style>
+
+<script id="comboConfig" type="application/json">
+{
+  "sizeOptionNames": ["Size", "Waist Size", "尺寸", "Talla", "Tamanho"],
+  "rows": {
+    "1": {{ combo_ref.value.color_size_1 | strip | json }},
+    "2": {{ combo_ref.value.color_size_2 | strip | json }},
+    "3": {{ combo_ref.value.color_size_3 | strip | json }},
+    "4": {{ combo_ref.value.color_size_4 | strip | json }},
+    "5": {{ combo_ref.value.color_size_5 | strip | json }}
+  }
+}
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  /* --------------------------------------------------------
+     PRODUCT HANDLE → OFFER-ID MAPPING
+  --------------------------------------------------------- */
+
+  const offerIdMap = {
+    "pick-any-5-women-cotton-pant": "FBT-565646",
+    "pick-any-3-women-cotton-pant": "FBT-310776",
+
+    "pick-any-3-women-airy-linen-short-kurta-1": "FBT-704026",
+    "pick-any-3-women-airy-linen-short-kurta-sdfsk": "FBT-704026",
+
+    "pick-any-3-women-airy-linen-long-kurta": "FBT-083524",
+    "pick-any-3-women-airy-linen-long-kurta-sdflk": "FBT-083524",
+
+    "pick-any-3-women-viscose-pleated-top-1": "FBT-913798",
+
+    "pick-any-3-women-viscose-palazzo-pant": "FBT-279940",
+    "pick-any-3-women-viscose-palazzo-pant-sdvpl": "FBT-279940",
+
+    "pick-any-3-women-airy-linen-shirt": "FBT-242475",
+
+    "pick-any-3-women-airy-linen-straight-pant": "FBT-372574",
+    "pick-any-3-women-airy-linen-straight-pants-sdasp": "FBT-372574",
+
+    "pick-any-3-women-airy-linen-wide-leg-pant": "FBT-015339",
+    "pick-any-3-women-airy-linen-flared-dress-1": "FBT-345018",
+    "pick-any-2-4-way-stretchable-pant-1": "FBT-514759",
+
+    "pick-any-3-men-airy-linen-long-kurta-1": "FBT-904657",
+    "pick-any-3-men-airy-linen-long-kurta-smflk": "FBT-904657",
+
+    "pick-any-3-men-cotton-pant-smcp": "FBT-609949",
+    "pick-any-3-men-short-kurta-smfsk": "FBT-144850",
+
+    "buy-any-3-women-round-neck-t-shirt": "FBT-576139",
+    "buy-any-3-women-v-neck-tshirt": "FBT-339085",
+    "buy-any-3-men-round-neck-t-shirt": "FBT-129549",
+    "buy-any-3-men-polo-t-shirt": "FBT-498888",
+    "buy-any-3-oversized-t-shirt": "FBT-023484",
+
+    "pick-any-3-men-cotton-chinos":"FBT-959959",
+    "pick-any-3-men-5-pocket-classic-pant":"FBT-358933",
+    "pick-any-3-men-tailored-cotton-shorts":"FBT-055349",
+    "pick-any-3-women-wide-leg-trouser":"FBT-092595",
+    "pick-any-2-airy-linen-split-neck-short-kurta":"FBT-284749",
+    "pick-any-2-cotton-pant":"FBT-446094",
+    "pick-any-2-airy-linen-shirt-1":"FBT-421271",
+    "pick-any-2-airy-linen-straight-pants-1":"FBT-193317",
+    "pick-any-2-airy-linen-wide-leg-pants":"FBT-703268",
+    "pick-any-2-airy-linen-long-kurta":"FBT-073703",
+    "pick-any-2-airy-linen-short-kurta-2":"FBT-735291",
+    "pick-any-2-women-v-neck-t-shirt":"FBT-898712",
+    "pick-any-2-women-round-neck-t-shirt":"FBT-768059",
+    "pick-any-2-women-viscosse-palazzo-pant":"FBT-357534",
+    "pick-any-2-men-cotton-pant-2":"FBT-404942",
+    "pick-any-2-men-polo-t-shirt-1":"FBT-185225",
+    "pick-any-2-men-airy-linen-long-kurta-2":"FBT-422468",
+    "pick-any-2-men-airy-short-kurta":"FBT-736276",
+    "pick-any-2-men-round-neck-t-shirt-1":"FBT-664489",
+    "pick-any-2-oversized-t-shirt-1":"FBT-469924",
+    "pick-any-2-women-airy-line-thigh-length-kurta":"FBT-924734",
+    "pick-any-2-women-v-neck-top":"FBT-084915",
+    "pick-any-2-women-4-way-stretchable-pants":"FBT-664606",
+    "pick-any-3-women-4-way-stretchable-pants":"FBT-978615",
+    "pick-any-3-women-sleeveless-top":"FBT-489439",
+    "pick-any-3-men-round-neck-jersey":"FBT-212385",
+    "pick-any-3-men-polo-t-shirt-1":"FBT-362014",
+    "pick-any-3-women-round-neck-t-shirt":"FBT-061200",
+    "pick-any-3-airy-linen-shirt-1":"FBT-055211",
+    "pick-any-3-oversized-t-shirt-1":"FBT-949625",
+    "pick-any-3-women-mid-length-kurta":"FBT-920515",
+    "pick-any-3-women-v-neck-t-shirt":"FBT-067136",
+
+    
+
+  };
+
+  const CURRENT_PRODUCT_HANDLE = {{ product.handle | json }};
+  const selectedOfferId = offerIdMap[CURRENT_PRODUCT_HANDLE] || "";
+
+  const comboRoot = document.getElementById("comboRoot");
+  const comboAddButton = document.getElementById("comboAdd");
+
+  let rowsCfg = [];
+  let sizeOptionNames = [];
+
+  if (!comboRoot || !comboAddButton) {
+    return;
+  }
+
+  /* --------------------------------------------------------
+     MESSAGE HELPERS
+  --------------------------------------------------------- */
+
+  function setMsg(text, type = "") {
+    const messageElement = document.getElementById("comboMsg");
+
+    if (!messageElement) {
+      return;
+    }
+
+    messageElement.textContent = text;
+    messageElement.className = `msg ${type}`.trim();
+  }
+
+  function setLoading(isLoading) {
+    comboAddButton.disabled = isLoading;
+    comboAddButton.textContent = isLoading
+      ? "ADDING..."
+      : "ADD TO CART";
+  }
+
+  /* --------------------------------------------------------
+     BUNDLE HELPERS
+  --------------------------------------------------------- */
+
+  function randomSuffix(length = 6) {
+    const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      result += characters[randomIndex];
+    }
+
+    return result;
+  }
+
+  function generateComboFingerprint(selections) {
+    return selections
+      .map(selection => `${selection.color}::${selection.size}`)
+      .join("|");
+  }
+
+  function saveLastCombo(fingerprint, offerId) {
+    try {
+      sessionStorage.setItem("lastComboFP", fingerprint);
+      sessionStorage.setItem("lastComboOfferId", offerId);
+    } catch (error) {
+      console.warn("Could not save combo session data:", error);
+    }
+  }
+
+  function getLastCombo() {
+    try {
+      return {
+        fp: sessionStorage.getItem("lastComboFP"),
+        offerId: sessionStorage.getItem("lastComboOfferId")
+      };
+    } catch (error) {
+      console.warn("Could not read combo session data:", error);
+
+      return {
+        fp: null,
+        offerId: null
+      };
+    }
+  }
+
+  /* --------------------------------------------------------
+     METAOBJECT HELPERS
+  --------------------------------------------------------- */
+
+  function fromMetaobjectJSON() {
+    const configElement = document.getElementById("comboConfig");
+
+    if (!configElement) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(configElement.textContent);
+    } catch (error) {
+      console.error("Invalid combo configuration JSON:", error);
+      return null;
+    }
+  }
+
+  function normalizeField(input) {
+    if (input == null) {
+      return "";
+    }
+
+    if (typeof input === "string") {
+      return input;
+    }
+
+    if (
+      typeof input === "object" &&
+      typeof input.value === "string"
+    ) {
+      return input.value;
+    }
+
+    return String(input);
+  }
+
+  function parseColorHandleList(rawValue) {
+    const normalizedText = normalizeField(rawValue)
+      .replace(/<br\s*\/?>/gi, "\n")
+      .trim();
+
+    if (!normalizedText) {
+      return {};
+    }
+
+    const parts = normalizedText
+      .replace(/\r?\n/g, "|")
+      .split("|")
+      .map(item => item.trim())
+      .filter(Boolean);
+
+    const colorHandleMap = {};
+
+    for (let index = 0; index < parts.length; index += 2) {
+      const color = parts[index];
+      const handle = parts[index + 1];
+
+      if (
+        color &&
+        handle &&
+        !/^\d+$/.test(handle)
+      ) {
+        colorHandleMap[color] = handle;
+      }
+    }
+
+    return colorHandleMap;
+  }
+
+  /* --------------------------------------------------------
+     PRODUCT HELPERS
+  --------------------------------------------------------- */
+
+  async function fetchProductByHandle(handle) {
+    const response = await fetch(
+      `/products/${encodeURIComponent(handle)}.js`,
+      {
+        credentials: "same-origin"
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Could not load product "${handle}". Status: ${response.status}`
+      );
+    }
+
+    return response.json();
+  }
+
+  function detectSizeIndex(productData, sizeNames) {
+    const optionNames = Array.isArray(productData.options)
+      ? productData.options.map(option =>
+          String(option.name || "").toLowerCase()
+        )
+      : [];
+
+    const acceptedNames = sizeNames.map(name =>
+      String(name).toLowerCase()
+    );
+
+    for (let index = 0; index < optionNames.length; index++) {
+      if (acceptedNames.includes(optionNames[index])) {
+        return index + 1;
+      }
+    }
+
+    return optionNames.length === 1 ? 1 : 2;
+  }
+
+  function extractAvailableSizes(productData, sizeNames) {
+    const sizeIndex = detectSizeIndex(productData, sizeNames);
+    const sizeKey = `option${sizeIndex}`;
+    const sizes = [];
+
+    productData.variants.forEach(variant => {
+      const size = variant[sizeKey];
+
+      if (
+        variant.available &&
+        size &&
+        !sizes.includes(size)
+      ) {
+        sizes.push(size);
+      }
+    });
+
+    return sizes;
+  }
+
+  function findVariantIdBySize(productData, size, sizeNames) {
+    const sizeIndex = detectSizeIndex(productData, sizeNames);
+    const sizeKey = `option${sizeIndex}`;
+
+    const matchingVariant = productData.variants.find(variant => {
+      return (
+        variant.available &&
+        String(variant[sizeKey]) === String(size)
+      );
+    });
+
+    return matchingVariant ? matchingVariant.id : null;
+  }
+
+  async function getCachedProduct(rowConfig, color) {
+    rowConfig.__productCache ??= {};
+
+    if (rowConfig.__productCache[color]) {
+      return rowConfig.__productCache[color];
+    }
+
+    const handle = rowConfig.colors[color];
+    const productData = await fetchProductByHandle(handle);
+
+    rowConfig.__productCache[color] = productData;
+
+    return productData;
+  }
+
+  /* --------------------------------------------------------
+     INITIALIZE COMBO DROPDOWNS
+  --------------------------------------------------------- */
+
+  function initializeCombo() {
+    const metaConfig = fromMetaobjectJSON();
+
+    if (
+      !metaConfig ||
+      !metaConfig.rows ||
+      !Array.isArray(metaConfig.sizeOptionNames)
+    ) {
+      setMsg("Combo configuration is invalid.", "error");
+      comboAddButton.disabled = true;
+      return;
+    }
+
+    sizeOptionNames = metaConfig.sizeOptionNames;
+
+    for (let index = 1; index <= 5; index++) {
+      const rawValue = metaConfig.rows[String(index)];
+      const colorMap = parseColorHandleList(rawValue);
+
+      if (Object.keys(colorMap).length > 0) {
+        rowsCfg.push({
+          colors: colorMap,
+          __productCache: {}
+        });
+      }
+    }
+
+    if (rowsCfg.length === 0) {
+      setMsg("No combo options are configured.", "error");
+      comboAddButton.disabled = true;
+      return;
+    }
+
+    comboRoot.querySelectorAll(".row").forEach((row, index) => {
+      if (index >= rowsCfg.length) {
+        row.style.display = "none";
+        return;
+      }
+
+      const rowConfig = rowsCfg[index];
+      const colorSelect = row.querySelector(".color");
+      const sizeSelect = row.querySelector(".size");
+
+      if (!colorSelect || !sizeSelect) {
+        return;
+      }
+
+      sizeSelect.disabled = true;
+
+      Object.keys(rowConfig.colors).forEach(color => {
+        const option = document.createElement("option");
+
+        option.value = color;
+        option.textContent = color;
+
+        colorSelect.appendChild(option);
+      });
+
+      colorSelect.addEventListener("change", async function () {
+        sizeSelect.innerHTML = '<option value="">Select</option>';
+        sizeSelect.disabled = true;
+        setMsg("");
+
+        const selectedColor = colorSelect.value;
+
+        if (!selectedColor) {
+          return;
+        }
+
+        colorSelect.disabled = true;
+        sizeSelect.innerHTML = '<option value="">Loading...</option>';
+
+        try {
+          const productData = await getCachedProduct(
+            rowConfig,
+            selectedColor
+          );
+
+          const availableSizes = extractAvailableSizes(
+            productData,
+            sizeOptionNames
+          );
+
+          sizeSelect.innerHTML = '<option value="">Select</option>';
+
+          if (availableSizes.length === 0) {
+            sizeSelect.innerHTML =
+              '<option value="">No sizes available</option>';
+
+            setMsg(
+              `No sizes are currently available for ${selectedColor}.`,
+              "error"
+            );
+
+            return;
+          }
+
+          availableSizes.forEach(size => {
+            const option = document.createElement("option");
+
+            option.value = size;
+            option.textContent = size;
+
+            sizeSelect.appendChild(option);
+          });
+
+          sizeSelect.disabled = false;
+        } catch (error) {
+          console.error(error);
+
+          sizeSelect.innerHTML =
+            '<option value="">Unable to load sizes</option>';
+
+          setMsg(
+            `Could not load sizes for ${selectedColor}.`,
+            "error"
+          );
+        } finally {
+          colorSelect.disabled = false;
+        }
+      });
+    });
+
+    if (!selectedOfferId) {
+      console.error(
+        `No offer ID is mapped for product handle: ${CURRENT_PRODUCT_HANDLE}`
+      );
+
+      setMsg(
+        "The bundle offer is not configured for this product.",
+        "error"
+      );
+
+      comboAddButton.disabled = true;
+    }
+  }
+
+  initializeCombo();
+
+  /* --------------------------------------------------------
+     DUPLICATE ITEM MERGE
+  --------------------------------------------------------- */
+
+  function checkDuplicateItems(items) {
+    const itemMap = {};
+
+    items.forEach(item => {
+      const variantId = String(item.id);
+
+      if (!itemMap[variantId]) {
+        itemMap[variantId] = {
+          quantity: 0,
+          customField:
+            item.properties["_flyBundles:customField"] || "",
+          offerId:
+            item.properties["_flyBundles:OfferId"] || ""
+        };
+      }
+
+      itemMap[variantId].quantity += Number(item.quantity) || 0;
+    });
+
+    return Object.keys(itemMap).map(variantId => {
+      const mergedItem = itemMap[variantId];
+
+      return {
+        id: Number(variantId),
+        quantity: mergedItem.quantity,
+        properties: {
+          "_flyBundles:customField": mergedItem.customField,
+          "_flyBundles:OfferId": mergedItem.offerId,
+          "_flyBundles:prodQty": String(mergedItem.quantity)
+        }
+      };
+    });
+  }
+
+  /* --------------------------------------------------------
+     ADD TO CART
+  --------------------------------------------------------- */
+
+  comboAddButton.addEventListener("click", async function () {
+    if (!selectedOfferId) {
+      setMsg(
+        "The bundle offer is not configured for this product.",
+        "error"
+      );
+
+      return;
+    }
+
+    setMsg("");
+    setLoading(true);
+
+    try {
+      const selections = [];
+      const items = [];
+
+      /*
+       * Validate every row and prepare the selected variants before
+       * generating or saving the bundle ID.
+       */
+      for (let index = 0; index < rowsCfg.length; index++) {
+        const rowNumber = index + 1;
+        const row = comboRoot.querySelector(
+          `.row[data-index="${rowNumber}"]`
+        );
+
+        if (!row) {
+          throw new Error(`Combo row ${rowNumber} was not found.`);
+        }
+
+        const colorSelect = row.querySelector(".color");
+        const sizeSelect = row.querySelector(".size");
+
+        const selectedColor = colorSelect
+          ? colorSelect.value
+          : "";
+
+        const selectedSize = sizeSelect
+          ? sizeSelect.value
+          : "";
+
+        if (!selectedColor || !selectedSize) {
+          setMsg(
+            `Please select Color and Size for row ${rowNumber}.`,
+            "error"
+          );
+
+          return;
+        }
+
+        const rowConfig = rowsCfg[index];
+
+        const productData = await getCachedProduct(
+          rowConfig,
+          selectedColor
+        );
+
+        const variantId = findVariantIdBySize(
+          productData,
+          selectedSize,
+          sizeOptionNames
+        );
+
+        if (!variantId) {
+          setMsg(
+            `The selected size is unavailable for ${selectedColor}.`,
+            "error"
+          );
+
+          return;
+        }
+
+        selections.push({
+          color: selectedColor,
+          size: selectedSize
+        });
+
+        items.push({
+          id: variantId,
+          quantity: 1
+        });
+      }
+
+      /*
+       * Use the same bundle OfferId when the exact same selection
+       * is added again. Generate a unique suffix for a new selection.
+       */
+      const currentFingerprint =
+        generateComboFingerprint(selections);
+
+      const lastCombo = getLastCombo();
+
+      let offerIdToUse;
+
+      if (
+        lastCombo.fp === currentFingerprint &&
+        lastCombo.offerId
+      ) {
+        offerIdToUse = lastCombo.offerId;
+      } else {
+        offerIdToUse =
+          `${selectedOfferId}_${randomSuffix()}`;
+
+        saveLastCombo(
+          currentFingerprint,
+          offerIdToUse
+        );
+      }
+
+      const itemsWithProperties = items.map(item => ({
+        id: item.id,
+        quantity: item.quantity,
+        properties: {
+          "_flyBundles:OfferId": offerIdToUse,
+          "_flyBundles:prodQty": "1",
+          "_flyBundles:customField": ""
+        }
+      }));
+
+      const mergedItems = checkDuplicateItems(
+        itemsWithProperties
+      );
+
+      const cartResponse = await fetch("/cart/add.js", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          items: mergedItems
+        })
+      });
+
+      const cartResult = await cartResponse.json();
+
+      if (!cartResponse.ok) {
+        throw new Error(
+          cartResult.description ||
+          cartResult.message ||
+          "Could not add the combo to the cart."
+        );
+      }
+
+      setMsg("Added to cart!", "success");
+
+      if (
+        window.Gokwik &&
+        typeof window.Gokwik.openCart === "function"
+      ) {
+        window.Gokwik.openCart();
+      } else if (
+        window.gokwik &&
+        typeof window.gokwik.openCart === "function"
+      ) {
+        window.gokwik.openCart();
+      }
+    } catch (error) {
+      console.error("Combo add-to-cart error:", error);
+
+      setMsg(
+        error.message || "Could not add to cart.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  });
+})();
+</script>
+
+{% endif %}
