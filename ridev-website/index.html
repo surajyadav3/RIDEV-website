@@ -15,8 +15,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/ridev.css">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/ridev.css?v=20260921-hero-equal2">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230A0D0A'/><path d='M18.5 4.5 8.5 18.5h6l-2 9 10-14h-6.5z' fill='%2395DB67'/></svg>">
 
 <script type="application/ld+json">
@@ -46,7 +46,7 @@ if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
 document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 </script>
 </head>
-<body>
+<body class="rider-page">
 
 <div class="ticker">
   <div class="wrap">Backed by <b>Kunal Bahl</b> on Shark Tank India · <b>Delhivery</b> fleet partner · <a href="investors.html">Investors →</a></div>
@@ -61,7 +61,7 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
       <a href="#cities">Cities</a>
       <a href="#fleet">Fleet</a>
       <a href="#app">App</a>
-      <a href="#business">For business</a>
+      <a href="business.html">For business</a>
       <a href="investors.html">Investors</a>
     </nav>
     <div class="nav__cta">
@@ -70,7 +70,7 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
         <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       </button>
 
-      <a class="btn btn--ghost btn--sm" href="#business">Fleet enquiry</a>
+      <a class="btn btn--ghost btn--sm" href="business.html">Fleet enquiry</a>
       <a class="btn btn--primary btn--sm" href="#get">Get a bike</a>
     </div>
     <button class="nav__burger" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -80,21 +80,89 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 <!-- ══════════ 1 · hero ══════════ -->
 <section class="hero">
   <div class="wrap">
-    <div class="hero__in">
-      <div>
-        <div class="hero__price">From <b>₹1,400</b> a week · zero down payment</div>
-        <h1 class="h-xl">Just the weekly rent.<br><span class="hl">Everything else is on us.</span></h1>
-        <p class="hero__sub">
-          Electric two-wheelers for India's delivery riders. Battery swaps, repairs, servicing,
-          a replacement bike and insurance — all inside one weekly price.
-        </p>
-        <div class="btn-row">
-          <a class="btn btn--primary" href="#get">Get a bike</a>
-          <a class="btn btn--ghost" href="#pricing">See prices</a>
-        </div>
+    <div class="hero__slider" data-hero-slider aria-label="RIDEV hero carousel">
+      <div class="hero__track">
+        <article class="hero__slide hero__slide--primary">
+          <div class="hero__copy">
+            <div class="hero__price">From <b>₹1,400</b> a week · zero down payment</div>
+            <h1 class="h-xl">Just the weekly rent.<br><span class="hl">Everything else is on us.</span></h1>
+            <p class="hero__sub">
+              Electric two-wheelers for India's delivery riders. Battery swaps, repairs, servicing,
+              a replacement bike and insurance — all inside one weekly price.
+            </p>
+            <div class="btn-row">
+              <a class="btn btn--primary" href="#get">Get a bike</a>
+              <a class="btn btn--ghost" href="#pricing">See prices</a>
+            </div>
+          </div>
+          <div class="herofig" data-r="heroArt" aria-hidden="true"></div>
+        </article>
+
+        <article class="hero__slide hero__slide--cities">
+          <div class="hero__panel-copy">
+            <div class="brandslide__eyebrow">Bengaluru hub launch</div>
+            <h2 class="h-xl">A new hub is live.<br><span class="hl">More are opening soon.</span></h2>
+            <p class="hero__sub">Choose a city to watch its opening story and see what is coming next for RIDEV riders.</p>
+          </div>
+          <div class="hub-preview" data-hub-preview>
+            <div class="hub-preview__card">
+              <div class="hub-preview__stage" data-hub-stage>
+                <iframe
+                  src="https://www.instagram.com/reel/DdEemdujAxd/embed?autoplay=1"
+                  title="RIDEV Bengaluru hub opening"
+                  loading="eager"
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  allowfullscreen></iframe>
+                <div class="hub-preview__media" aria-hidden="true"></div>
+                <div class="hub-preview__placeholder" aria-hidden="true"><span class="hub-preview__pulse"></span><b>Opening soon</b></div>
+              </div>
+            </div>
+            <div class="hub-preview__states" role="tablist" aria-label="Hub openings">
+              <button class="hub-state is-active" type="button" role="tab" aria-selected="true" data-hub-state="bengaluru" data-hub-video="https://www.instagram.com/reel/DdEemdujAxd/embed?autoplay=1"><i></i><span>Bengaluru</span><small>Now open</small></button>
+              <button class="hub-state" type="button" role="tab" aria-selected="false" data-hub-state="pune"><i></i><span>Pune</span><small>Opening soon</small></button>
+              <button class="hub-state" type="button" role="tab" aria-selected="false" data-hub-state="hyderabad"><i></i><span>Hyderabad</span><small>Next hub</small></button>
+              <button class="hub-state" type="button" role="tab" aria-selected="false" data-hub-state="chennai"><i></i><span>Chennai</span><small>Next hub</small></button>
+            </div>
+          </div>
+        </article>
+
+        <article class="hero__slide hero__slide--video">
+          <div class="hero__panel-copy">
+            <div class="brandslide__eyebrow">Shark Tank India</div>
+            <h2 class="h-xl">RIDEV on<br><span class="hl">Shark Tank India.</span></h2>
+            <p class="hero__sub">Watch the first 15 seconds of the RIDEV pitch and see the idea that is changing how riders earn on the road.</p>
+          </div>
+          <div class="brandslide__video">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/tp4bcH19VEg?start=0&amp;end=15&amp;controls=1&amp;rel=0&amp;modestbranding=1&amp;autoplay=0&amp;mute=1"
+              title="RIDEV Shark Tank teaser"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen></iframe>
+          </div>
+        </article>
       </div>
-      <div class="herofig" data-r="heroArt" aria-hidden="true"></div>
+
+      <div class="hero__controls">
+        <button class="hero__arrow" type="button" data-hero-prev aria-label="Previous slide">‹</button>
+        <div class="hero__dots" aria-label="Select a slide">
+          <button class="hero__dot is-active" type="button" data-hero-dot="0" aria-label="Go to slide 1"></button>
+          <button class="hero__dot" type="button" data-hero-dot="1" aria-label="Go to slide 2"></button>
+          <button class="hero__dot" type="button" data-hero-dot="2" aria-label="Go to slide 3"></button>
+        </div>
+        <button class="hero__arrow" type="button" data-hero-next aria-label="Next slide">›</button>
+      </div>
     </div>
+
+    <section class="brandstory" aria-labelledby="brandstory-title">
+      <div class="brandstory__in">
+        <div>
+          <div class="eyebrow">The RIDEV brand</div>
+          <h2 class="h-lg" id="brandstory-title">Built around the rider, not the vehicle.</h2>
+        </div>
+        <p>Reliable electric mobility should feel simple: one fair weekly price, a nearby hub and a team that keeps you moving. That is the promise behind every RIDEV bike.</p>
+      </div>
+    </section>
 
     <div class="hstrip" data-r="heroStrip"></div>
     <div class="oemline">
@@ -105,6 +173,7 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
       <span class="oemline__lbl">Powering deliveries for</span>
       <span class="oemline__row" data-r="deliveryChips"></span>
     </div>
+
   </div>
 </section>
 
@@ -138,12 +207,19 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
       <p class="lede mt-s">Tap a step to see it. Everything from booking to the weekly payment happens in the app.</p>
     </div>
     <div class="flow">
-      <ol class="flow__steps" data-r="flowSteps"></ol>
+      <div class="flow__steps-wrap">
+        <ol class="flow__steps" data-r="flowSteps"></ol>
+        <div class="flow__nav" data-r="flowNav" aria-label="Onboarding steps"></div>
+      </div>
       <div class="flow__phone">
-        <div class="phone">
-          <div class="phone__screen">
-            <div class="phone__notch"></div>
-            <div class="phone__body" data-r="flowScreen"></div>
+        <div class="appband__visual flow__phone-visual" data-flow-transition>
+          <div class="appband__ghost appband__ghost--back" aria-hidden="true"><span></span><i></i><b></b></div>
+          <div class="appband__ghost appband__ghost--mid" aria-hidden="true"><span></span><i></i><b></b></div>
+          <div class="phone">
+            <div class="phone__screen">
+              <div class="phone__notch"></div>
+              <div class="phone__body" data-r="flowScreen"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -256,7 +332,12 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
       <h2 class="h-lg">“Everything included” is easy to say and expensive to keep.</h2>
       <p class="lede mt-s">RIDEV owns the bikes, staffs the hubs and runs its own fleet software — which is what makes an all-in weekly price something we can hold.</p>
     </div>
-    <div class="grid g3" data-r="trustCards"></div>
+    <div class="trustcarousel" data-trust-carousel>
+      <div class="trustcarousel__viewport">
+        <div class="trustcarousel__cards" data-r="trustCards"></div>
+      </div>
+      <div class="trustcarousel__controls" data-trust-controls aria-label="Why RIDEV holds up carousel controls"></div>
+    </div>
 
     <div class="pressline mt-l">
       <span class="pressline__lbl">As covered in</span>
@@ -276,87 +357,48 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
         <ul class="plan__inc mt-m inline-ticks" data-r="appFeatures"></ul>
         <div class="btn-row mt-m" data-r="appCta"></div>
       </div>
-      <div class="phone">
-        <div class="phone__screen">
-          <div class="phone__notch"></div>
-          <div class="phone__body" data-r="phoneBody"></div>
+      <div class="appband__visual" data-app-transition>
+        <div class="appband__ghost appband__ghost--back" aria-hidden="true"><span></span><i></i><b></b></div>
+        <div class="appband__ghost appband__ghost--mid" aria-hidden="true"><span></span><i></i><b></b></div>
+        <div class="phone">
+          <div class="phone__screen">
+            <div class="phone__notch"></div>
+            <div class="phone__body" data-r="phoneBody"></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════ 8 · for business ══════════ -->
+<!-- ══════════ 8 · for business teaser ══════════ -->
 <section class="sec" id="business">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">Partner with RIDEV</div>
-      <h2 class="h-lg">Four ways to work with us.</h2>
-    </div>
-    <div class="grid g4" data-r="partnerCards"></div>
-
-    <div class="callout mt-m">
+    <div class="business-teaser">
       <div>
-        <span class="pill">Case in point</span>
-        <h3 class="h-sm mt-s">Delhivery — 150 EVs for last-mile delivery</h3>
-        <p class="mt-s">
-          An EV-as-a-service deployment over three months that removes upfront cost for gig workers.
-          Pilots in Delhi NCR and Bengaluru cut 4,260&nbsp;kg of CO₂ and more than halved riders'
-          daily running costs. <span class="muted">Reported by ET Auto and GoodReturns, Feb 2026.</span>
-        </p>
+      <div class="eyebrow">Partner with RIDEV</div>
+      <h2 class="h-lg">Bring your riders, vehicles or site. We bring the operating system.</h2>
+      <p class="lede mt-s">Fleet deployment, OEM supply, service workshops and hubs all plug into the same RIDEV network.</p>
       </div>
-      <a class="btn btn--dark" href="mailto:info@ridev.in?subject=Fleet%20partnership">Talk to the fleet team</a>
+      <a class="btn btn--primary" href="business.html">Explore business partnerships <span class="arw" aria-hidden="true"></span></a>
     </div>
   </div>
 </section>
 
-<!-- ══════════ 8b · carbon story (slider) ══════════ -->
-<section class="sec sec--paper2" id="carbon">
+<!-- ══════════ 8b · impact + ESG ══════════ -->
+<section class="sec impactsection" id="impact">
   <div class="wrap">
-    <!-- carbon story: visual metrics as a snap-scroll slider with a progress bar -->
-    <div class="carbonstory">
-      <div class="carbonstory__head" data-r="esgCarbonHead"></div>
-      <div class="carbonstory__viewport">
-        <div class="carbonstory__track" data-r="esgCarbonCards" role="list"></div>
+    <div class="sec-head impactsection__head">
+      <div>
+        <div class="eyebrow">Impact, measured honestly</div>
+        <h2 class="h-lg">The work behind the green claims.</h2>
       </div>
-      <div class="carbonstory__progress"
-           role="progressbar" aria-label="Carbon story progress"
-           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
-        <div class="carbonstory__progress-fill"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════ 8c · impact band ══════════ -->
-<section class="sec sec--dark sec--tight" id="impact">
-  <div class="wrap">
-    <div class="sec-head center">
-      <div class="eyebrow">Real-world impact</div>
-      <h2 class="h-lg">Numbers behind the bikes.</h2>
-      <p class="lede mt-s" data-fill="impact.intro"></p>
+      <p class="lede" data-fill="esg.intro"></p>
     </div>
     <div class="impact" data-r="impactStats"></div>
-  </div>
-</section>
-
-<!-- ══════════ 9 · ESG ══════════ -->
-<section class="sec sec--paper2" id="esg">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">ESG</div>
-      <h2 class="h-lg">The unglamorous version.</h2>
-      <p class="lede mt-s" data-fill="esg.intro"></p>
-    </div>
-
-    <!-- three pillars — desktop: 3-col grid · mobile: single-card slider -->
-    <div class="esgslider">
-      <div class="esg" data-r="esgPillars"></div>
-      <div class="esgslider__progress"
-           role="progressbar" aria-label="ESG pillars progress"
-           aria-valuemin="0" aria-valuemax="100" aria-valuenow="33" tabindex="0">
-        <div class="esgslider__progress-fill"></div>
-      </div>
+    <div class="impactdetail">
+      <div class="impactdetail__tabs" data-r="impactTabs" role="tablist" aria-label="Impact areas"></div>
+      <div class="impactdetail__panel" data-r="impactPillars"></div>
     </div>
     <p class="muted mt-m" data-fill="esg.entity"></p>
   </div>
@@ -463,7 +505,7 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
           <li><a href="investors.html">Investors</a></li>
           <li><a href="investors.html#growth">Growth</a></li>
           <li><a href="investors.html#team">Founders</a></li>
-          <li><a href="#business">Partner with us</a></li>
+          <li><a href="business.html">Partner with us</a></li>
           <li><a href="mailto:info@ridev.in?subject=Careers">Careers</a></li>
         </ul>
       </div>
@@ -491,6 +533,6 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 
 <script src="data/metrics.js"></script>
 <script src="assets/js/india-map.js"></script>
-<script src="assets/js/ridev.js"></script>
+<script src="assets/js/ridev.js?v=20260921-hero-bg"></script>
 </body>
 </html>

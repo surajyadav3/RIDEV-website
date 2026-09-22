@@ -169,7 +169,7 @@
 
   fill('heroStrip',
     stat(n(H.fleet), 'Electric vehicles') +
-    stat(H.cities_live + '<em>+2 opening</em>', 'Cities live') +
+    stat('15+', 'Cities live · 12,000+ vehicles') +
     stat(H.hubs, 'Operating hubs') +
     stat(n(H.registered_riders), 'Riders registered')
   );
@@ -218,6 +218,131 @@
   /* ============================================================
      Impact band + rider testimonials
      ============================================================ */
+  (function () {
+    var slider = document.querySelector('[data-hero-slider]');
+    if (!slider) return;
+
+    var track = slider.querySelector('.hero__track');
+    var slides = Array.prototype.slice.call(slider.querySelectorAll('.hero__slide'));
+    var dots = Array.prototype.slice.call(slider.querySelectorAll('.hero__dot'));
+    var prev = slider.querySelector('[data-hero-prev]');
+    var next = slider.querySelector('[data-hero-next]');
+    var index = 0;
+    var hero = slider.closest('.hero');
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var autoTimer = null;
+    var AUTO_MS = 6000;
+    var primarySlide = slider.querySelector('.hero__slide--primary');
+    if (primarySlide) {
+      var heroBackground = new Image();
+      heroBackground.onload = function () { primarySlide.classList.add('has-hero-bg'); };
+      heroBackground.src = 'assets/img/image.png';
+    }
+
+    function render() {
+      track.style.transform = 'translateX(-' + (index * 100) + '%)';
+      slider.dataset.activeSlide = String(index);
+      if (hero) hero.dataset.activeSlide = String(index);
+      dots.forEach(function (dot, i) { dot.classList.toggle('is-active', i === index); });
+    }
+
+    function schedule() {
+      if (reduce || slides.length < 2) return;
+      clearTimeout(autoTimer);
+      slider.classList.remove('is-autoplaying');
+      void slider.offsetWidth;
+      slider.classList.add('is-autoplaying');
+      autoTimer = setTimeout(function () {
+        index = (index + 1) % slides.length;
+        render();
+        schedule();
+      }, AUTO_MS);
+    }
+
+    function moveTo(nextIndex) {
+      index = (nextIndex + slides.length) % slides.length;
+      render();
+      schedule();
+    }
+
+    prev && prev.addEventListener('click', function () {
+      moveTo(index - 1);
+    });
+
+    next && next.addEventListener('click', function () {
+      moveTo(index + 1);
+    });
+
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () {
+        moveTo(Number(dot.dataset.heroDot || 0));
+      });
+    });
+
+    slider.addEventListener('mouseenter', function () { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); });
+    slider.addEventListener('mouseleave', schedule);
+    slider.addEventListener('focusin', function () { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); });
+    slider.addEventListener('focusout', function (event) {
+      if (!slider.contains(event.relatedTarget)) schedule();
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); }
+      else schedule();
+    });
+
+    var hubPreview = slider.querySelector('[data-hub-preview]');
+    if (hubPreview) {
+      var hubStage = hubPreview.querySelector('[data-hub-stage]');
+      var hubName = hubPreview.querySelector('[data-hub-name]');
+      var hubStatus = hubPreview.querySelector('[data-hub-status]');
+      var hubStates = Array.prototype.slice.call(hubPreview.querySelectorAll('[data-hub-state]'));
+      var hubDetails = {
+        bengaluru: { name: 'Bengaluru', status: 'Now open' },
+        pune: { name: 'Pune', status: 'Opening soon' },
+        hyderabad: { name: 'Hyderabad', status: 'Next hub' },
+        chennai: { name: 'Chennai', status: 'Next hub' }
+      };
+
+      function showHub(state) {
+        var detail = hubDetails[state] || hubDetails.bengaluru;
+        hubStates.forEach(function (button) {
+          var active = button.dataset.hubState === state;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        hubName.textContent = detail.name;
+        hubStatus.textContent = detail.status;
+        hubPreview.classList.remove('is-changing');
+        void hubPreview.offsetWidth;
+        hubPreview.classList.add('is-changing');
+
+        var video = hubStage.querySelector('iframe');
+        var source = hubStates.filter(function (button) { return button.dataset.hubState === state; })[0];
+        if (source && source.dataset.hubVideo) {
+          if (!video) {
+            video = document.createElement('iframe');
+            video.title = detail.name + ' hub opening';
+            video.allow = 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share';
+            video.allowFullscreen = true;
+            hubStage.appendChild(video);
+          }
+          video.src = source.dataset.hubVideo;
+          video.style.display = 'block';
+        } else if (video) {
+          video.style.display = 'none';
+          video.src = 'about:blank';
+        }
+      }
+
+      hubStates.forEach(function (button) {
+        button.addEventListener('click', function () { showHub(button.dataset.hubState); });
+      });
+    }
+
+    render();
+    schedule();
+  })();
+
   (function(){
     if (D.impact && D.impact.stats) {
       fill('impactStats', D.impact.stats.map(function (s, i) {
@@ -351,7 +476,12 @@
       return '<button class="tab" role="tab" data-city="' + c + '" aria-selected="' + (i === 0) + '">' + c + '</button>';
     }).join('');
 
-    function render(city) {
+    function render(city, direction) {
+      var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && planWrap.children.length) {
+        planWrap.classList.add('is-switching');
+        planWrap.dataset.transitionDirection = direction || 'next';
+      }
       // one card per distinct weekly price; the longest-range model leads,
       // the rest are listed inside. Keeps the grid to a single row.
       var groups = {};
@@ -370,7 +500,7 @@
       });
       var star = value.indexOf(Math.max.apply(null, value));
 
-      planWrap.innerHTML = prices.map(function (wk, i) {
+      var html = prices.map(function (wk, i) {
         var set  = groups[wk].slice().sort(function (a, b) { return b.range_km - a.range_km; });
         var lead = set[0];
         var rest = set.slice(1);
@@ -399,15 +529,29 @@
           '<a class="btn ' + (i === star ? 'btn--primary' : 'btn--ghost') + '" href="#get">Reserve</a>' +
         '</article>';
       }).join('');
-      observeAll();
+      function paint() {
+        planWrap.innerHTML = html;
+        planWrap.classList.remove('is-switching');
+        planWrap.classList.add('has-switched');
+        window.setTimeout(function () { planWrap.classList.remove('has-switched'); }, 620);
+        observeAll();
+      }
+      if (!reduce && planWrap.classList.contains('is-switching')) {
+        window.setTimeout(paint, 180);
+      } else {
+        paint();
+      }
     }
 
     render(cityKeys[0]);
     if (tabsBox) $$('.tab', tabsBox).forEach(function (t) {
-      t.addEventListener('click', function () {
+        t.addEventListener('click', function () {
+          var previous = cityKeys.indexOf(tabsBox.querySelector('[aria-selected="true"]').dataset.city);
+          var next = cityKeys.indexOf(t.dataset.city);
+          var direction = next >= previous ? 'next' : 'prev';
         $$('.tab', tabsBox).forEach(function (x) { x.setAttribute('aria-selected', 'false'); });
         t.setAttribute('aria-selected', 'true');
-        render(t.dataset.city);
+          render(t.dataset.city, direction);
       });
     });
   });
@@ -431,7 +575,7 @@
         '<div class="cityrow__city">' +
           '<b>' + c.city + '</b><span>' + c.state + '</span>' +
         '</div>' +
-        '<div class="cityrow__hubs">' + c.hubs.map(function (h) {
+        '<div class="cityrow__hubs"><div class="hubcards">' + c.hubs.map(function (h) {
             var hubSlug = citySlug + '-' + slugify(h.name);
             var label = h.name + ' — RIDEV hub';
             var url = mapsUrl(h.name + ', ' + c.city + ', ' + c.state);
@@ -439,8 +583,22 @@
                    'data-hub="' + hubSlug + '" data-hubname="' + h.name +
                    '" data-hubarea="' + (h.area || c.city) + '"' +
                    ' title="Open ' + h.name + ' on Google Maps" aria-label="' + label + ' — open on Google Maps">' +
-                   PIN + h.name + '</a>';
-          }).join('') + '</div>' +
+                   '<span class="hubtag__media">' +
+                     '<img class="hubtag__img" src="assets/img/hubs/' + hubSlug + '.jpg" alt="" loading="lazy" ' +
+                       'onload="this.parentNode.classList.add(\'is-loaded\')" onerror="this.remove()">' +
+                     '<svg class="hubtag__fallback" viewBox="0 0 160 100" aria-hidden="true">' +
+                       '<rect width="160" height="100" fill="url(#hub-' + hubSlug + ')"/>' +
+                       '<defs><linearGradient id="hub-' + hubSlug + '" x1="0" y1="0" x2="0" y2="1">' +
+                         '<stop offset="0%" stop-color="#EEFAE0"/><stop offset="100%" stop-color="#95DB67"/>' +
+                       '</linearGradient></defs>' +
+                       '<path d="M22 82h116M34 82V52l46-23 46 23v30M56 82V60h18v22M100 82V60h18v22" ' +
+                         'fill="none" stroke="#34691C" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>' +
+                       '<circle cx="80" cy="22" r="7" fill="#4E9130"/>' +
+                     '</svg>' +
+                   '</span>' +
+                   '<span class="hubtag__body">' + PIN + '<span>' + h.name + '</span></span>' +
+                   '</a>';
+                 }).join('') + '</div><div class="hubprogress" aria-hidden="true"><span></span></div></div>' +
         '<div class="cityrow__tag">' +
           '<button class="zoombtn" type="button" data-zoom-city="' + c.city +
             '" title="Zoom map to ' + c.city + '" aria-label="Zoom map to ' + c.city + '">' +
@@ -460,7 +618,37 @@
         '<div class="cityrow__tag"><span class="pill pill--soon">Opening</span></div>' +
       '</div>');
     }
-    fill('cityList', rows.join(''));
+    fill('cityList',
+      '<div class="cityslider__nav" aria-label="Browse operating cities">' +
+        '<button class="cityslider__arrow" type="button" data-city-prev aria-label="Previous city">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>' +
+        '</button>' +
+        '<span class="cityslider__count" data-city-count aria-live="polite"></span>' +
+        '<button class="cityslider__arrow" type="button" data-city-next aria-label="Next city">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="cityslider__viewport">' + rows.join('') + '</div>'
+    );
+
+    var citySlider = $('[data-r="cityList"]');
+    var cityRows = citySlider ? $$('.cityrow', citySlider) : [];
+    var cityCount = citySlider ? $('[data-city-count]', citySlider) : null;
+    var cityIndex = 0;
+    function showCity(index) {
+      if (!cityRows.length) return;
+      cityIndex = (index + cityRows.length) % cityRows.length;
+      cityRows.forEach(function (row, i) {
+        row.classList.toggle('is-current', i === cityIndex);
+        row.setAttribute('aria-hidden', i === cityIndex ? 'false' : 'true');
+      });
+      if (cityCount) cityCount.textContent = String(cityIndex + 1).padStart(2, '0') + ' / ' + String(cityRows.length).padStart(2, '0');
+    }
+    if (citySlider) {
+      $('[data-city-prev]', citySlider).addEventListener('click', function () { showCity(cityIndex - 1); });
+      $('[data-city-next]', citySlider).addEventListener('click', function () { showCity(cityIndex + 1); });
+      showCity(0);
+    }
   })();
 
   fill('footerCities', D.cities.map(function (c) {
@@ -709,8 +897,63 @@
     return '<article class="card card--hover rv" style="border-top:3px solid var(--brand)">' +
       '<h3 class="h-sm">' + t + '</h3><p class="mt-s">' + b + '</p></article>';
   }
-  fill('trustCards', (D.trust || []).map(function (t) { return railCard(t.t, t.b); }).join(''));
+  fill('trustCards', (D.trust || []).map(function (t, i) {
+    return railCard(t.t, t.b).replace('<article ', '<article data-trust-index="' + i + '" ');
+  }).join(''));
   fill('modelCards', (D.model_cards || []).map(function (t) { return railCard(t.t, t.b); }).join(''));
+
+  /* Why it holds up: overlapping carousel, shared by desktop and mobile. */
+  (function () {
+    var root = $('[data-trust-carousel]');
+    var track = $('[data-r="trustCards"]');
+    var controls = $('[data-trust-controls]');
+    if (!root || !track) return;
+    var cards = $$('[data-trust-index]', track);
+    if (!cards.length) return;
+    var current = 0, timer = null;
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function wrap(i) { return (i + cards.length) % cards.length; }
+    function render(index) {
+      current = wrap(index);
+      cards.forEach(function (card, i) {
+        var delta = (i - current + cards.length) % cards.length;
+        card.classList.toggle('is-active', delta === 0);
+        card.classList.toggle('is-next', delta === 1);
+        card.classList.toggle('is-prev', delta === cards.length - 1);
+        card.classList.toggle('is-hidden', delta > 1 && delta < cards.length - 1);
+        card.setAttribute('aria-hidden', delta === 0 ? 'false' : 'true');
+        card.setAttribute('tabindex', delta === 0 ? '0' : '-1');
+      });
+      if (controls) $$('.trustcarousel__dot', controls).forEach(function (dot, i) {
+        dot.classList.toggle('is-active', i === current);
+        dot.setAttribute('aria-selected', i === current ? 'true' : 'false');
+      });
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    function start() { if (!reduce && cards.length > 1 && !timer) timer = setInterval(function () { render(current + 1); }, 5200); }
+    if (controls) {
+      controls.innerHTML = '<button class="trustcarousel__arrow" type="button" data-trust-prev aria-label="Previous reason">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>' +
+        '<div class="trustcarousel__dots" role="tablist" aria-label="Select a reason"></div>' +
+        '<button class="trustcarousel__arrow" type="button" data-trust-next aria-label="Next reason">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>';
+      var dots = $('.trustcarousel__dots', controls);
+      dots.innerHTML = cards.map(function (_, i) {
+        return '<button class="trustcarousel__dot" type="button" role="tab" data-trust-dot="' + i + '" aria-label="Show reason ' + (i + 1) + '" aria-selected="false"></button>';
+      }).join('');
+      $('[data-trust-prev]', controls).addEventListener('click', function () { render(current - 1); stop(); start(); });
+      $('[data-trust-next]', controls).addEventListener('click', function () { render(current + 1); stop(); start(); });
+      $$('[data-trust-dot]', controls).forEach(function (dot) {
+        dot.addEventListener('click', function () { render(Number(dot.dataset.trustDot)); stop(); start(); });
+      });
+    }
+    root.addEventListener('pointerenter', stop);
+    root.addEventListener('pointerleave', start);
+    root.addEventListener('focusin', stop);
+    root.addEventListener('focusout', function () { if (!root.contains(document.activeElement)) start(); });
+    render(0);
+    start();
+  })();
 
   fill('partnerCards', (D.partner_types || []).map(function (p) {
     return '<article class="card card--hover rv partnercard">' +
@@ -901,6 +1144,21 @@
      ============================================================ */
   (function () {
     var A = D.app; if (!A) return;
+    var appVisual = document.querySelector('[data-app-transition]');
+    if (appVisual) {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+        appVisual.classList.add('is-ready');
+      } else {
+        var appObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            appVisual.classList.add('is-ready');
+            appObserver.disconnect();
+          });
+        }, { threshold: 0.25 });
+        appObserver.observe(appVisual);
+      }
+    }
     fill('appFeatures', A.features.map(function (f) { return '<li>' + CHK + f + '</li>'; }).join(''));
 
     var PLAY = '<svg viewBox="0 0 24 24" style="width:19px;height:19px" aria-hidden="true">' +
@@ -1021,6 +1279,21 @@
      ============================================================ */
   (function () {
     if (!$$('[data-r="flowSteps"]').length) return;
+    var flowVisual = document.querySelector('[data-flow-transition]');
+    if (flowVisual) {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+        flowVisual.classList.add('is-ready');
+      } else {
+        var flowObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            flowVisual.classList.add('is-ready');
+            flowObserver.disconnect();
+          });
+        }, { threshold: 0.25 });
+        flowObserver.observe(flowVisual);
+      }
+    }
     var steps = D.onboarding || [];
     var planCity = Object.keys(D.plans)[0];
     var plan = D.plans[planCity][0];
@@ -1094,22 +1367,44 @@
     };
 
     fill('flowSteps', steps.map(function (s, i) {
-      return '<li class="flowstep' + (i === 0 ? ' on' : '') + '" data-screen="' + s.screen + '" tabindex="0" role="button">' +
+      return '<li class="flowstep' + (i === 0 ? ' on is-current' : '') + '" data-index="' + i + '" data-screen="' + s.screen + '" tabindex="0" role="button" aria-hidden="' + (i === 0 ? 'false' : 'true') + '">' +
         '<span class="flowstep__n">' + (i + 1) + '</span>' +
         '<div><b>' + s.t + '</b><p>' + s.b + '</p></div>' +
       '</li>';
     }).join(''));
 
-    function show(key) {
+    var flowNav = $('[data-r="flowNav"]');
+    var current = 0;
+    function showAt(index) {
+      if (!steps.length) return;
+      current = (index + steps.length) % steps.length;
+      var key = steps[current].screen;
       fill('flowScreen', SCREENS[key] || SCREENS.app);
-      $$('.flowstep').forEach(function (el) { el.classList.toggle('on', el.dataset.screen === key); });
+      $$('.flowstep').forEach(function (el, i) {
+        var active = i === current;
+        el.classList.toggle('on', active);
+        el.classList.toggle('is-current', active);
+        el.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+      if (flowNav) {
+        var count = $('[data-flow-count]', flowNav);
+        if (count) count.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(steps.length).padStart(2, '0');
+      }
     }
-    show(steps.length ? steps[0].screen : 'app');
+    if (flowNav) {
+      flowNav.innerHTML = '<button class="flow__arrow" type="button" data-flow-prev aria-label="Previous step">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>' +
+        '<span class="flow__count" data-flow-count aria-live="polite"></span>' +
+        '<button class="flow__arrow" type="button" data-flow-next aria-label="Next step">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>';
+      $('[data-flow-prev]', flowNav).addEventListener('click', function () { showAt(current - 1); });
+      $('[data-flow-next]', flowNav).addEventListener('click', function () { showAt(current + 1); });
+    }
+    showAt(0);
 
     $$('.flowstep').forEach(function (el) {
-      var go = function () { show(el.dataset.screen); };
+      var go = function () { showAt(Number(el.dataset.index)); };
       el.addEventListener('click', go);
-      el.addEventListener('mouseenter', go);
       el.addEventListener('focus', go);
       el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     });
@@ -1411,6 +1706,33 @@
       refresh();
       (mm.addEventListener ? mm.addEventListener.bind(mm, 'change') : mm.addListener.bind(mm))(refresh);
       window.addEventListener('resize', refresh);
+    })();
+
+    /* --- compact impact tabs: keep the full ESG evidence in one panel --- */
+    (function () {
+      var tabs = $('[data-r="impactTabs"]');
+      var panel = $('[data-r="impactPillars"]');
+      if (!tabs || !panel || !E.pillars) return;
+      var current = 0;
+      tabs.innerHTML = E.pillars.map(function (p, i) {
+        return '<button class="impacttab' + (i === 0 ? ' is-active' : '') + '" type="button" role="tab" aria-selected="' + (i === 0 ? 'true' : 'false') + '" data-impact-index="' + i + '">' +
+          '<span>' + p.k + '</span>' + p.title + '</button>';
+      }).join('');
+      function show(index) {
+        current = (index + E.pillars.length) % E.pillars.length;
+        var p = E.pillars[current];
+        panel.innerHTML = '<div class="impactdetail__intro"><span class="impactdetail__key">' + p.k + '</span><div><h3>' + p.title + '</h3><p>' + p.lead + '</p></div>' +
+          (p.stat ? '<div class="impactdetail__stat"><b>' + p.stat.n + '</b><span>' + p.stat.l + '</span></div>' : '') + '</div>' +
+          '<ul class="impactdetail__points">' + p.points.map(function (x) { return '<li>' + CHK + x + '</li>'; }).join('') + '</ul>';
+        $$('.impacttab', tabs).forEach(function (tab, i) {
+          tab.classList.toggle('is-active', i === current);
+          tab.setAttribute('aria-selected', i === current ? 'true' : 'false');
+        });
+      }
+      $$('.impacttab', tabs).forEach(function (tab) {
+        tab.addEventListener('click', function () { show(Number(tab.dataset.impactIndex)); });
+      });
+      show(0);
     })();
   })();
 

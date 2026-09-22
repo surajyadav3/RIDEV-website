@@ -127,7 +127,7 @@ out = f"""<!doctype html>
 
 {BANNER}
 
-<div class="page" id="page-rent">
+<div class="page rider-page" id="page-rent">
 {rent}
 </div>
 

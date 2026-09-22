@@ -15,7 +15,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230A0D0A'/><path d='M18.5 4.5 8.5 18.5h6l-2 9 10-14h-6.5z' fill='%2395DB67'/></svg>">
 
@@ -122,8 +122,8 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
   --nav-h: 76px;
 
   /* ---- typography ---- */
-  --font-display: "Sora", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-text:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Manrope", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-text:    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   /* ---- motion tokens ---- */
   --ease:      cubic-bezier(.2,.8,.25,1);
@@ -342,7 +342,7 @@ table{ border-collapse:collapse; width:100%; }
     radial-gradient(820px 560px at -6% 108%, rgba(149,219,103,.22), transparent 62%),
     radial-gradient(420px 320px at 46% 6%, rgba(198,242,107,.14), transparent 66%),
     var(--paper);
-  color:var(--text); padding:72px 0 0; position:relative; overflow:hidden;
+  color:var(--text); padding:0; position:relative; overflow:hidden;
   border-bottom:1px solid var(--line);
 }
 .hero::after{
@@ -355,6 +355,7 @@ table{ border-collapse:collapse; width:100%; }
 }
 .hero > *{ position:relative; z-index:1; }
 .hero__in{ display:grid; grid-template-columns:1.08fr .92fr; gap:48px; align-items:center; padding-block:24px 12px; }
+.hero__visual{ min-width:0; }
 .hero h1{ margin-bottom:22px; }
 .hero__sub{ font-size:clamp(17px,1.45vw,19.5px); line-height:1.62; color:var(--text-2); max-width:52ch; margin-bottom:32px; }
 .hero__price{
@@ -408,7 +409,7 @@ table{ border-collapse:collapse; width:100%; }
 /* ---------- hero stat strip ---------- */
 .hstrip{
   display:grid; grid-auto-flow:column; grid-auto-columns:1fr;
-  margin-top:40px;
+  margin-top:34px;
   background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.75));
   backdrop-filter:blur(10px);
   border:1px solid var(--line);
@@ -451,7 +452,7 @@ table{ border-collapse:collapse; width:100%; }
 /* ---------- OEM marquee (Yulu-style ticker) ---------- */
 .oemline{
   display:flex; align-items:center; gap:24px; flex-wrap:nowrap; padding:28px 0 36px;
-  border-top:1px solid var(--line); margin-top:28px; min-width:0;
+  border-top:1px solid var(--line); margin-top:34px; min-width:0;
 }
 .oemline__lbl{ font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-3); white-space:nowrap; flex-shrink:0; }
 .oemline__row{
@@ -503,6 +504,125 @@ table{ border-collapse:collapse; width:100%; }
 }
 .oemchip--delivery.is-loaded{ padding-left:10px; }
 .oemline__track--rev{ animation-direction:reverse; animation-duration:36s; }
+
+.hero__slider{ position:relative; width:100vw; margin-left:calc(50% - 50vw); overflow:hidden; background:var(--ink); }
+.hero__slider[data-active-slide="0"]{ background:
+  url("../img/image.png") center center / cover no-repeat;
+}
+.hero__slider[data-active-slide="0"]::before,
+.hero__slider[data-active-slide="2"]::before{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(7,16,9,.96) 0%,rgba(7,16,9,.78) 42%,rgba(7,16,9,.18) 100%),
+    linear-gradient(180deg,rgba(7,16,9,.08) 0%,rgba(7,16,9,.08) 58%,rgba(7,16,9,.58) 82%,rgba(7,16,9,.9) 100%);
+}
+.hero__slider[data-active-slide="2"]{ background:
+  url("../img/image_2.png") center center / cover no-repeat;
+}
+.hero__track{
+  position:relative; z-index:2; display:flex; width:100%; transition:transform .45s var(--ease-out);
+}
+.hero__slide{
+  flex:0 0 100%; width:100%; min-width:0; height:560px; min-height:560px; padding:24px 0 34px;
+}
+.hero__slide--primary{
+  position:relative; display:grid; grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr); gap:48px; align-items:center;
+  height:560px; padding:54px max(var(--gut),calc((100vw - var(--wrap)) / 2 + var(--gut))) 42px; overflow:hidden;
+  background:transparent;
+  box-shadow:none;
+}
+.hero__slide--primary::before{ content:none; }
+.hero__slide--primary > *{ position:relative; z-index:1; }
+.hero__slide--primary .herofig{ display:none; }
+.hero__slide--cities,.hero__slide--video{
+  display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;
+  padding-left:max(var(--gut),calc((100vw - var(--wrap)) / 2 + var(--gut)));
+  padding-right:max(var(--gut),calc((100vw - var(--wrap)) / 2 + var(--gut)));
+}
+.hero__copy,.hero__panel-copy{ min-width:0; }
+.hero__slide--cities ul{ list-style:none; display:flex; flex-wrap:wrap; gap:10px; margin:24px 0 0; padding:0; }
+.hero__slide--cities li{ padding:10px 15px; border:1px solid rgba(149,219,103,.35); border-radius:100px; color:var(--brand-ink); background:rgba(149,219,103,.1); font-weight:700; }
+.hub-preview{ min-width:0; }
+.hub-preview__card{ background:rgba(255,255,255,.96); border:1px solid rgba(78,145,48,.22); border-radius:22px; overflow:hidden; box-shadow:0 16px 38px rgba(13,18,10,.12); }
+.hub-preview__header{ display:none !important; }
+.hub-preview__profile{ display:none; }
+.hub-preview__avatar{ display:none; }
+.hub-preview__identity{ display:none; }
+.hub-preview__cta{ display:none !important; }
+.hub-preview__stage{ position:relative; width:100%; height:clamp(250px,28vw,330px); overflow:hidden; border-top:0; border-bottom:1px solid rgba(14,22,15,.08); background:linear-gradient(135deg, rgba(160,196,166,.28), rgba(22,33,26,.74)), url("../img/image_2.png") center center / cover no-repeat; box-shadow:inset 0 0 0 1px rgba(255,255,255,.12); }
+.hub-preview__media{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,15,12,.02), rgba(10,15,12,.2)); }
+.hub-preview__stage iframe{ position:absolute; inset:0; z-index:2; width:100%; height:100%; display:block; border:0; opacity:1; pointer-events:auto; }
+.hub-preview__placeholder{ position:absolute; inset:0; z-index:1; display:none; opacity:0; visibility:hidden; }
+.hub-preview__pulse{ width:82px; height:82px; border:1px solid rgba(149,219,103,.75); border-radius:50%; box-shadow:0 0 0 16px rgba(149,219,103,.08),0 0 0 32px rgba(149,219,103,.04); animation:hubPulse 2s ease-in-out infinite; }
+@keyframes hubPulse{ 0%,100%{ transform:scale(.9); opacity:.55; } 50%{ transform:scale(1.05); opacity:1; } }
+.hub-preview__states{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:18px; margin-bottom:0; }
+.hub-state{ min-width:0; padding:11px 9px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.035); color:var(--text-2); text-align:left; cursor:pointer; transition:transform .3s var(--spring),border-color .3s,background var(--dur-fast); }
+.hub-state:hover{ transform:translateY(-3px); border-color:var(--brand); }
+.hub-state.is-active{ border-color:var(--brand); background:var(--brand-wash); box-shadow:0 8px 22px rgba(149,219,103,.12); }
+.hub-state i{ display:block; width:7px; height:7px; margin-bottom:9px; border-radius:50%; background:var(--brand); box-shadow:0 0 0 4px rgba(149,219,103,.12); }
+.hub-state:not(.is-active) i{ background:var(--text-3); box-shadow:none; }
+.hub-state span,.hub-state small{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hub-state span{ color:var(--text); font-size:12px; font-weight:700; }
+.hub-state small{ margin-top:3px; color:var(--text-3); font-size:9px; }
+.hub-preview.is-changing .hub-preview__stage{ animation:hubSwap .45s var(--ease-out); }
+@keyframes hubSwap{ from{ opacity:.35; transform:translateY(8px) scale(.98); } to{ opacity:1; transform:translateY(0) scale(1); } }
+.hero__controls{ position:relative; z-index:2; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:18px; width:100%; max-width:none; min-height:86px; margin:0 auto; padding:10px max(var(--gut),calc((100vw - var(--wrap)) / 2 + var(--gut))) 18px; background:transparent; }
+.hero__slide--video .brandslide__video{ width:100%; }
+.hero__slide--video .hero__sub{ margin-bottom:0; }
+@media (min-width:1041px){
+  .hero__slide--video .hero__panel-copy h2{ font-size:clamp(52px,5vw,62px); line-height:1.04; }
+  .hero__slide--video .hero__panel-copy .hero__sub{ font-size:18px; line-height:1.48; }
+}
+.hero__controls{ padding-bottom:10px; }
+.hero__slide--primary .herofig{ min-width:0; }
+.hero__slide--primary .herofig svg{ max-width:520px; }
+.hero__slide--headline h3{
+  margin:0 0 10px; font-family:var(--font-display); font-size:clamp(24px,2vw,36px); line-height:1.06; letter-spacing:-.04em; color:var(--text);
+}
+.hero__slide--headline h3 span{ color:var(--brand); }
+.hero__slide--cities h3{ margin:0 0 10px; font-family:var(--font-display); font-size:clamp(24px,2vw,34px); line-height:1; letter-spacing:-.04em; color:var(--text); }
+.hero__slide p{ margin:0; color:var(--text-2); line-height:1.55; }
+.hero__slide ul{ list-style:none; margin:12px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
+.hero__slide li{ padding:6px 10px; border-radius:999px; background:rgba(149,219,103,.10); color:var(--brand-ink); font-size:12px; font-weight:700; }
+.brandslide__eyebrow{
+  display:inline-flex; margin-bottom:14px; padding:6px 10px; border-radius:999px;
+  background:var(--brand-wash); color:var(--brand-ink); font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700;
+}
+.brandslide__video{ position:relative; overflow:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.08); aspect-ratio:16/9; background:var(--ink-2); margin-top:6px; }
+.brandslide__video iframe{ width:100%; height:100%; border:0; display:block; }
+.hero__controls{ position:relative; z-index:2; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:18px; width:100%; max-width:none; min-height:86px; margin:0 auto; padding:0 max(var(--gut),calc((100vw - var(--wrap)) / 2 + var(--gut))) 18px; background:transparent; }
+.hero__arrow{ color:#fff; }
+.hero__arrow:hover{ color:var(--brand); }
+.hero__slide--primary .btn--primary{ background:#fff; border-color:#fff; color:var(--ink); box-shadow:0 8px 24px rgba(0,0,0,.28); }
+.hero__slide--primary .btn--primary:hover{ background:var(--brand); border-color:var(--brand); color:var(--black); }
+.hero__slide--primary .btn--ghost{ border-color:rgba(255,255,255,.72); color:#fff; background:rgba(7,16,9,.2); }
+.hero__slide--primary .btn--ghost:hover{ border-color:#fff; background:rgba(255,255,255,.14); color:#fff; }
+@media (min-width:1041px){
+  .hero__slide--primary{ padding-top:34px; padding-bottom:24px; }
+  .hero__slide--primary h1{ font-size:clamp(54px,5vw,62px); line-height:1.04; margin-bottom:14px; }
+  .hero__slide--primary .hero__price{ margin-bottom:14px; }
+  .hero__slide--primary .hero__sub{ font-size:18px; line-height:1.48; }
+}
+.hero__arrow{
+  width:42px; height:42px; border:0; border-radius:0; background:transparent; color:#fff; font-size:32px; line-height:1; display:grid; place-items:center; cursor:pointer; transition:all var(--dur) var(--spring);
+}
+.hero__arrow:first-child{ justify-self:end; }
+.hero__arrow:last-child{ justify-self:start; }
+.hero__arrow:hover{ background:transparent; color:var(--brand); transform:translateY(-1px) scale(1.08); }
+.hero__dots{ display:flex; align-items:center; gap:10px; }
+.hero__dot{
+  width:10px; height:10px; border-radius:50%; border:0; padding:0; background:rgba(78,145,48,.25); cursor:pointer; transition:all var(--dur) var(--spring);
+}
+.hero__dot.is-active{ width:28px; border-radius:100px; background:var(--brand); }
+.hero__controls::after{ content:""; position:absolute; left:50%; bottom:6px; width:86px; height:2px; border-radius:99px; transform:translateX(-50%) scaleX(0); transform-origin:left; background:var(--brand); opacity:.7; }
+.hero__slider.is-autoplaying .hero__controls::after{ animation:heroTimer 6s linear infinite; }
+@keyframes heroTimer{ from{ transform:translateX(-50%) scaleX(0); } to{ transform:translateX(-50%) scaleX(1); } }
+
+.brandstory{ width:100vw; margin-left:calc(50% - 50vw); margin-top:0; background:linear-gradient(135deg,var(--paper),var(--brand-mist)); color:var(--text); padding:58px 0; border-top:1px solid rgba(78,145,48,.12); border-bottom:1px solid rgba(78,145,48,.12); }
+.brandstory__in{ width:100%; max-width:var(--wrap); margin-inline:auto; padding-inline:var(--gut); display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,.8fr); gap:64px; align-items:end; }
+.brandstory .eyebrow{ color:var(--brand-ink); }
+.brandstory h2{ color:var(--text); max-width:14ch; margin:0; }
+.brandstory p{ color:var(--text-2); font-size:17px; line-height:1.65; max-width:46ch; margin:0; }
 
 /* ---------- cards ---------- */
 .card{
@@ -562,13 +682,17 @@ table{ border-collapse:collapse; width:100%; }
 
 /* ---------- flow (onboarding) ---------- */
 .flow{ display:grid; grid-template-columns:1.15fr .85fr; gap:56px; align-items:start; }
-.flow__steps{ counter-reset:s; display:grid; gap:12px; }
+.flow__steps-wrap{ min-width:0; }
+.flow__steps{ counter-reset:s; display:block; }
 .flowstep{
   counter-increment:s; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center;
   padding:16px 20px; border:1px solid var(--line); border-radius:var(--r);
   background:var(--paper); cursor:pointer; position:relative;
   transition:transform var(--dur) var(--ease), border-color var(--dur-fast), background var(--dur-fast), box-shadow var(--dur);
 }
+.flowstep{ display:none; }
+.flowstep.is-current{ display:grid; animation:flowStepIn .36s var(--ease-out) both; }
+@keyframes flowStepIn{ from{ opacity:0; transform:translateX(14px); } to{ opacity:1; transform:none; } }
 .flowstep::before{
   content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:4px;
   background:var(--brand); border-radius:var(--r) 0 0 var(--r);
@@ -588,8 +712,15 @@ table{ border-collapse:collapse; width:100%; }
 .flowstep > div{ min-width:0; }
 .flowstep b{ display:block; font-family:var(--font-display); font-size:15.5px; letter-spacing:-.02em; margin-bottom:3px; }
 .flowstep p{ font-size:13px; color:var(--text-2); line-height:1.5; }
+.flow__nav{ display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px; padding-top:18px; border-top:1px solid var(--line); }
+.flow__count{ min-width:58px; color:var(--text-3); font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:.08em; text-align:center; }
+.flow__arrow{ width:40px; height:40px; display:grid; place-items:center; border:1px solid var(--line-2); border-radius:50%; background:var(--paper); color:var(--text); cursor:pointer; transition:transform var(--dur) var(--spring), background var(--dur-fast), border-color var(--dur-fast); }
+.flow__arrow svg{ width:16px; height:16px; }
+.flow__arrow:hover{ transform:translateY(-2px); border-color:var(--brand); background:var(--brand-wash); }
+.flow__arrow:focus-visible{ outline:2px solid var(--brand-deep); outline-offset:2px; }
 
 .flow__phone{ display:grid; place-items:center; position:sticky; top:calc(var(--nav-h) + 24px); }
+.flow__phone-visual{ width:100%; min-height:440px; }
 
 /* ---------- steps (legacy) ---------- */
 .steps{ counter-reset:s; display:grid; grid-template-columns:repeat(4,1fr); gap:0; }
@@ -836,12 +967,21 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
 :root[data-theme="dark"] .hubpop__area{ color:var(--on-dark-2); }
 :root[data-theme="dark"] .hubpop__cta{ color:var(--brand); border-color:var(--line-dark-2); }
 
-.citylist{ border-top:1px solid var(--line); }
+.citylist{ display:flex; flex-direction:column; border-top:1px solid var(--line); min-width:0; }
+.cityslider__nav{ order:2; display:flex; align-items:center; justify-content:center; gap:12px; width:100%; min-height:64px; border-top:1px solid var(--line); }
+.cityslider__count{ min-width:58px; color:var(--text-3); font-family:var(--font-display); font-size:12px; font-weight:700; letter-spacing:.08em; text-align:center; }
+.cityslider__arrow{ width:36px; height:36px; display:grid; place-items:center; border:1px solid var(--line-2); border-radius:50%; background:var(--paper); color:var(--text); cursor:pointer; transition:transform var(--dur) var(--spring), background var(--dur-fast), border-color var(--dur-fast); }
+.cityslider__arrow svg{ width:16px; height:16px; }
+.cityslider__arrow:hover{ transform:translateY(-2px); border-color:var(--brand); background:var(--brand-wash); }
+.cityslider__arrow:focus-visible{ outline:2px solid var(--brand-deep); outline-offset:2px; }
+.cityslider__viewport{ order:1; min-width:0; }
 .cityrow{
-  display:grid; grid-template-columns:220px 1fr auto; gap:24px; align-items:center;
+  display:none; grid-template-columns:1fr auto; gap:14px 20px; align-items:center;
   padding:22px 4px; border-bottom:1px solid var(--line);
   transition:background var(--dur-fast), padding-left var(--dur) var(--ease);
 }
+.cityrow.is-current{ display:grid; animation:citySlideIn .36s var(--ease-out) both; }
+@keyframes citySlideIn{ from{ opacity:0; transform:translateX(16px); } to{ opacity:1; transform:none; } }
 .cityrow:hover{ background:var(--brand-wash); padding-left:16px; }
 .cityrow--soon{ opacity:.72; }
 .cityrow.is-hot{ background:var(--brand-pale); padding-left:16px; }
@@ -849,7 +989,14 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
 .cityrow[data-city]{ cursor:default; }
 .cityrow__city b{ font-family:var(--font-display); font-size:19px; letter-spacing:-.025em; display:block; }
 .cityrow__city span{ font-size:12.5px; color:var(--text-3); }
-.cityrow__hubs{ display:flex; flex-wrap:wrap; gap:8px; }
+.cityrow__city{ grid-column:1 / -1; }
+.cityrow__hubs{
+  grid-column:1 / -1; display:flex; flex-direction:column; gap:10px; align-self:stretch; min-width:0;
+  padding:4px 2px 8px;
+}
+.hubcards{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; min-width:0; }
+.hubprogress{ height:3px; width:100%; background:var(--line-2); border-radius:100px; overflow:hidden; }
+.hubprogress span{ display:block; width:100%; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--brand-deep),var(--brand)); }
 .cityrow__tag{ display:flex; align-items:center; gap:10px; }
 
 /* per-city zoom button — small pill next to the "hubs" count */
@@ -870,13 +1017,17 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
 .cityrow.is-hot .zoombtn{ border-color:var(--brand); background:#fff; color:var(--brand-ink); }
 @media (max-width:780px){ .zoombtn span{ display:none; } .zoombtn{ padding:7px 9px; } }
 .hubtag{
-  display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:500;
-  background:var(--paper); border:1px solid var(--line-2); border-radius:100px; padding:8px 14px;
-  transition:all var(--dur) var(--ease);
+  display:flex; flex-direction:column; min-width:0; overflow:hidden;
+  background:var(--paper); border:1px solid var(--line-2); border-radius:var(--r-sm);
+  transition:transform var(--dur) var(--ease), box-shadow var(--dur), border-color var(--dur-fast);
 }
-.hubtag svg{ width:13px; height:13px; color:var(--brand-deep); flex-shrink:0; }
+.hubtag__media{ display:block; position:relative; aspect-ratio:16 / 10; overflow:hidden; background:var(--brand-wash); }
+.hubtag__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2; }
+.hubtag__fallback{ position:absolute; inset:0; width:100%; height:100%; z-index:1; }
+.hubtag__body{ display:flex; align-items:center; gap:7px; min-height:46px; padding:10px 12px; font-size:13px; font-weight:600; line-height:1.25; }
+.hubtag__body svg{ width:14px; height:14px; color:var(--brand-deep); flex-shrink:0; }
 .cityrow:hover .hubtag{ border-color:var(--brand); }
-.hubtag:hover{ transform:translateY(-1px); box-shadow:var(--shadow-xs); }
+.hubtag:hover{ transform:translateY(-3px); box-shadow:var(--shadow-sm); }
 
 /* ---------- press strip — borderless, equal-size, centered ---------- */
 .pressline{
@@ -1272,6 +1423,54 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
 .center .eyebrow{ justify-content:center; }
 .split{ display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
 
+/* ---------- business page ---------- */
+.business-teaser{
+  display:flex; align-items:center; justify-content:space-between; gap:40px;
+  padding:42px 46px; border:1px solid var(--line); border-left:4px solid var(--brand);
+  border-radius:0 var(--r-lg) var(--r-lg) 0; background:linear-gradient(135deg,var(--brand-wash),var(--paper));
+}
+.business-teaser > div{ max-width:760px; }
+.business-teaser .eyebrow{ margin-bottom:14px; }
+.business-teaser .h-lg{ max-width:760px; }
+.business-teaser .btn{ flex-shrink:0; }
+.business-hero{ background:var(--ink); color:var(--on-dark); overflow:hidden; }
+.business-hero h1{ color:#fff; max-width:850px; }
+.business-hero .lede{ color:var(--on-dark-2); max-width:680px; }
+.business-hero .eyebrow{ color:var(--brand); }
+.business-hero .hero__in{ grid-template-columns:1.2fr .8fr; min-height:360px; }
+.business-hero__signal{ display:grid; gap:12px; }
+.business-hero__signal div{ padding:20px 22px; border:1px solid var(--line-dark-2); border-radius:var(--r); background:rgba(255,255,255,.05); }
+.business-hero__signal b{ display:block; color:var(--brand); font-family:var(--font-display); font-size:30px; }
+.business-hero__signal span{ color:var(--on-dark-2); font-size:13px; }
+.business-page .partner-grid{ grid-template-columns:repeat(2,1fr); gap:18px; }
+.business-page #partnerships .sec-head{ margin-bottom:30px; }
+.business-page .partnercard{ min-height:250px; border-top:3px solid var(--brand); }
+.business-page .partnercard__cta{ margin-top:28px; }
+.business-case{ display:grid; grid-template-columns:1.15fr .85fr; gap:42px; align-items:center; padding:42px; border-radius:var(--r-lg); background:var(--ink); color:var(--on-dark); }
+.business-case h2{ color:#fff; }
+.business-case .lede{ color:var(--on-dark-2); }
+.business-case__stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.business-case__stats div{ padding:22px; border:1px solid var(--line-dark-2); border-radius:var(--r); background:rgba(255,255,255,.05); }
+.business-case__stats b{ display:block; color:var(--brand); font-family:var(--font-display); font-size:25px; }
+.business-case__stats span{ display:block; margin-top:5px; color:var(--on-dark-2); font-size:12px; line-height:1.4; }
+.business-steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; border-top:1px solid var(--line); }
+.business-step{ padding:24px 26px 0 0; border-right:1px solid var(--line); }
+.business-step + .business-step{ padding-left:26px; }
+.business-step:last-child{ border-right:0; }
+.business-step__n{ color:var(--brand-ink); font-family:var(--font-display); font-weight:800; font-size:13px; }
+.business-step h3{ margin-top:10px; font-size:18px; }
+.business-step p{ margin-top:8px; color:var(--text-2); font-size:14px; }
+@media (max-width:780px){
+  .business-teaser{ align-items:flex-start; flex-direction:column; padding:30px 24px; gap:24px; }
+  .business-teaser .btn{ width:100%; }
+  .business-hero .hero__in,.business-case{ grid-template-columns:1fr; }
+  .business-page .partner-grid{ grid-template-columns:1fr; }
+  .business-case{ padding:28px 24px; gap:28px; }
+  .business-steps{ grid-template-columns:1fr; }
+  .business-step,.business-step + .business-step{ padding:20px 0; border-right:0; border-bottom:1px solid var(--line); }
+  .business-step:last-child{ border-bottom:0; }
+}
+
 /* ---------- vehicle / partner cards ---------- */
 .vehicles{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
 .vehicle{
@@ -1430,6 +1629,26 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
   pointer-events:none;
 }
 .appband > *{ position:relative; z-index:1; }
+.appband__visual{ position:relative; min-height:430px; display:grid; place-items:center; isolation:isolate; }
+.appband__visual .phone{ position:relative; z-index:3; transform:translateY(22px); opacity:0; }
+.appband__ghost{ position:absolute; z-index:1; width:188px; height:364px; border:8px solid #1A211B; border-radius:31px; background:var(--paper-2); box-shadow:var(--shadow-md); opacity:0; overflow:hidden; }
+.appband__ghost::before{ content:""; position:absolute; top:13px; left:50%; width:58px; height:5px; border-radius:99px; background:rgba(0,0,0,.16); transform:translateX(-50%); }
+.appband__ghost::after{ content:""; position:absolute; inset:52px 15px 18px; border-radius:12px; background:linear-gradient(180deg,var(--brand-wash) 0 29%,transparent 29% 35%,var(--paper) 35% 53%,transparent 53% 59%,var(--paper) 59%); border:1px solid var(--line); }
+.appband__ghost span,.appband__ghost i,.appband__ghost b{ position:absolute; z-index:1; display:block; }
+.appband__ghost span{ top:76px; left:29px; width:76px; height:8px; border-radius:6px; background:var(--brand-deep); }
+.appband__ghost i{ top:110px; left:29px; width:112px; height:26px; border-radius:7px; background:var(--brand-pale); }
+.appband__ghost b{ bottom:45px; left:29px; width:112px; height:25px; border-radius:99px; background:var(--brand); }
+.appband__ghost--back{ transform:translate(-92px,-10px) rotate(-13deg) scale(.9); }
+.appband__ghost--mid{ transform:translate(74px,-2px) rotate(10deg) scale(.95); }
+.appband__visual.is-ready .phone{ animation:appPhoneIn .9s var(--ease-out) .18s forwards,appPhoneFloat 6s ease-in-out 1.2s infinite; }
+.appband__visual.is-ready .appband__ghost--back{ animation:appGhostBack .8s var(--ease-out) forwards,appGhostDriftBack 7s ease-in-out 1s infinite; }
+.appband__visual.is-ready .appband__ghost--mid{ animation:appGhostMid .8s var(--ease-out) .1s forwards,appGhostDriftMid 7s ease-in-out 1.2s infinite; }
+@keyframes appPhoneIn{ from{ opacity:0; transform:translateY(42px) scale(.9); } to{ opacity:1; transform:translateY(22px) scale(1); } }
+@keyframes appGhostBack{ from{ opacity:0; transform:translate(-32px,26px) rotate(0) scale(.8); } to{ opacity:.62; transform:translate(-92px,-10px) rotate(-13deg) scale(.9); } }
+@keyframes appGhostMid{ from{ opacity:0; transform:translate(24px,22px) rotate(0) scale(.84); } to{ opacity:.82; transform:translate(74px,-2px) rotate(10deg) scale(.95); } }
+@keyframes appPhoneFloat{ 0%,100%{ transform:translateY(22px); } 50%{ transform:translateY(12px); } }
+@keyframes appGhostDriftBack{ 0%,100%{ margin-top:0; } 50%{ margin-top:-8px; } }
+@keyframes appGhostDriftMid{ 0%,100%{ margin-top:0; } 50%{ margin-top:8px; } }
 .inline-ticks{ display:flex; flex-wrap:wrap; gap:10px 22px; }
 .inline-ticks li{ display:flex; align-items:center; gap:8px; font-size:14.5px; color:var(--text-2); }
 .inline-ticks svg{ width:15px; height:15px; color:var(--brand-deep); flex-shrink:0; }
@@ -1558,21 +1777,37 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
 /* ---------- responsive ---------- */
 @media (max-width:1040px){
   .hero__in{ grid-template-columns:1fr; gap:52px; min-height:auto; }
+  .hero__slide--primary,.hero__slide--cities,.hero__slide--video{ grid-template-columns:1fr; gap:24px; }
+  .hero__slide{ height:auto; min-height:0; }
+  .hero__slide--cities,.hero__slide--video{ padding-left:var(--gut); padding-right:var(--gut); }
+  .hero__slide--primary .herofig{ order:-1; }
   .g4,.band,.steps{ grid-template-columns:repeat(2,1fr); }
   .plans,.cities,.g3,.vehicles,.esg{ grid-template-columns:repeat(2,1fr); }
-  .calc,.split,.footer__top,.flow,.citymap,.appband{ grid-template-columns:1fr; gap:40px; }
+  .calc,.split,.footer__top,.flow,.citymap,.appband,.instaembed,.motosection{ grid-template-columns:1fr; gap:40px; }
   .appband{ padding:40px 32px; }
+  .instaembed__frame,.instaembed__frame iframe{ min-height:540px; }
+  .hero__slides{ grid-template-columns:1fr; }
+  .upcomingstores__grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
   .footer__contact{ grid-template-columns:repeat(2,1fr); }
   .step{ padding-right:22px; }
   .sec{ padding:76px 0; }
   .hstrip{ grid-auto-flow:row; grid-template-columns:repeat(3,1fr); }
-  .cityrow{ grid-template-columns:170px 1fr auto; gap:16px; }
+  .cityrow{ grid-template-columns:150px 1fr auto; gap:16px; }
+  .hubcards{ gap:10px; }
   .indiamap{ max-width:320px; }
   .ctaband{ padding:52px 40px; }
 }
 @media (max-width:780px){
   body{ font-size:16px; }
   :root{ --gut:20px; --nav-h:66px; }
+  .hero__slide--video{ display:flex; flex-direction:column; align-items:stretch; gap:18px; padding-top:18px; }
+  .hero__slide--video .hero__panel-copy{ order:1; }
+  .hero__slide--video .brandslide__video{ order:2; width:100%; aspect-ratio:16/9; min-height:0; margin-top:0; border-radius:12px; }
+  .hero__slide--video .brandslide__video iframe{ width:100%; height:100%; min-height:0; }
+  .hero__slide--video .hero__sub{ font-size:14px; line-height:1.45; }
+  .brandstory__in{ grid-template-columns:1fr; gap:20px; }
+  .hub-preview__stage{ height:270px; }
+  .hub-preview__states{ grid-template-columns:repeat(2,minmax(0,1fr)); }
   .sec{ padding:60px 0; }
   .sec-head{ margin-bottom:38px; }
   .nav__links{ display:none; }
@@ -1584,7 +1819,7 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
   }
   .nav.open .nav__links a{ padding:14px 16px; }
   .nav__cta .btn--ghost{ display:none; }
-  .g2,.g3,.g4,.plans,.cities,.band,.steps,.esg,.vehicles{ grid-template-columns:1fr; }
+  .g2,.g3,.g4,.plans,.cities,.band,.steps,.esg,.vehicles,.upcomingstores__grid,.hero__slides{ grid-template-columns:1fr; }
   .ctaband{ padding:44px 26px; border-radius:var(--r-lg); }
   .footer__top{ grid-template-columns:1fr 1fr; gap:32px; }
   .footer__contact{ grid-template-columns:1fr 1fr; gap:20px; }
@@ -1619,8 +1854,17 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
   .careers .btn{ width:100%; }
   .callout{ grid-template-columns:1fr; gap:18px; }
   .callout .btn{ width:100%; }
+  .cityslider__nav{ justify-content:center; gap:14px; min-height:60px; }
+  .cityslider__arrow{ width:42px; height:42px; }
   .cityrow{ grid-template-columns:1fr auto; gap:10px 14px; align-items:start; padding:18px 4px; }
-  .cityrow__hubs{ grid-column:1 / -1; }
+  .cityrow__hubs{ grid-column:1 / -1; padding-inline:0; }
+  .hubcards{
+    display:flex; gap:12px; overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory; scrollbar-width:none; -ms-overflow-style:none;
+    padding:2px 2px 6px;
+  }
+  .hubcards::-webkit-scrollbar{ display:none; }
+  .hubcards .hubtag{ flex:0 0 82%; scroll-snap-align:start; }
   /* keep the map visible on mobile — the per-city zoom buttons rely on it being there */
   .citymap{ grid-template-columns:1fr; gap:24px; }
   .citymap__map{ display:grid; place-items:center; }
@@ -1628,6 +1872,10 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
   .indiamap__hint{ font-size:11px; margin-top:8px; }
   .indiamap__reset{ padding:6px 10px; font-size:11px; }
   .phone__screen{ max-width:240px; }
+  .rider-page #how .flow{ display:flex; flex-direction:column; gap:28px; }
+  .rider-page #how .flow__phone{ order:1; position:static; width:100%; display:grid; place-items:center; }
+  .rider-page #how .flow__phone .phone{ width:100%; display:grid; place-items:center; }
+  .rider-page #how .flow__steps-wrap{ order:2; width:100%; border-top:1px solid var(--line); padding-top:30px; }
   .appband{ padding:32px 22px; gap:32px; }
   .herofig svg,.herofig__img,.herofig__mark{ max-width:340px; }
   .esgcard__k{ font-size:96px; }
@@ -1700,6 +1948,54 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
   margin-top:12px; font-size:13px; line-height:1.55; color:var(--on-dark-2);
 }
 
+/* ---------- compact environmental impact hub ---------- */
+.impactsection{ background:var(--paper-2); }
+.impactsection__head{ display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:end; max-width:none; }
+.impactsection__head .lede{ max-width:54ch; justify-self:end; }
+.impactsection .impact{ margin-top:8px; background:var(--line); border-color:var(--line); border-radius:14px; }
+.impactsection .impactcard{ background:var(--paper); padding:26px 24px 24px; }
+.impactsection .impactcard b{ color:var(--text); background:none; -webkit-text-fill-color:initial; }
+.impactsection .impactcard em,.impactsection .impactcard__l{ color:var(--brand-ink); }
+.impactsection .impactcard__s{ color:var(--text-2); }
+.impactsection .impactcard:hover{ background:var(--brand-wash); }
+.impactdetail{ margin-top:28px; padding:26px; border:1px solid var(--line); border-radius:14px; background:var(--paper); box-shadow:var(--shadow-sm); }
+.impactdetail__tabs{ display:flex; gap:8px; padding-bottom:20px; border-bottom:1px solid var(--line); }
+.impacttab{ display:inline-flex; align-items:center; gap:8px; padding:10px 15px; border:1px solid var(--line-2); border-radius:100px; background:transparent; color:var(--text-2); font-size:13px; font-weight:700; cursor:pointer; transition:all var(--dur) var(--ease); }
+.impacttab span{ display:grid; place-items:center; width:22px; height:22px; border-radius:50%; background:var(--paper-3); color:var(--brand-ink); font-family:var(--font-display); font-size:11px; }
+.impacttab:hover{ border-color:var(--brand); color:var(--text); }
+.impacttab.is-active{ border-color:var(--brand); background:var(--brand-wash); color:var(--brand-ink); }
+.impacttab.is-active span{ background:var(--brand); color:var(--black); }
+.impactdetail__panel{ padding-top:24px; }
+.impactdetail__intro{ display:grid; grid-template-columns:auto 1fr auto; gap:16px; align-items:center; }
+.impactdetail__key{ display:grid; place-items:center; width:54px; height:54px; border-radius:16px; background:var(--brand); color:var(--black); font-family:var(--font-display); font-size:22px; font-weight:800; }
+.impactdetail__intro h3{ font-size:22px; }
+.impactdetail__intro p{ margin-top:5px; color:var(--text-2); font-size:14px; }
+.impactdetail__stat{ padding-left:24px; border-left:1px solid var(--line); text-align:right; }
+.impactdetail__stat b{ display:block; color:var(--brand-ink); font-family:var(--font-display); font-size:25px; }
+.impactdetail__stat span{ display:block; max-width:120px; margin-top:3px; color:var(--text-3); font-size:11px; line-height:1.35; }
+.impactdetail__points{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px 28px; margin:24px 0 0 70px; }
+.impactdetail__points li{ display:flex; gap:9px; align-items:flex-start; color:var(--text-2); font-size:13px; line-height:1.5; }
+.impactdetail__points svg{ width:15px; height:15px; flex:0 0 auto; margin-top:3px; color:var(--brand-deep); }
+@media (max-width:1040px){
+  .impactsection__head{ grid-template-columns:1fr; gap:12px; }
+  .impactsection__head .lede{ justify-self:start; }
+  .impactsection .impact{ grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:780px){
+  .impactsection .impact{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .impactsection .impactcard{ padding:20px 16px 18px; }
+  .impactsection .impactcard b{ font-size:32px; }
+  .impactsection .impactcard em{ font-size:13px; }
+  .impactsection .impactcard__l{ margin-top:9px; font-size:10px; letter-spacing:.1em; }
+  .impactsection .impactcard__s{ margin-top:8px; font-size:11px; line-height:1.4; }
+  .impactdetail{ padding:20px; }
+  .impactdetail__tabs{ overflow-x:auto; margin-inline:-4px; padding-inline:4px 4px; }
+  .impacttab{ flex:0 0 auto; }
+  .impactdetail__intro{ grid-template-columns:auto 1fr; }
+  .impactdetail__stat{ grid-column:2; padding-left:0; border-left:0; text-align:left; }
+  .impactdetail__points{ grid-template-columns:1fr; margin:22px 0 0; }
+}
+
 /* ============================================================
    Testimonials — auto-rotating quote block
    ============================================================ */
@@ -1739,6 +2035,29 @@ input[type=range]:focus-visible{ outline:2px solid var(--brand); outline-offset:
 }
 .quotes__dot:hover{ background:var(--brand-deep); transform:scale(1.2); }
 .quotes__dot.on{ background:var(--brand-deep); width:28px; border-radius:100px; }
+
+/* ---------- nearby growth / future stores ---------- */
+.upcomingstores{ margin-top:8px; }
+.upcomingstores__grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; }
+.storecard{
+  position:relative; padding:28px 22px 20px; border:1px solid var(--line); border-radius:var(--r-xl);
+  background:linear-gradient(180deg,var(--paper),var(--paper-2)); box-shadow:var(--shadow-soft);
+}
+.storecard--soon{ border-top:3px solid var(--brand); }
+.storecard__label{
+  display:inline-block; margin-bottom:18px; padding:7px 10px; border-radius:999px; background:var(--brand-wash);
+  color:var(--brand-ink); font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:700;
+}
+.storecard h3{
+  margin:0 0 10px; font-family:var(--font-display); font-size:clamp(24px,2vw,32px); line-height:1; letter-spacing:-.04em; color:var(--text);
+}
+.storecard p{ margin:0; color:var(--text-2); line-height:1.6; }
+
+/* ---------- company moto block ---------- */
+.motosection{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:34px; align-items:center; }
+.motoblock{ max-width:560px; }
+.motovideo{ border:1px solid var(--line); border-radius:var(--r-xl); overflow:hidden; background:var(--paper); box-shadow:var(--shadow-soft); aspect-ratio:16/9; }
+.motovideo iframe{ width:100%; height:100%; border:0; display:block; }
 
 /* ============================================================
    Sticky mobile bottom CTA — Zypp-style floating pill
@@ -1929,6 +2248,559 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
   transition:background-color .35s var(--ease), border-color .35s var(--ease), color .35s var(--ease);
 }
 
+/* ---------- rider page direction: route-first, operational, unmistakably RIDEV ---------- */
+.rider-page .hero{
+  background:
+    radial-gradient(680px 420px at 88% 18%, rgba(149,219,103,.22), transparent 65%),
+    linear-gradient(135deg, var(--ink) 0%, #172318 56%, #263c25 100%);
+  color:var(--on-dark); padding:0; border-bottom:0;
+}
+.rider-page .hero::after{ opacity:.12; background-image:linear-gradient(rgba(149,219,103,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(149,219,103,.35) 1px,transparent 1px); }
+.rider-page .hero h1{ color:#fff; max-width:760px; }
+.rider-page .hero__sub{ color:var(--on-dark-2); max-width:54ch; }
+.rider-page .hero__price{ background:rgba(149,219,103,.12); border-color:rgba(149,219,103,.32); color:var(--brand); box-shadow:none; }
+.rider-page .hero__price b{ color:#fff; }
+.rider-page .hero .btn--ghost{ border-color:rgba(255,255,255,.24); color:#fff; background:rgba(255,255,255,.04); }
+.rider-page .hero .btn--ghost:hover{ border-color:var(--brand); background:rgba(149,219,103,.12); }
+.rider-page .herofig__glow{ opacity:.55; }
+.rider-page .hstrip{ margin-top:10px; background:rgba(12,17,13,.76); border-color:rgba(255,255,255,.14); box-shadow:0 24px 60px rgba(0,0,0,.2); }
+.rider-page .hstat{ padding:24px 26px 22px; }
+.rider-page .hstat b{ color:#fff; }
+.rider-page .hstat span{ color:var(--on-dark-3); }
+.rider-page .hstat + .hstat::before{ background:linear-gradient(180deg,transparent,rgba(255,255,255,.16),transparent); }
+.rider-page .hstat:hover{ background:rgba(149,219,103,.1); }
+.rider-page .oemline{ border-color:rgba(255,255,255,.14); }
+.rider-page .oemline__lbl{ color:var(--on-dark-3); }
+.rider-page .oemchip{ background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.16); color:var(--on-dark); }
+
+.rider-page .sec-head{ max-width:820px; }
+.rider-page #included .sec-head,
+.rider-page #pricing .sec-head,
+.rider-page #cities .sec-head{ display:grid; grid-template-columns:minmax(150px,.34fr) 1fr; column-gap:40px; align-items:start; max-width:100%; }
+.rider-page #included .sec-head .eyebrow,
+.rider-page #pricing .sec-head .eyebrow,
+.rider-page #cities .sec-head .eyebrow{ margin-top:8px; }
+.rider-page #included .sec-head h2,
+.rider-page #pricing .sec-head h2,
+.rider-page #cities .sec-head h2{ max-width:680px; }
+.rider-page #included .sec-head p,
+.rider-page #pricing .sec-head p,
+.rider-page #cities .sec-head p{ grid-column:2; }
+.rider-page #included .includedslider__track > .card{ border-radius:10px; border-top:4px solid var(--brand); }
+.rider-page #included .includedslider__track > .card:nth-child(even),
+.rider-page #included .includedslider__track > .card.in-view:nth-child(even){ transform:none; }
+.rider-page #included .includedslider__track > .card.in-view:nth-child(even):hover{ transform:translateY(-4px); }
+
+.rider-page #pricing{ background:var(--brand-wash); }
+.rider-page #pricing .tabs{ background:var(--paper); }
+.rider-page #pricing .plans{ max-width:none; grid-template-columns:repeat(3,1fr); align-items:stretch; }
+.rider-page #pricing .plan{ border-radius:10px; background:var(--paper); box-shadow:none; }
+.rider-page #pricing .plan--best{ margin-top:-14px; margin-bottom:14px; box-shadow:0 18px 38px rgba(52,105,28,.14); }
+.rider-page #pricing .plan__ph{ border-radius:8px; background:var(--paper-3); }
+.rider-page #pricing .plans{ transition:opacity 180ms var(--ease), transform 180ms var(--ease); }
+.rider-page #pricing .plans.is-switching{ opacity:0; transform:translateY(8px) scale(.985); pointer-events:none; }
+.rider-page #pricing .plans.has-switched .plan{ animation:pricingCardIn 520ms var(--ease-out) both; }
+.rider-page #pricing .plans[data-transition-direction="next"].has-switched .plan{ animation-name:pricingCardInNext; }
+.rider-page #pricing .plans[data-transition-direction="prev"].has-switched .plan{ animation-name:pricingCardInPrev; }
+.rider-page #pricing .plans.has-switched .plan:nth-child(2){ animation-delay:70ms; }
+.rider-page #pricing .plans.has-switched .plan:nth-child(3){ animation-delay:140ms; }
+.rider-page #pricing .plans.has-switched .plan:nth-child(4){ animation-delay:210ms; }
+@keyframes pricingCardIn{
+  from{ opacity:0; transform:translateY(18px) scale(.97); }
+  to{ opacity:1; transform:none; }
+}
+@keyframes pricingCardInNext{
+  from{ opacity:0; transform:translateX(28px) translateY(10px) scale(.97); }
+  to{ opacity:1; transform:none; }
+}
+@keyframes pricingCardInPrev{
+  from{ opacity:0; transform:translateX(-28px) translateY(10px) scale(.97); }
+  to{ opacity:1; transform:none; }
+}
+
+.rider-page #how{ background:var(--paper); }
+.rider-page #how .flow{ border-top:1px solid var(--line); padding-top:34px; }
+.rider-page #how .flowstep{ border-radius:8px; background:var(--paper-2); }
+.rider-page #how .flowstep.on{ background:var(--brand-wash); }
+.rider-page #how .flow{ display:flex; flex-direction:column; gap:28px; }
+.rider-page #how .flow__phone{ order:1; position:static; width:100%; display:grid; place-items:center; }
+.rider-page #how .flow__phone .phone{ width:100%; display:grid; place-items:center; }
+.rider-page #how .flow__steps-wrap{ order:2; width:100%; border-top:1px solid var(--line); padding-top:30px; }
+.rider-page #how .flow__phone .phone__screen{ max-width:300px; }
+
+.rider-page #savings{ background:var(--ink); }
+.rider-page #savings .sec-head{ max-width:620px; }
+.rider-page #savings .calc{ border-top:1px solid rgba(149,219,103,.24); padding-top:38px; }
+
+.rider-page #cities .citymap{ border-top:1px solid var(--line); padding-top:36px; }
+.rider-page #cities .citylist{ border-top:0; }
+.rider-page #cities .indiamap__wrap{ max-width:480px; }
+.rider-page #cities .hubprogress{ display:none; }
+.rider-page #cities .cityrow{ padding-block:18px; }
+
+.rider-page #fleet{ background:var(--paper-2); }
+.rider-page #fleet .sec-head{ margin-bottom:38px; }
+.rider-page #fleet h3{
+  display:flex; align-items:center; gap:12px;
+  color:var(--text) !important; letter-spacing:-.02em !important;
+}
+.rider-page #fleet h3::before{
+  content:""; width:24px; height:3px; flex:0 0 auto;
+  border-radius:100px; background:linear-gradient(90deg,var(--brand-deep),var(--brand));
+}
+.rider-page #fleet .brandrow{
+  display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px;
+  margin-inline:0; padding:0; overflow:visible;
+}
+.rider-page #fleet .brandchip{
+  min-width:0; min-height:76px; padding:18px 14px; border-radius:12px;
+  justify-content:flex-start; background:var(--paper); box-shadow:var(--shadow-xs);
+  font-size:15.5px;
+}
+.rider-page #fleet .brandchip:hover{ transform:translateY(-3px); box-shadow:var(--shadow-sm); }
+.rider-page #fleet .tbl-wrap{
+  margin-top:0; border-radius:14px; overflow:auto; background:var(--paper);
+  box-shadow:var(--shadow-sm); border-color:var(--line-2);
+}
+.rider-page #fleet .tbl{ min-width:680px; font-size:14px; }
+.rider-page #fleet .tbl th{
+  padding:15px 22px; background:var(--brand-wash); color:var(--brand-ink);
+  letter-spacing:.12em; font-size:10.5px;
+}
+.rider-page #fleet .tbl td{ padding:17px 22px; }
+.rider-page #fleet .tbl tbody tr:nth-child(even){ background:rgba(244,251,238,.58); }
+.rider-page #fleet .tbl tbody tr:hover{ background:var(--brand-pale); }
+.rider-page #fleet .tbl tbody td:first-child strong{ font-family:var(--font-display); font-weight:700; }
+
+.rider-page #trust .grid{ grid-template-columns:1.2fr .9fr .9fr; }
+.rider-page #trust .card{ border-radius:8px; border-top:3px solid var(--brand); }
+.rider-page #business .card{ border-radius:8px; }
+.rider-page #app .appband{ border-radius:10px; background:var(--ink); border-color:rgba(149,219,103,.2); }
+.rider-page #app .appband h2{ color:#fff; }
+.rider-page #app .appband .lede,
+.rider-page #app .appband .inline-ticks li{ color:var(--on-dark-2); }
+.rider-page #app .phone__screen{ box-shadow:0 24px 54px rgba(0,0,0,.35), 0 0 0 1px rgba(149,219,103,.22); }
+
+@media (max-width:1040px){
+  .rider-page #included .sec-head,
+  .rider-page #pricing .sec-head,
+  .rider-page #cities .sec-head{ display:block; }
+  .rider-page #included .sec-head p,
+  .rider-page #pricing .sec-head p,
+  .rider-page #cities .sec-head p{ margin-top:16px; }
+  .rider-page #pricing .plans{ grid-template-columns:repeat(2,1fr); }
+  .rider-page #trust .grid{ grid-template-columns:repeat(3,1fr); }
+}
+
+/* ---------- rider app tutorial carousel ---------- */
+@media (min-width:1041px){
+  .rider-page #how .flow{
+    display:grid;
+    grid-template-columns:minmax(220px,1fr) minmax(260px,.72fr) minmax(220px,1fr);
+    grid-template-rows:repeat(3, minmax(0,1fr));
+    gap:22px 28px;
+    align-items:center;
+    min-height:680px;
+    position:relative;
+  }
+  .rider-page #how .flow__steps-wrap{ display:contents; }
+  .rider-page #how .flow__steps{
+    grid-column:1 / -1;
+    grid-row:1;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);
+    grid-template-rows:repeat(3, minmax(0,1fr));
+    gap:18px 26px;
+    align-items:center;
+    min-width:0;
+  }
+  .rider-page #how .flowstep{
+    display:grid;
+    min-height:94px;
+    padding:15px 17px;
+    border-radius:8px;
+    background:var(--paper);
+    box-shadow:var(--shadow-xs);
+    z-index:1;
+  }
+  .rider-page #how .flowstep:nth-child(1){ grid-column:1; grid-row:1; }
+  .rider-page #how .flowstep:nth-child(2){ grid-column:1; grid-row:2; }
+  .rider-page #how .flowstep:nth-child(3){ grid-column:1; grid-row:3; }
+  .rider-page #how .flowstep:nth-child(4){ grid-column:3; grid-row:1; }
+  .rider-page #how .flowstep:nth-child(5){ grid-column:3; grid-row:2; }
+  .rider-page #how .flowstep:nth-child(6){ grid-column:3; grid-row:3; }
+  .rider-page #how .flowstep.is-current{
+    background:var(--brand-wash);
+    border-color:var(--brand);
+    box-shadow:var(--shadow-sm);
+    transform:translateY(-3px);
+  }
+  .rider-page #how .flowstep:not(.is-current){ opacity:.72; }
+  .rider-page #how .flowstep:hover,
+  .rider-page #how .flowstep:focus-visible{ opacity:1; }
+  .rider-page #how .flow__phone{
+    grid-column:2;
+    grid-row:1 / 4;
+    position:relative;
+    z-index:2;
+    pointer-events:none;
+  }
+  .rider-page #how .flow__phone .phone__screen{ max-width:276px; }
+  .rider-page #how .flow__nav{
+    grid-column:2;
+    grid-row:3;
+    align-self:end;
+    z-index:3;
+    width:max-content;
+    justify-self:center;
+    margin:0 0 -10px;
+    padding:9px 12px;
+    border:1px solid var(--line);
+    border-radius:100px;
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    box-shadow:var(--shadow-sm);
+    backdrop-filter:blur(10px);
+  }
+}
+
+@media (max-width:1040px){
+  .rider-page #how .flowstep{ display:none; }
+  .rider-page #how .flowstep.is-current{ display:grid; }
+  .rider-page #how .flow::before{ display:none !important; }
+}
+
+/* Geometric orbit: the phone is centered in the circle and cards stay level. */
+@media (min-width:1041px){
+  .rider-page #how .flow{
+    display:block !important;
+    height:760px;
+    min-height:760px !important;
+    position:relative;
+  }
+  .rider-page #how .flow__steps-wrap{ display:contents; }
+  .rider-page #how .flow__steps{
+    position:absolute;
+    inset:0;
+    display:block !important;
+  }
+  .rider-page #how .flowstep{
+    position:absolute !important;
+    display:grid !important;
+    grid-column:auto !important;
+    grid-row:auto !important;
+    width:280px;
+    min-height:100px;
+    transform:none !important;
+    z-index:1;
+  }
+  /* Six points on one circle: 210°, 180°, 150°, 30°, 0°, 330°. */
+  .rider-page #how .flowstep:nth-child(1){ left:calc(50% - 140px - 294px); top:calc(50% - 50px - 170px); }
+  .rider-page #how .flowstep:nth-child(2){ left:calc(50% - 140px - 340px); top:calc(50% - 50px); }
+  .rider-page #how .flowstep:nth-child(3){ left:calc(50% - 140px - 294px); top:calc(50% - 50px + 170px); }
+  .rider-page #how .flowstep:nth-child(4){ left:calc(50% - 140px + 294px); top:calc(50% - 50px - 170px); }
+  .rider-page #how .flowstep:nth-child(5){ left:calc(50% - 140px + 340px); top:calc(50% - 50px); }
+  .rider-page #how .flowstep:nth-child(6){ left:calc(50% - 140px + 294px); top:calc(50% - 50px + 170px); }
+  .rider-page #how .flowstep.is-current{ box-shadow:var(--shadow-sm); }
+  .rider-page #how .flowstep:not(.is-current){ opacity:.72; }
+  .rider-page #how .flow__phone{
+    position:absolute !important;
+    inset:0;
+    display:grid !important;
+    place-items:center;
+    z-index:2;
+    pointer-events:none;
+  }
+  .rider-page #how .flow__phone .phone__screen{ max-width:300px !important; }
+  .rider-page #how .flow__nav{
+    position:absolute !important;
+    left:50%;
+    bottom:0 !important;
+    z-index:3;
+    width:max-content;
+    margin:0;
+    transform:translateX(-50%);
+    padding:9px 12px;
+    border:1px solid var(--line);
+    border-radius:100px;
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    box-shadow:var(--shadow-sm);
+    backdrop-filter:blur(10px);
+  }
+}
+
+@media (min-width:1041px){
+  .rider-page #how .flow{ display:block; min-height:760px; position:relative; }
+  .rider-page #how .flow__steps-wrap{ display:contents; }
+  .rider-page #how .flow__steps{ position:absolute; inset:0; display:block; }
+  .rider-page #how .flowstep{
+    position:absolute; display:grid; grid-column:auto !important; grid-row:auto !important;
+    width:31%; min-height:100px; z-index:1;
+  }
+  .rider-page #how .flowstep:nth-child(1){ left:0; right:auto; top:3%; bottom:auto; transform:rotate(-4deg); }
+  .rider-page #how .flowstep:nth-child(2){ left:4%; right:auto; top:37%; bottom:auto; transform:rotate(-1.5deg); }
+  .rider-page #how .flowstep:nth-child(3){ left:11%; right:auto; top:auto; bottom:3%; transform:rotate(3deg); }
+  .rider-page #how .flowstep:nth-child(4){ left:auto; right:0; top:3%; bottom:auto; transform:rotate(4deg); }
+  .rider-page #how .flowstep:nth-child(5){ left:auto; right:4%; top:37%; bottom:auto; transform:rotate(1.5deg); }
+  .rider-page #how .flowstep:nth-child(6){ left:auto; right:11%; top:auto; bottom:3%; transform:rotate(-3deg); }
+  .rider-page #how .flowstep.is-current{ transform:translateY(-4px) rotate(0deg); }
+  .rider-page #how .flowstep:not(.is-current){ opacity:.72; }
+  .rider-page #how .flow__phone{ position:absolute; inset:0; display:grid; place-items:center; z-index:2; pointer-events:none; }
+  .rider-page #how .flow__phone .phone__screen{ max-width:300px; }
+  .rider-page #how .flow__nav{
+    position:absolute; left:50%; bottom:0; z-index:3; width:max-content; margin:0;
+    transform:translateX(-50%); padding:9px 12px; border:1px solid var(--line);
+    border-radius:100px; background:color-mix(in srgb, var(--paper) 88%, transparent);
+    box-shadow:var(--shadow-sm); backdrop-filter:blur(10px);
+  }
+}
+
+@media (max-width:1040px){
+  .rider-page #how .flowstep{ display:none; }
+  .rider-page #how .flowstep.is-current{ display:grid; }
+}
+
+@media (max-width:1040px){
+  .rider-page #fleet .brandrow{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+
+@media (max-width:780px){
+  .rider-page #fleet .brandrow{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .rider-page #fleet .brandchip{ min-height:64px; padding:14px 12px; font-size:14px; }
+  .rider-page #fleet .tbl td{ padding:15px 16px; }
+  .rider-page #fleet .tbl th{ padding:13px 16px; }
+}
+
+/* ---------- overlapping trust carousel ---------- */
+.trustcarousel{ position:relative; }
+.trustcarousel__viewport{ position:relative; min-height:286px; overflow:hidden; padding:8px 0 18px; }
+.trustcarousel__cards{ position:relative; min-height:260px; }
+.trustcarousel__cards > .card{
+  position:absolute; left:50%; top:0; width:min(560px,calc(100% - 80px)); min-height:250px;
+  margin:0; border-radius:14px; border-top:3px solid var(--brand) !important;
+  opacity:0; pointer-events:none; transform:translateX(-50%) scale(.86);
+  transition:transform 520ms var(--ease-out), opacity 420ms var(--ease), box-shadow 420ms var(--ease), filter 420ms var(--ease);
+  z-index:0; filter:saturate(.72); box-shadow:var(--shadow-sm);
+}
+.trustcarousel__cards > .card.is-active{
+  opacity:1; pointer-events:auto; transform:translateX(-50%) scale(1); z-index:3;
+  filter:none; box-shadow:var(--shadow-md);
+}
+.trustcarousel__cards > .card.is-prev,
+.trustcarousel__cards > .card.is-next{
+  opacity:.58; pointer-events:auto; transform:translateX(-50%) scale(.9); z-index:2;
+  filter:saturate(.6); box-shadow:var(--shadow-sm);
+}
+.trustcarousel__cards > .card.is-prev{ transform:translateX(calc(-50% - 48%)) scale(.9); }
+.trustcarousel__cards > .card.is-next{ transform:translateX(calc(-50% + 48%)) scale(.9); }
+.trustcarousel__cards > .card.is-hidden{ opacity:0; pointer-events:none; z-index:0; }
+.trustcarousel__cards > .card h3{ font-size:24px; }
+.trustcarousel__cards > .card p{ max-width:48ch; font-size:16px; line-height:1.65; }
+.trustcarousel__controls{ display:flex; align-items:center; justify-content:center; gap:16px; margin-top:12px; }
+.trustcarousel__arrow{
+  width:40px; height:40px; display:grid; place-items:center; border:1px solid var(--line-2);
+  border-radius:50%; background:var(--paper); color:var(--text); cursor:pointer;
+  transition:transform var(--dur) var(--spring), background var(--dur-fast), border-color var(--dur-fast);
+}
+.trustcarousel__arrow svg{ width:16px; height:16px; }
+.trustcarousel__arrow:hover{ transform:translateY(-2px); border-color:var(--brand); background:var(--brand-wash); }
+.trustcarousel__arrow:focus-visible{ outline:2px solid var(--brand-deep); outline-offset:2px; }
+.trustcarousel__dots{ display:flex; align-items:center; gap:7px; }
+.trustcarousel__dot{ width:7px; height:7px; padding:0; border:0; border-radius:50%; background:var(--line-2); cursor:pointer; transition:width var(--dur) var(--ease), background var(--dur) var(--ease); }
+.trustcarousel__dot.is-active{ width:24px; border-radius:100px; background:var(--brand-deep); }
+@media (max-width:780px){
+  .trustcarousel__viewport{ min-height:330px; margin-inline:-8px; padding-inline:8px; }
+  .trustcarousel__cards{ min-height:300px; }
+  .trustcarousel__cards > .card{ width:86%; min-height:280px; padding:24px; }
+  .trustcarousel__cards > .card h3{ font-size:21px; }
+  .trustcarousel__cards > .card p{ font-size:15px; line-height:1.55; }
+  .trustcarousel__cards > .card.is-prev{ transform:translateX(calc(-50% - 42%)) scale(.88); }
+  .trustcarousel__cards > .card.is-next{ transform:translateX(calc(-50% + 42%)) scale(.88); }
+}
+
+@media (min-width:1041px){
+  .rider-page #how .flow{
+    display:block;
+    min-height:760px;
+    position:relative;
+  }
+  .rider-page #how .flow__steps-wrap{ display:contents; }
+  .rider-page #how .flow__steps{
+    position:absolute;
+    inset:0;
+    display:block;
+  }
+  .rider-page #how .flowstep{
+    position:absolute;
+    display:grid;
+    width:31%;
+    min-height:100px;
+    z-index:1;
+  }
+  .rider-page #how .flowstep:nth-child(1){ left:0; top:4%; transform:rotate(-5deg); }
+  .rider-page #how .flowstep:nth-child(2){ left:4%; top:37%; transform:rotate(-2deg); }
+  .rider-page #how .flowstep:nth-child(3){ left:9%; bottom:4%; transform:rotate(4deg); }
+  .rider-page #how .flowstep:nth-child(4){ right:0; top:4%; transform:rotate(5deg); }
+  .rider-page #how .flowstep:nth-child(5){ right:4%; top:37%; transform:rotate(2deg); }
+  .rider-page #how .flowstep:nth-child(6){ right:9%; bottom:4%; transform:rotate(-4deg); }
+  .rider-page #how .flowstep.is-current{ transform:translateY(-4px) rotate(0deg); }
+  .rider-page #how .flow__phone{
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    z-index:2;
+    pointer-events:none;
+  }
+  .rider-page #how .flow__phone .phone__screen{ max-width:276px; }
+  .rider-page #how .flow__nav{
+    position:absolute;
+    left:50%;
+    bottom:-10px;
+    z-index:3;
+    width:max-content;
+    margin:0;
+    transform:translateX(-50%);
+    padding:9px 12px;
+    border:1px solid var(--line);
+    border-radius:100px;
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    box-shadow:var(--shadow-sm);
+    backdrop-filter:blur(10px);
+  }
+}
+@media (max-width:780px){
+  .rider-page .hero{ padding-top:42px; }
+  .rider-page .hero__in{ padding-block:12px 0; }
+  .rider-page .hstrip{ margin-top:28px; }
+  .rider-page #included .includedslider__track > .card:nth-child(even),
+  .rider-page #included .includedslider__track > .card.in-view:nth-child(even){ transform:none; }
+  .rider-page #pricing .plans{ grid-template-columns:1fr; }
+  .rider-page #pricing .plan--best{ margin-top:0; margin-bottom:0; }
+  .rider-page #trust .grid{ grid-template-columns:1fr; }
+}
+
+@media (max-width:1100px){
+  .rider-page .nav__links{ display:none; }
+  .rider-page .nav__burger{ display:block; }
+  .rider-page .nav.open .nav__links{
+    display:flex; flex-direction:column; position:absolute; top:var(--nav-h); left:0; right:0;
+    background:var(--paper); border-bottom:1px solid var(--line); padding:14px; gap:2px;
+    box-shadow:var(--shadow);
+  }
+  .rider-page .nav.open .nav__links a{ padding:14px 16px; }
+  .rider-page .nav__cta .btn--ghost{ display:none; }
+}
+
+.rider-page .logo__mark{
+  aspect-ratio:92 / 70;
+  background-size:100% 100%;
+}
+
+/* Final circular tutorial layout. */
+@media (min-width:1041px){
+  .rider-page #how .flow{
+    display:block !important;
+    min-height:760px !important;
+    position:relative;
+  }
+  .rider-page #how .flow__steps-wrap{ display:contents; }
+  .rider-page #how .flow__steps{
+    position:absolute;
+    inset:0;
+    display:block !important;
+  }
+  .rider-page #how .flowstep{
+    position:absolute !important;
+    display:grid !important;
+    grid-column:auto !important;
+    grid-row:auto !important;
+    width:31%;
+    min-height:100px;
+    z-index:1;
+  }
+  .rider-page #how .flowstep:nth-child(1){ left:0 !important; right:auto !important; top:3% !important; bottom:auto !important; transform:rotate(-4deg) !important; }
+  .rider-page #how .flowstep:nth-child(2){ left:4% !important; right:auto !important; top:37% !important; bottom:auto !important; transform:rotate(-1.5deg) !important; }
+  .rider-page #how .flowstep:nth-child(3){ left:11% !important; right:auto !important; top:auto !important; bottom:3% !important; transform:rotate(3deg) !important; }
+  .rider-page #how .flowstep:nth-child(4){ left:auto !important; right:0 !important; top:3% !important; bottom:auto !important; transform:rotate(4deg) !important; }
+  .rider-page #how .flowstep:nth-child(5){ left:auto !important; right:4% !important; top:37% !important; bottom:auto !important; transform:rotate(1.5deg) !important; }
+  .rider-page #how .flowstep:nth-child(6){ left:auto !important; right:11% !important; top:auto !important; bottom:3% !important; transform:rotate(-3deg) !important; }
+  .rider-page #how .flowstep.is-current{ transform:translateY(-4px) rotate(0deg); }
+  .rider-page #how .flowstep:not(.is-current){ opacity:.72; }
+  .rider-page #how .flow__phone{
+    position:absolute !important;
+    inset:0;
+    display:grid !important;
+    place-items:center;
+    z-index:2;
+    pointer-events:none;
+  }
+  .rider-page #how .flow__phone .phone__screen{ max-width:300px !important; }
+  .rider-page #how .flow__nav{
+    position:absolute !important;
+    left:50%;
+    bottom:0 !important;
+    z-index:3;
+    width:max-content;
+    margin:0;
+    transform:translateX(-50%);
+    padding:9px 12px;
+    border:1px solid var(--line);
+    border-radius:100px;
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    box-shadow:var(--shadow-sm);
+    backdrop-filter:blur(10px);
+  }
+}
+
+@media (max-width:1040px){
+  .rider-page #how .flowstep{ display:none; }
+  .rider-page #how .flowstep.is-current{ display:grid; }
+}
+
+/* Final tutorial composition: straight cards on a shared circle. */
+@media (min-width:1041px){
+  .rider-page #how .flow{ display:block !important; height:860px; min-height:860px !important; position:relative; }
+  .rider-page #how .flow::before{
+    content:"";
+    position:absolute;
+    width:760px;
+    height:760px;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    border:1px solid color-mix(in srgb, var(--text-3) 20%, transparent);
+    border-radius:50%;
+    pointer-events:none;
+    z-index:0;
+  }
+  .rider-page #how .flow__steps-wrap{ display:contents; }
+  .rider-page #how .flow__steps{ position:absolute; inset:0; display:block !important; }
+  .rider-page #how .flowstep{
+    position:absolute !important; display:grid !important; grid-column:auto !important; grid-row:auto !important;
+    width:280px; min-height:100px; transform:none !important; z-index:1;
+  }
+  .rider-page #how .flowstep:nth-child(1){ left:calc(50% - 512px) !important; top:calc(50% - 215px) !important; bottom:auto !important; transform:translateY(-50%) !important; }
+  .rider-page #how .flowstep:nth-child(2){ left:calc(50% - 570px) !important; top:50% !important; bottom:auto !important; transform:translateY(-50%) !important; }
+  .rider-page #how .flowstep:nth-child(3){ left:calc(50% - 512px) !important; top:calc(50% + 215px) !important; bottom:auto !important; transform:translateY(-50%) !important; }
+  .rider-page #how .flowstep:nth-child(4){ left:calc(50% + 232px) !important; top:calc(50% - 215px) !important; bottom:auto !important; transform:translateY(-50%) !important; }
+  .rider-page #how .flowstep:nth-child(5){ left:calc(50% + 290px) !important; top:50% !important; bottom:auto !important; transform:translateY(-50%) !important; }
+  .rider-page #how .flowstep:nth-child(6){ left:calc(50% + 232px) !important; top:calc(50% + 215px) !important; bottom:auto !important; transform:translateY(-50%) !important; }
+  .rider-page #how .flowstep.is-current{ box-shadow:var(--shadow-sm); }
+  .rider-page #how .flowstep:not(.is-current){ opacity:.72; }
+  .rider-page #how .flow__phone{ position:absolute !important; inset:0; display:grid !important; place-items:center; z-index:2; pointer-events:none; }
+  .rider-page #how .flow__phone .phone__screen{ max-width:300px !important; }
+  .rider-page #how .flow__nav{
+    position:absolute !important; left:50%; bottom:0 !important; z-index:3; width:max-content; margin:0;
+    transform:translateX(-50%); padding:9px 12px; border:1px solid var(--line); border-radius:100px;
+    background:color-mix(in srgb, var(--paper) 88%, transparent); box-shadow:var(--shadow-sm); backdrop-filter:blur(10px);
+  }
+}
+
+@media (max-width:1040px){
+  .rider-page #how .flowstep{ display:none; }
+  .rider-page #how .flowstep.is-current{ display:grid; }
+}
+
 
 /* ---------- single-file preview shell ---------- */
 [hidden]{ display:none !important; }
@@ -1970,7 +2842,7 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
 </div>
 
 
-<div class="page" id="page-rent">
+<div class="page rider-page" id="page-rent">
 <div class="ticker">
   <div class="wrap">Backed by <b>Kunal Bahl</b> on Shark Tank India · <b>Delhivery</b> fleet partner · <a href="investors.html">Investors →</a></div>
 </div>
@@ -1984,7 +2856,7 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
       <a href="#cities">Cities</a>
       <a href="#fleet">Fleet</a>
       <a href="#app">App</a>
-      <a href="#business">For business</a>
+      <a href="business.html">For business</a>
       <a href="investors.html">Investors</a>
     </nav>
     <div class="nav__cta">
@@ -1993,7 +2865,7 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
         <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       </button>
 
-      <a class="btn btn--ghost btn--sm" href="#business">Fleet enquiry</a>
+      <a class="btn btn--ghost btn--sm" href="business.html">Fleet enquiry</a>
       <a class="btn btn--primary btn--sm" href="#get">Get a bike</a>
     </div>
     <button class="nav__burger" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -2003,21 +2875,89 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
 <!-- ══════════ 1 · hero ══════════ -->
 <section class="hero">
   <div class="wrap">
-    <div class="hero__in">
-      <div>
-        <div class="hero__price">From <b>₹1,400</b> a week · zero down payment</div>
-        <h1 class="h-xl">Just the weekly rent.<br><span class="hl">Everything else is on us.</span></h1>
-        <p class="hero__sub">
-          Electric two-wheelers for India's delivery riders. Battery swaps, repairs, servicing,
-          a replacement bike and insurance — all inside one weekly price.
-        </p>
-        <div class="btn-row">
-          <a class="btn btn--primary" href="#get">Get a bike</a>
-          <a class="btn btn--ghost" href="#pricing">See prices</a>
-        </div>
+    <div class="hero__slider" data-hero-slider aria-label="RIDEV hero carousel">
+      <div class="hero__track">
+        <article class="hero__slide hero__slide--primary">
+          <div class="hero__copy">
+            <div class="hero__price">From <b>₹1,400</b> a week · zero down payment</div>
+            <h1 class="h-xl">Just the weekly rent.<br><span class="hl">Everything else is on us.</span></h1>
+            <p class="hero__sub">
+              Electric two-wheelers for India's delivery riders. Battery swaps, repairs, servicing,
+              a replacement bike and insurance — all inside one weekly price.
+            </p>
+            <div class="btn-row">
+              <a class="btn btn--primary" href="#get">Get a bike</a>
+              <a class="btn btn--ghost" href="#pricing">See prices</a>
+            </div>
+          </div>
+          <div class="herofig" data-r="heroArt" aria-hidden="true"></div>
+        </article>
+
+        <article class="hero__slide hero__slide--cities">
+          <div class="hero__panel-copy">
+            <div class="brandslide__eyebrow">Bengaluru hub launch</div>
+            <h2 class="h-xl">A new hub is live.<br><span class="hl">More are opening soon.</span></h2>
+            <p class="hero__sub">Choose a city to watch its opening story and see what is coming next for RIDEV riders.</p>
+          </div>
+          <div class="hub-preview" data-hub-preview>
+            <div class="hub-preview__card">
+              <div class="hub-preview__stage" data-hub-stage>
+                <iframe
+                  src="https://www.instagram.com/reel/DdEemdujAxd/embed?autoplay=1"
+                  title="RIDEV Bengaluru hub opening"
+                  loading="eager"
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  allowfullscreen></iframe>
+                <div class="hub-preview__media" aria-hidden="true"></div>
+                <div class="hub-preview__placeholder" aria-hidden="true"><span class="hub-preview__pulse"></span><b>Opening soon</b></div>
+              </div>
+            </div>
+            <div class="hub-preview__states" role="tablist" aria-label="Hub openings">
+              <button class="hub-state is-active" type="button" role="tab" aria-selected="true" data-hub-state="bengaluru" data-hub-video="https://www.instagram.com/reel/DdEemdujAxd/embed?autoplay=1"><i></i><span>Bengaluru</span><small>Now open</small></button>
+              <button class="hub-state" type="button" role="tab" aria-selected="false" data-hub-state="pune"><i></i><span>Pune</span><small>Opening soon</small></button>
+              <button class="hub-state" type="button" role="tab" aria-selected="false" data-hub-state="hyderabad"><i></i><span>Hyderabad</span><small>Next hub</small></button>
+              <button class="hub-state" type="button" role="tab" aria-selected="false" data-hub-state="chennai"><i></i><span>Chennai</span><small>Next hub</small></button>
+            </div>
+          </div>
+        </article>
+
+        <article class="hero__slide hero__slide--video">
+          <div class="hero__panel-copy">
+            <div class="brandslide__eyebrow">Shark Tank India</div>
+            <h2 class="h-xl">RIDEV on<br><span class="hl">Shark Tank India.</span></h2>
+            <p class="hero__sub">Watch the first 15 seconds of the RIDEV pitch and see the idea that is changing how riders earn on the road.</p>
+          </div>
+          <div class="brandslide__video">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/tp4bcH19VEg?start=0&amp;end=15&amp;controls=1&amp;rel=0&amp;modestbranding=1&amp;autoplay=0&amp;mute=1"
+              title="RIDEV Shark Tank teaser"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen></iframe>
+          </div>
+        </article>
       </div>
-      <div class="herofig" data-r="heroArt" aria-hidden="true"></div>
+
+      <div class="hero__controls">
+        <button class="hero__arrow" type="button" data-hero-prev aria-label="Previous slide">‹</button>
+        <div class="hero__dots" aria-label="Select a slide">
+          <button class="hero__dot is-active" type="button" data-hero-dot="0" aria-label="Go to slide 1"></button>
+          <button class="hero__dot" type="button" data-hero-dot="1" aria-label="Go to slide 2"></button>
+          <button class="hero__dot" type="button" data-hero-dot="2" aria-label="Go to slide 3"></button>
+        </div>
+        <button class="hero__arrow" type="button" data-hero-next aria-label="Next slide">›</button>
+      </div>
     </div>
+
+    <section class="brandstory" aria-labelledby="brandstory-title">
+      <div class="brandstory__in">
+        <div>
+          <div class="eyebrow">The RIDEV brand</div>
+          <h2 class="h-lg" id="brandstory-title">Built around the rider, not the vehicle.</h2>
+        </div>
+        <p>Reliable electric mobility should feel simple: one fair weekly price, a nearby hub and a team that keeps you moving. That is the promise behind every RIDEV bike.</p>
+      </div>
+    </section>
 
     <div class="hstrip" data-r="heroStrip"></div>
     <div class="oemline">
@@ -2028,6 +2968,7 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
       <span class="oemline__lbl">Powering deliveries for</span>
       <span class="oemline__row" data-r="deliveryChips"></span>
     </div>
+
   </div>
 </section>
 
@@ -2061,12 +3002,19 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
       <p class="lede mt-s">Tap a step to see it. Everything from booking to the weekly payment happens in the app.</p>
     </div>
     <div class="flow">
-      <ol class="flow__steps" data-r="flowSteps"></ol>
+      <div class="flow__steps-wrap">
+        <ol class="flow__steps" data-r="flowSteps"></ol>
+        <div class="flow__nav" data-r="flowNav" aria-label="Onboarding steps"></div>
+      </div>
       <div class="flow__phone">
-        <div class="phone">
-          <div class="phone__screen">
-            <div class="phone__notch"></div>
-            <div class="phone__body" data-r="flowScreen"></div>
+        <div class="appband__visual flow__phone-visual" data-flow-transition>
+          <div class="appband__ghost appband__ghost--back" aria-hidden="true"><span></span><i></i><b></b></div>
+          <div class="appband__ghost appband__ghost--mid" aria-hidden="true"><span></span><i></i><b></b></div>
+          <div class="phone">
+            <div class="phone__screen">
+              <div class="phone__notch"></div>
+              <div class="phone__body" data-r="flowScreen"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2179,7 +3127,12 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
       <h2 class="h-lg">“Everything included” is easy to say and expensive to keep.</h2>
       <p class="lede mt-s">RIDEV owns the bikes, staffs the hubs and runs its own fleet software — which is what makes an all-in weekly price something we can hold.</p>
     </div>
-    <div class="grid g3" data-r="trustCards"></div>
+    <div class="trustcarousel" data-trust-carousel>
+      <div class="trustcarousel__viewport">
+        <div class="trustcarousel__cards" data-r="trustCards"></div>
+      </div>
+      <div class="trustcarousel__controls" data-trust-controls aria-label="Why RIDEV holds up carousel controls"></div>
+    </div>
 
     <div class="pressline mt-l">
       <span class="pressline__lbl">As covered in</span>
@@ -2199,87 +3152,48 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
         <ul class="plan__inc mt-m inline-ticks" data-r="appFeatures"></ul>
         <div class="btn-row mt-m" data-r="appCta"></div>
       </div>
-      <div class="phone">
-        <div class="phone__screen">
-          <div class="phone__notch"></div>
-          <div class="phone__body" data-r="phoneBody"></div>
+      <div class="appband__visual" data-app-transition>
+        <div class="appband__ghost appband__ghost--back" aria-hidden="true"><span></span><i></i><b></b></div>
+        <div class="appband__ghost appband__ghost--mid" aria-hidden="true"><span></span><i></i><b></b></div>
+        <div class="phone">
+          <div class="phone__screen">
+            <div class="phone__notch"></div>
+            <div class="phone__body" data-r="phoneBody"></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══════════ 8 · for business ══════════ -->
+<!-- ══════════ 8 · for business teaser ══════════ -->
 <section class="sec" id="business">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">Partner with RIDEV</div>
-      <h2 class="h-lg">Four ways to work with us.</h2>
-    </div>
-    <div class="grid g4" data-r="partnerCards"></div>
-
-    <div class="callout mt-m">
+    <div class="business-teaser">
       <div>
-        <span class="pill">Case in point</span>
-        <h3 class="h-sm mt-s">Delhivery — 150 EVs for last-mile delivery</h3>
-        <p class="mt-s">
-          An EV-as-a-service deployment over three months that removes upfront cost for gig workers.
-          Pilots in Delhi NCR and Bengaluru cut 4,260&nbsp;kg of CO₂ and more than halved riders'
-          daily running costs. <span class="muted">Reported by ET Auto and GoodReturns, Feb 2026.</span>
-        </p>
+      <div class="eyebrow">Partner with RIDEV</div>
+      <h2 class="h-lg">Bring your riders, vehicles or site. We bring the operating system.</h2>
+      <p class="lede mt-s">Fleet deployment, OEM supply, service workshops and hubs all plug into the same RIDEV network.</p>
       </div>
-      <a class="btn btn--dark" href="mailto:info@ridev.in?subject=Fleet%20partnership">Talk to the fleet team</a>
+      <a class="btn btn--primary" href="business.html">Explore business partnerships <span class="arw" aria-hidden="true"></span></a>
     </div>
   </div>
 </section>
 
-<!-- ══════════ 8b · carbon story (slider) ══════════ -->
-<section class="sec sec--paper2" id="carbon">
+<!-- ══════════ 8b · impact + ESG ══════════ -->
+<section class="sec impactsection" id="impact">
   <div class="wrap">
-    <!-- carbon story: visual metrics as a snap-scroll slider with a progress bar -->
-    <div class="carbonstory">
-      <div class="carbonstory__head" data-r="esgCarbonHead"></div>
-      <div class="carbonstory__viewport">
-        <div class="carbonstory__track" data-r="esgCarbonCards" role="list"></div>
+    <div class="sec-head impactsection__head">
+      <div>
+        <div class="eyebrow">Impact, measured honestly</div>
+        <h2 class="h-lg">The work behind the green claims.</h2>
       </div>
-      <div class="carbonstory__progress"
-           role="progressbar" aria-label="Carbon story progress"
-           aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
-        <div class="carbonstory__progress-fill"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════ 8c · impact band ══════════ -->
-<section class="sec sec--dark sec--tight" id="impact">
-  <div class="wrap">
-    <div class="sec-head center">
-      <div class="eyebrow">Real-world impact</div>
-      <h2 class="h-lg">Numbers behind the bikes.</h2>
-      <p class="lede mt-s" data-fill="impact.intro"></p>
+      <p class="lede" data-fill="esg.intro"></p>
     </div>
     <div class="impact" data-r="impactStats"></div>
-  </div>
-</section>
-
-<!-- ══════════ 9 · ESG ══════════ -->
-<section class="sec sec--paper2" id="esg">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">ESG</div>
-      <h2 class="h-lg">The unglamorous version.</h2>
-      <p class="lede mt-s" data-fill="esg.intro"></p>
-    </div>
-
-    <!-- three pillars — desktop: 3-col grid · mobile: single-card slider -->
-    <div class="esgslider">
-      <div class="esg" data-r="esgPillars"></div>
-      <div class="esgslider__progress"
-           role="progressbar" aria-label="ESG pillars progress"
-           aria-valuemin="0" aria-valuemax="100" aria-valuenow="33" tabindex="0">
-        <div class="esgslider__progress-fill"></div>
-      </div>
+    <div class="impactdetail">
+      <div class="impactdetail__tabs" data-r="impactTabs" role="tablist" aria-label="Impact areas"></div>
+      <div class="impactdetail__panel" data-r="impactPillars"></div>
     </div>
     <p class="muted mt-m" data-fill="esg.entity"></p>
   </div>
@@ -2386,7 +3300,7 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
           <li><a href="investors.html">Investors</a></li>
           <li><a href="investors.html#growth">Growth</a></li>
           <li><a href="investors.html#team">Founders</a></li>
-          <li><a href="#business">Partner with us</a></li>
+          <li><a href="business.html">Partner with us</a></li>
           <li><a href="mailto:info@ridev.in?subject=Careers">Careers</a></li>
         </ul>
       </div>
@@ -2545,13 +3459,13 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
         <div class="grid g2 mt-m" data-r="founders" style="gap:14px"></div>
       </div>
       <div>
-        <div class="video" data-r="videoBox" role="button" tabindex="0" aria-label="Play the RIDEV founders' pitch"
-             style="display:grid;place-items:center;cursor:pointer">
-          <div style="text-align:center;padding:28px">
-            <div class="video__btn"><svg viewBox="0 0 24 24" fill="#000" style="width:26px;height:26px;margin-left:4px"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-            <div style="font-family:var(--font-display);font-weight:700;font-size:18px" data-fill="video.title"></div>
-            <p class="muted" style="margin-top:6px;max-width:34ch" data-fill="video.caption"></p>
-          </div>
+        <div class="video video--embed">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/tp4bcH19VEg?rel=0"
+            title="RIDEV on Shark Tank India, Season 5"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen></iframe>
         </div>
         <p class="muted mt-s">The full 18-minute pitch, including the Sharks' questions on end-of-life battery management and fleet economics.</p>
       </div>
@@ -2642,7 +3556,7 @@ body,.nav,.card,.plan,.city,.vehicle,.hstrip,.hstat,.tbl-wrap,.founder,
           <li><a href="index.html#pricing">Bikes &amp; pricing</a></li>
           <li><a href="index.html#included">What's included</a></li>
           <li><a href="index.html#cities">Find a hub</a></li>
-          <li><a href="index.html#business">For business</a></li>
+          <li><a href="business.html">For business</a></li>
           <li><a href="mailto:info@ridev.in">info@ridev.in</a></li>
         </ul>
       </div>
@@ -3936,7 +4850,7 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
 
   fill('heroStrip',
     stat(n(H.fleet), 'Electric vehicles') +
-    stat(H.cities_live + '<em>+2 opening</em>', 'Cities live') +
+    stat('15+', 'Cities live · 12,000+ vehicles') +
     stat(H.hubs, 'Operating hubs') +
     stat(n(H.registered_riders), 'Riders registered')
   );
@@ -3985,6 +4899,131 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
   /* ============================================================
      Impact band + rider testimonials
      ============================================================ */
+  (function () {
+    var slider = document.querySelector('[data-hero-slider]');
+    if (!slider) return;
+
+    var track = slider.querySelector('.hero__track');
+    var slides = Array.prototype.slice.call(slider.querySelectorAll('.hero__slide'));
+    var dots = Array.prototype.slice.call(slider.querySelectorAll('.hero__dot'));
+    var prev = slider.querySelector('[data-hero-prev]');
+    var next = slider.querySelector('[data-hero-next]');
+    var index = 0;
+    var hero = slider.closest('.hero');
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var autoTimer = null;
+    var AUTO_MS = 6000;
+    var primarySlide = slider.querySelector('.hero__slide--primary');
+    if (primarySlide) {
+      var heroBackground = new Image();
+      heroBackground.onload = function () { primarySlide.classList.add('has-hero-bg'); };
+      heroBackground.src = 'assets/img/image.png';
+    }
+
+    function render() {
+      track.style.transform = 'translateX(-' + (index * 100) + '%)';
+      slider.dataset.activeSlide = String(index);
+      if (hero) hero.dataset.activeSlide = String(index);
+      dots.forEach(function (dot, i) { dot.classList.toggle('is-active', i === index); });
+    }
+
+    function schedule() {
+      if (reduce || slides.length < 2) return;
+      clearTimeout(autoTimer);
+      slider.classList.remove('is-autoplaying');
+      void slider.offsetWidth;
+      slider.classList.add('is-autoplaying');
+      autoTimer = setTimeout(function () {
+        index = (index + 1) % slides.length;
+        render();
+        schedule();
+      }, AUTO_MS);
+    }
+
+    function moveTo(nextIndex) {
+      index = (nextIndex + slides.length) % slides.length;
+      render();
+      schedule();
+    }
+
+    prev && prev.addEventListener('click', function () {
+      moveTo(index - 1);
+    });
+
+    next && next.addEventListener('click', function () {
+      moveTo(index + 1);
+    });
+
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () {
+        moveTo(Number(dot.dataset.heroDot || 0));
+      });
+    });
+
+    slider.addEventListener('mouseenter', function () { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); });
+    slider.addEventListener('mouseleave', schedule);
+    slider.addEventListener('focusin', function () { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); });
+    slider.addEventListener('focusout', function (event) {
+      if (!slider.contains(event.relatedTarget)) schedule();
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); }
+      else schedule();
+    });
+
+    var hubPreview = slider.querySelector('[data-hub-preview]');
+    if (hubPreview) {
+      var hubStage = hubPreview.querySelector('[data-hub-stage]');
+      var hubName = hubPreview.querySelector('[data-hub-name]');
+      var hubStatus = hubPreview.querySelector('[data-hub-status]');
+      var hubStates = Array.prototype.slice.call(hubPreview.querySelectorAll('[data-hub-state]'));
+      var hubDetails = {
+        bengaluru: { name: 'Bengaluru', status: 'Now open' },
+        pune: { name: 'Pune', status: 'Opening soon' },
+        hyderabad: { name: 'Hyderabad', status: 'Next hub' },
+        chennai: { name: 'Chennai', status: 'Next hub' }
+      };
+
+      function showHub(state) {
+        var detail = hubDetails[state] || hubDetails.bengaluru;
+        hubStates.forEach(function (button) {
+          var active = button.dataset.hubState === state;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        hubName.textContent = detail.name;
+        hubStatus.textContent = detail.status;
+        hubPreview.classList.remove('is-changing');
+        void hubPreview.offsetWidth;
+        hubPreview.classList.add('is-changing');
+
+        var video = hubStage.querySelector('iframe');
+        var source = hubStates.filter(function (button) { return button.dataset.hubState === state; })[0];
+        if (source && source.dataset.hubVideo) {
+          if (!video) {
+            video = document.createElement('iframe');
+            video.title = detail.name + ' hub opening';
+            video.allow = 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share';
+            video.allowFullscreen = true;
+            hubStage.appendChild(video);
+          }
+          video.src = source.dataset.hubVideo;
+          video.style.display = 'block';
+        } else if (video) {
+          video.style.display = 'none';
+          video.src = 'about:blank';
+        }
+      }
+
+      hubStates.forEach(function (button) {
+        button.addEventListener('click', function () { showHub(button.dataset.hubState); });
+      });
+    }
+
+    render();
+    schedule();
+  })();
+
   (function(){
     if (D.impact && D.impact.stats) {
       fill('impactStats', D.impact.stats.map(function (s, i) {
@@ -4118,7 +5157,12 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
       return '<button class="tab" role="tab" data-city="' + c + '" aria-selected="' + (i === 0) + '">' + c + '</button>';
     }).join('');
 
-    function render(city) {
+    function render(city, direction) {
+      var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && planWrap.children.length) {
+        planWrap.classList.add('is-switching');
+        planWrap.dataset.transitionDirection = direction || 'next';
+      }
       // one card per distinct weekly price; the longest-range model leads,
       // the rest are listed inside. Keeps the grid to a single row.
       var groups = {};
@@ -4137,7 +5181,7 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
       });
       var star = value.indexOf(Math.max.apply(null, value));
 
-      planWrap.innerHTML = prices.map(function (wk, i) {
+      var html = prices.map(function (wk, i) {
         var set  = groups[wk].slice().sort(function (a, b) { return b.range_km - a.range_km; });
         var lead = set[0];
         var rest = set.slice(1);
@@ -4166,15 +5210,29 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
           '<a class="btn ' + (i === star ? 'btn--primary' : 'btn--ghost') + '" href="#get">Reserve</a>' +
         '</article>';
       }).join('');
-      observeAll();
+      function paint() {
+        planWrap.innerHTML = html;
+        planWrap.classList.remove('is-switching');
+        planWrap.classList.add('has-switched');
+        window.setTimeout(function () { planWrap.classList.remove('has-switched'); }, 620);
+        observeAll();
+      }
+      if (!reduce && planWrap.classList.contains('is-switching')) {
+        window.setTimeout(paint, 180);
+      } else {
+        paint();
+      }
     }
 
     render(cityKeys[0]);
     if (tabsBox) $$('.tab', tabsBox).forEach(function (t) {
-      t.addEventListener('click', function () {
+        t.addEventListener('click', function () {
+          var previous = cityKeys.indexOf(tabsBox.querySelector('[aria-selected="true"]').dataset.city);
+          var next = cityKeys.indexOf(t.dataset.city);
+          var direction = next >= previous ? 'next' : 'prev';
         $$('.tab', tabsBox).forEach(function (x) { x.setAttribute('aria-selected', 'false'); });
         t.setAttribute('aria-selected', 'true');
-        render(t.dataset.city);
+          render(t.dataset.city, direction);
       });
     });
   });
@@ -4198,7 +5256,7 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
         '<div class="cityrow__city">' +
           '<b>' + c.city + '</b><span>' + c.state + '</span>' +
         '</div>' +
-        '<div class="cityrow__hubs">' + c.hubs.map(function (h) {
+        '<div class="cityrow__hubs"><div class="hubcards">' + c.hubs.map(function (h) {
             var hubSlug = citySlug + '-' + slugify(h.name);
             var label = h.name + ' — RIDEV hub';
             var url = mapsUrl(h.name + ', ' + c.city + ', ' + c.state);
@@ -4206,8 +5264,22 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
                    'data-hub="' + hubSlug + '" data-hubname="' + h.name +
                    '" data-hubarea="' + (h.area || c.city) + '"' +
                    ' title="Open ' + h.name + ' on Google Maps" aria-label="' + label + ' — open on Google Maps">' +
-                   PIN + h.name + '</a>';
-          }).join('') + '</div>' +
+                   '<span class="hubtag__media">' +
+                     '<img class="hubtag__img" src="assets/img/hubs/' + hubSlug + '.jpg" alt="" loading="lazy" ' +
+                       'onload="this.parentNode.classList.add(\'is-loaded\')" onerror="this.remove()">' +
+                     '<svg class="hubtag__fallback" viewBox="0 0 160 100" aria-hidden="true">' +
+                       '<rect width="160" height="100" fill="url(#hub-' + hubSlug + ')"/>' +
+                       '<defs><linearGradient id="hub-' + hubSlug + '" x1="0" y1="0" x2="0" y2="1">' +
+                         '<stop offset="0%" stop-color="#EEFAE0"/><stop offset="100%" stop-color="#95DB67"/>' +
+                       '</linearGradient></defs>' +
+                       '<path d="M22 82h116M34 82V52l46-23 46 23v30M56 82V60h18v22M100 82V60h18v22" ' +
+                         'fill="none" stroke="#34691C" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>' +
+                       '<circle cx="80" cy="22" r="7" fill="#4E9130"/>' +
+                     '</svg>' +
+                   '</span>' +
+                   '<span class="hubtag__body">' + PIN + '<span>' + h.name + '</span></span>' +
+                   '</a>';
+                 }).join('') + '</div><div class="hubprogress" aria-hidden="true"><span></span></div></div>' +
         '<div class="cityrow__tag">' +
           '<button class="zoombtn" type="button" data-zoom-city="' + c.city +
             '" title="Zoom map to ' + c.city + '" aria-label="Zoom map to ' + c.city + '">' +
@@ -4227,7 +5299,37 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
         '<div class="cityrow__tag"><span class="pill pill--soon">Opening</span></div>' +
       '</div>');
     }
-    fill('cityList', rows.join(''));
+    fill('cityList',
+      '<div class="cityslider__nav" aria-label="Browse operating cities">' +
+        '<button class="cityslider__arrow" type="button" data-city-prev aria-label="Previous city">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>' +
+        '</button>' +
+        '<span class="cityslider__count" data-city-count aria-live="polite"></span>' +
+        '<button class="cityslider__arrow" type="button" data-city-next aria-label="Next city">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="cityslider__viewport">' + rows.join('') + '</div>'
+    );
+
+    var citySlider = $('[data-r="cityList"]');
+    var cityRows = citySlider ? $$('.cityrow', citySlider) : [];
+    var cityCount = citySlider ? $('[data-city-count]', citySlider) : null;
+    var cityIndex = 0;
+    function showCity(index) {
+      if (!cityRows.length) return;
+      cityIndex = (index + cityRows.length) % cityRows.length;
+      cityRows.forEach(function (row, i) {
+        row.classList.toggle('is-current', i === cityIndex);
+        row.setAttribute('aria-hidden', i === cityIndex ? 'false' : 'true');
+      });
+      if (cityCount) cityCount.textContent = String(cityIndex + 1).padStart(2, '0') + ' / ' + String(cityRows.length).padStart(2, '0');
+    }
+    if (citySlider) {
+      $('[data-city-prev]', citySlider).addEventListener('click', function () { showCity(cityIndex - 1); });
+      $('[data-city-next]', citySlider).addEventListener('click', function () { showCity(cityIndex + 1); });
+      showCity(0);
+    }
   })();
 
   fill('footerCities', D.cities.map(function (c) {
@@ -4476,8 +5578,63 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
     return '<article class="card card--hover rv" style="border-top:3px solid var(--brand)">' +
       '<h3 class="h-sm">' + t + '</h3><p class="mt-s">' + b + '</p></article>';
   }
-  fill('trustCards', (D.trust || []).map(function (t) { return railCard(t.t, t.b); }).join(''));
+  fill('trustCards', (D.trust || []).map(function (t, i) {
+    return railCard(t.t, t.b).replace('<article ', '<article data-trust-index="' + i + '" ');
+  }).join(''));
   fill('modelCards', (D.model_cards || []).map(function (t) { return railCard(t.t, t.b); }).join(''));
+
+  /* Why it holds up: overlapping carousel, shared by desktop and mobile. */
+  (function () {
+    var root = $('[data-trust-carousel]');
+    var track = $('[data-r="trustCards"]');
+    var controls = $('[data-trust-controls]');
+    if (!root || !track) return;
+    var cards = $$('[data-trust-index]', track);
+    if (!cards.length) return;
+    var current = 0, timer = null;
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function wrap(i) { return (i + cards.length) % cards.length; }
+    function render(index) {
+      current = wrap(index);
+      cards.forEach(function (card, i) {
+        var delta = (i - current + cards.length) % cards.length;
+        card.classList.toggle('is-active', delta === 0);
+        card.classList.toggle('is-next', delta === 1);
+        card.classList.toggle('is-prev', delta === cards.length - 1);
+        card.classList.toggle('is-hidden', delta > 1 && delta < cards.length - 1);
+        card.setAttribute('aria-hidden', delta === 0 ? 'false' : 'true');
+        card.setAttribute('tabindex', delta === 0 ? '0' : '-1');
+      });
+      if (controls) $$('.trustcarousel__dot', controls).forEach(function (dot, i) {
+        dot.classList.toggle('is-active', i === current);
+        dot.setAttribute('aria-selected', i === current ? 'true' : 'false');
+      });
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    function start() { if (!reduce && cards.length > 1 && !timer) timer = setInterval(function () { render(current + 1); }, 5200); }
+    if (controls) {
+      controls.innerHTML = '<button class="trustcarousel__arrow" type="button" data-trust-prev aria-label="Previous reason">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>' +
+        '<div class="trustcarousel__dots" role="tablist" aria-label="Select a reason"></div>' +
+        '<button class="trustcarousel__arrow" type="button" data-trust-next aria-label="Next reason">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>';
+      var dots = $('.trustcarousel__dots', controls);
+      dots.innerHTML = cards.map(function (_, i) {
+        return '<button class="trustcarousel__dot" type="button" role="tab" data-trust-dot="' + i + '" aria-label="Show reason ' + (i + 1) + '" aria-selected="false"></button>';
+      }).join('');
+      $('[data-trust-prev]', controls).addEventListener('click', function () { render(current - 1); stop(); start(); });
+      $('[data-trust-next]', controls).addEventListener('click', function () { render(current + 1); stop(); start(); });
+      $$('[data-trust-dot]', controls).forEach(function (dot) {
+        dot.addEventListener('click', function () { render(Number(dot.dataset.trustDot)); stop(); start(); });
+      });
+    }
+    root.addEventListener('pointerenter', stop);
+    root.addEventListener('pointerleave', start);
+    root.addEventListener('focusin', stop);
+    root.addEventListener('focusout', function () { if (!root.contains(document.activeElement)) start(); });
+    render(0);
+    start();
+  })();
 
   fill('partnerCards', (D.partner_types || []).map(function (p) {
     return '<article class="card card--hover rv partnercard">' +
@@ -4668,6 +5825,21 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
      ============================================================ */
   (function () {
     var A = D.app; if (!A) return;
+    var appVisual = document.querySelector('[data-app-transition]');
+    if (appVisual) {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+        appVisual.classList.add('is-ready');
+      } else {
+        var appObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            appVisual.classList.add('is-ready');
+            appObserver.disconnect();
+          });
+        }, { threshold: 0.25 });
+        appObserver.observe(appVisual);
+      }
+    }
     fill('appFeatures', A.features.map(function (f) { return '<li>' + CHK + f + '</li>'; }).join(''));
 
     var PLAY = '<svg viewBox="0 0 24 24" style="width:19px;height:19px" aria-hidden="true">' +
@@ -4788,6 +5960,21 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
      ============================================================ */
   (function () {
     if (!$$('[data-r="flowSteps"]').length) return;
+    var flowVisual = document.querySelector('[data-flow-transition]');
+    if (flowVisual) {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+        flowVisual.classList.add('is-ready');
+      } else {
+        var flowObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            flowVisual.classList.add('is-ready');
+            flowObserver.disconnect();
+          });
+        }, { threshold: 0.25 });
+        flowObserver.observe(flowVisual);
+      }
+    }
     var steps = D.onboarding || [];
     var planCity = Object.keys(D.plans)[0];
     var plan = D.plans[planCity][0];
@@ -4861,22 +6048,44 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
     };
 
     fill('flowSteps', steps.map(function (s, i) {
-      return '<li class="flowstep' + (i === 0 ? ' on' : '') + '" data-screen="' + s.screen + '" tabindex="0" role="button">' +
+      return '<li class="flowstep' + (i === 0 ? ' on is-current' : '') + '" data-index="' + i + '" data-screen="' + s.screen + '" tabindex="0" role="button" aria-hidden="' + (i === 0 ? 'false' : 'true') + '">' +
         '<span class="flowstep__n">' + (i + 1) + '</span>' +
         '<div><b>' + s.t + '</b><p>' + s.b + '</p></div>' +
       '</li>';
     }).join(''));
 
-    function show(key) {
+    var flowNav = $('[data-r="flowNav"]');
+    var current = 0;
+    function showAt(index) {
+      if (!steps.length) return;
+      current = (index + steps.length) % steps.length;
+      var key = steps[current].screen;
       fill('flowScreen', SCREENS[key] || SCREENS.app);
-      $$('.flowstep').forEach(function (el) { el.classList.toggle('on', el.dataset.screen === key); });
+      $$('.flowstep').forEach(function (el, i) {
+        var active = i === current;
+        el.classList.toggle('on', active);
+        el.classList.toggle('is-current', active);
+        el.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+      if (flowNav) {
+        var count = $('[data-flow-count]', flowNav);
+        if (count) count.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(steps.length).padStart(2, '0');
+      }
     }
-    show(steps.length ? steps[0].screen : 'app');
+    if (flowNav) {
+      flowNav.innerHTML = '<button class="flow__arrow" type="button" data-flow-prev aria-label="Previous step">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>' +
+        '<span class="flow__count" data-flow-count aria-live="polite"></span>' +
+        '<button class="flow__arrow" type="button" data-flow-next aria-label="Next step">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>';
+      $('[data-flow-prev]', flowNav).addEventListener('click', function () { showAt(current - 1); });
+      $('[data-flow-next]', flowNav).addEventListener('click', function () { showAt(current + 1); });
+    }
+    showAt(0);
 
     $$('.flowstep').forEach(function (el) {
-      var go = function () { show(el.dataset.screen); };
+      var go = function () { showAt(Number(el.dataset.index)); };
       el.addEventListener('click', go);
-      el.addEventListener('mouseenter', go);
       el.addEventListener('focus', go);
       el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     });
@@ -5178,6 +6387,33 @@ window.RIDEV_INDIA = {"w":386,"h":431,"country":"M130.2,39.5 L134.9,39.8 L135.3,
       refresh();
       (mm.addEventListener ? mm.addEventListener.bind(mm, 'change') : mm.addListener.bind(mm))(refresh);
       window.addEventListener('resize', refresh);
+    })();
+
+    /* --- compact impact tabs: keep the full ESG evidence in one panel --- */
+    (function () {
+      var tabs = $('[data-r="impactTabs"]');
+      var panel = $('[data-r="impactPillars"]');
+      if (!tabs || !panel || !E.pillars) return;
+      var current = 0;
+      tabs.innerHTML = E.pillars.map(function (p, i) {
+        return '<button class="impacttab' + (i === 0 ? ' is-active' : '') + '" type="button" role="tab" aria-selected="' + (i === 0 ? 'true' : 'false') + '" data-impact-index="' + i + '">' +
+          '<span>' + p.k + '</span>' + p.title + '</button>';
+      }).join('');
+      function show(index) {
+        current = (index + E.pillars.length) % E.pillars.length;
+        var p = E.pillars[current];
+        panel.innerHTML = '<div class="impactdetail__intro"><span class="impactdetail__key">' + p.k + '</span><div><h3>' + p.title + '</h3><p>' + p.lead + '</p></div>' +
+          (p.stat ? '<div class="impactdetail__stat"><b>' + p.stat.n + '</b><span>' + p.stat.l + '</span></div>' : '') + '</div>' +
+          '<ul class="impactdetail__points">' + p.points.map(function (x) { return '<li>' + CHK + x + '</li>'; }).join('') + '</ul>';
+        $$('.impacttab', tabs).forEach(function (tab, i) {
+          tab.classList.toggle('is-active', i === current);
+          tab.setAttribute('aria-selected', i === current ? 'true' : 'false');
+        });
+      }
+      $$('.impacttab', tabs).forEach(function (tab) {
+        tab.addEventListener('click', function () { show(Number(tab.dataset.impactIndex)); });
+      });
+      show(0);
     })();
   })();
 
