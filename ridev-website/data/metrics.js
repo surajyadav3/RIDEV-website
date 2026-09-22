@@ -10,13 +10,13 @@ window.RIDEV_DATA = {
     "how_to_update": "Edit this file only. index.html and company.html read every number from here at load time."
   },
   "headline": {
-    "fleet": 6702,
-    "cities_live": 5,
+    "fleet": 12000,
+    "cities_live": 15,
     "cities_provisioned": 7,
     "hubs": 8,
     "on_road": 5766,
     "active_subscriptions": 5671,
-    "registered_riders": 45907,
+    "registered_riders": 50000,
     "lifetime_bookings": 19878,
     "oem_partners": 6,
     "utilisation_pct": 86.0,

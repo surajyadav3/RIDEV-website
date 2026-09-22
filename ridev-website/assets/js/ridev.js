@@ -168,10 +168,10 @@
   }
 
   fill('heroStrip',
-    stat(n(H.fleet), 'Electric vehicles') +
-    stat('15+', 'Cities live · 12,000+ vehicles') +
+    stat('12000+', 'Electric vehicles') +
+    stat('15+', 'Cities live') +
     stat(H.hubs, 'Operating hubs') +
-    stat(n(H.registered_riders), 'Riders registered')
+    stat('50000+', 'Riders registered')
   );
 
   fill('invStrip',
