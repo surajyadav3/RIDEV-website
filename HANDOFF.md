@@ -14,7 +14,7 @@ subscription. Battery swaps, repairs, a replacement bike and insurance are all i
 Two pages, one design system, zero dependencies.
 
 ```
-ridev-website/
+(repo root)/
 ├── index.html          # rider + fleet-customer site
 ├── business.html       # business partnerships page
 ├── investors.html      # INVESTOR tab — every granular metric + growth trajectory
@@ -32,7 +32,7 @@ ridev-website/
 ### Run it
 
 ```bash
-cd ridev-website && python3 -m http.server 8787
+python3 -m http.server 8787
 ```
 → http://localhost:8787/
 

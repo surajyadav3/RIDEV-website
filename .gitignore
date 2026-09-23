@@ -11,3 +11,7 @@ package-lock.json
 *.pid
 *.bak
 *.zip
+
+# deployment
+.vercel
+.env*

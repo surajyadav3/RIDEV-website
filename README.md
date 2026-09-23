@@ -4,7 +4,7 @@ A self-contained static site. No build step, no framework, no dependencies.
 Drop the folder on any host (Netlify, S3, nginx, the existing ridev.in server) and it works.
 
 ```
-ridev-website/
+(repo root)/
 ├── index.html          # rider + fleet-customer site
 ├── business.html       # business partnerships page
 ├── investors.html      # INVESTOR tab — every granular metric + growth trajectory
@@ -24,7 +24,7 @@ ridev-website/
 ## 1. Run it locally
 
 ```bash
-cd ridev-website && python3 -m http.server 8787
+python3 -m http.server 8787
 ```
 → http://localhost:8787/ — the pages need to be served (not opened as files) so the data and map scripts load.
 Hard-reload (⌘⇧R) after edits; asset URLs carry a `?v=` version to bust caches, bump it when you change CSS/JS.
@@ -313,7 +313,7 @@ RIDEV can't out-scale Zypp today, so the page competes on specificity instead.
 ## 8. Local preview
 
 ```bash
-cd ridev-website && python3 -m http.server 8787
+python3 -m http.server 8787
 ```
 
 Then open http://localhost:8787/. Opening `index.html` from the filesystem also works — data is
