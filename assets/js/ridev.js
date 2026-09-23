@@ -326,6 +326,7 @@
       var hubMap = hubPreview.querySelector('[data-hub-map]');
       var hubRoute = slider.querySelector('[data-hub-route]');
       var hubStops = Array.prototype.slice.call(slider.querySelectorAll('[data-hub-state]'));
+      if (hubRoute) hubRoute.style.setProperty('--n', hubStops.length);
 
       // Route map: real India geometry, cropped to the hub cities, with a curved route
       // from the launch hub (first stop) out to every upcoming city.
@@ -354,7 +355,9 @@
           }).join('');
           var pins = hubPts.map(function (p, i) {
             // launch hub labelled underneath (Chennai shares its latitude), the rest to the right
-            var label = i === 0 ? '<text x="0" y="9" text-anchor="middle">' : '<text x="5" y="1.8">';
+            var nearRight = p.x > minX + vbW * 0.72;  // keep labels near the right edge out of the fade
+            var label = i === 0 ? '<text x="0" y="9" text-anchor="middle">'
+              : nearRight ? '<text x="-5" y="1.8" text-anchor="end">' : '<text x="5" y="1.8">';
             return '<g class="hubs__pin' + (i === 0 ? ' is-live' : '') + '" data-pin="' + p.key + '" transform="translate(' +
               p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')">' +
               (i === 0 ? '<circle class="hubs__ring" r="3"/>' : '') +
@@ -583,7 +586,8 @@
         var lead = set[0];
         var rest = set.slice(1);
         var src = IMG[lead.model] || IMG._default;
-        var pic = shot(src, 'plan__img', lead.brand + ' ' + lead.model, '.plan__ph');
+        // eager: the img stays display:none until it loads, and a hidden lazy image is never fetched
+        var pic = shot(src, 'plan__img', lead.brand + ' ' + lead.model, '.plan__ph', true);
         var best = i === star;
         return '<article class="plan' + (best ? ' plan--best' : '') + '">' +
           '<div class="plan__head"><span class="plan__brand">' + lead.brand + '</span>' +
@@ -613,6 +617,7 @@
       function paint() {
         planWrap.innerHTML = html;
         planWrap.style.setProperty('--count', prices.length);  // grid always fills the row
+        planWrap.dataset.count = prices.length;                  // lets CSS compact 4-up rows / cap a lone card
         planWrap.classList.remove('is-switching');
         planWrap.classList.add('has-switched');
         window.setTimeout(function () { planWrap.classList.remove('has-switched'); }, 620);
@@ -676,7 +681,7 @@
           shot('assets/img/hubs/' + slug + '.jpg', 'hubx__img', h.name + ' — RIDEV hub, ' + c.city, '.hubx__preview') +
           '<figcaption class="hubx__cap">' +
             '<span><b>' + h.name + '</b><small>' + (h.area || c.city) + '</small></span>' +
-            '<a href="' + mapsUrl(h.name + ', ' + c.city + ', ' + c.state) + '" target="_blank" rel="noopener noreferrer">' +
+            '<a href="' + mapsUrl(h.address || (h.name + ', ' + c.city + ', ' + c.state)) + '" target="_blank" rel="noopener noreferrer">' +
               'Directions <span aria-hidden="true">↗</span></a>' +
           '</figcaption>' +
         '</figure>';
@@ -744,21 +749,29 @@
   }).join(''));
 
   /* ============================================================
-     India map — real boundary geometry from assets/js/india-map.js
+     India map — political map (MapChart base) split into three greyscale
+     masks in assets/img/map/: land, state borders, coastline. CSS paints them
+     with theme colours, so the map follows light/dark mode. Pins use a
+     projection fitted to the image (lon/lat → map units, ~1–2 px accurate).
      ============================================================ */
   (function () {
     if (!$$('[data-r="cityMap"]').length) return;
-    var M = window.RIDEV_INDIA;
-    if (!M) { console.warn('RIDEV: india-map.js did not load.'); return; }
-
-    var pr = M.proj;
-    var PX = function (lon) { return pr.padx + (lon - pr.lon0) * pr.sx; };
-    var PY = function (lat) { return pr.pady + (pr.latTop - lat) * pr.sy; };
+    var M = { w: 386, h: 441.29, img: 'assets/img/map/' };
+    var FIT = { L0: 82.5, P0: 22.5, k: 0.1043243, ox: 60, oy: 290,
+                p: [1964.1892, 124.28039, -0.6194485, -0.3504748, 2432.8221, -139.275738, -0.1054511, -0.2100434] };
+    function toMap(lon, lat) {
+      var u = lon - FIT.L0, v = lat - FIT.P0, p = FIT.p;
+      return [(p[0] + p[1] * u + p[2] * u * v + p[3] * u * u - FIT.ox) * FIT.k,
+              (p[4] + p[5] * v + p[6] * v * v + p[7] * u * u - FIT.oy) * FIT.k];
+    }
 
     var pinData = {};
     var pins = D.cities.filter(function (c) { return c.lat; }).map(function (c) {
       var live = c.status === 'live';
-      var x = PX(c.lon) + (c.dx || 0), y = PY(c.lat) + (c.dy || 0);
+      var xy = toMap(c.lon, c.lat);
+      // true position; the optional dx/dy nudge (keeps close pins like Delhi/Gurugram apart)
+      // is applied inside the counter-scaled body, so it stays a few screen px at any zoom
+      var x = xy[0], y = xy[1], nudge = (c.dx || c.dy) ? ' transform="translate(' + (c.dx || 0) + ',' + (c.dy || 0) + ')"' : '';
       var hubs = live ? c.hubs.map(function (h) { return h.name; }).join(' · ') : 'Opening next';
       var w = Math.max(120, hubs.length * 5.4 + 40);
       var flip = y > M.h * 0.66;
@@ -770,15 +783,18 @@
              '" transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')" tabindex="0" role="button" ' +
              'aria-label="' + c.city + ' — ' + hubs + ' — click to zoom, then open on maps">' +
         '<g class="pin__body">' +  // counter-scaled by CSS so pins stay the same size while zoomed
+        '<g' + nudge + '>' +
         (live ? '<circle class="pin__pulse" r="14"/>' : '') +
+        '<circle class="pin__burst" r="8"/>' +
         '<circle class="pin__hit" r="20" fill="transparent"/>' +
-        '<circle class="pin__dot" r="' + (live ? 5.5 : 4.5) + '"/>' +
+        '<circle class="pin__dot" r="' + (live ? (4.2 + Math.min(c.hubs.length, 4) * 0.8).toFixed(1) : 4) + '"/>' +  // bigger dot = more hubs
         '<g class="pin__tip" transform="translate(0,' + ty + ')">' +
           '<rect x="' + (-w / 2) + '" y="0" width="' + w + '" height="' + tipH + '" rx="10"/>' +
           '<text class="pin__tipname" y="19" text-anchor="middle">' + c.city + '</text>' +
           (live ? '<text class="pin__tiphub" y="34" text-anchor="middle">' + hubs + '</text>' : '') +
           (live ? '<a class="pin__tipcta" href="' + mapsHref + '" target="_blank" rel="noopener noreferrer">' +
                     '<text y="52" text-anchor="middle">Open on Google Maps ↗</text></a>' : '') +
+        '</g>' +
         '</g>' +
         '</g>' +
       '</g>';
@@ -788,18 +804,18 @@
       '<div class="indiamap__wrap">' +
         '<svg class="indiamap" viewBox="0 0 ' + M.w + ' ' + M.h + '" role="img" ' +
           'aria-label="RIDEV operating cities across India">' +
+          '<defs>' +
+            '<radialGradient id="im-glowgrad"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></radialGradient>' +
+            '<mask id="im-glow" maskUnits="userSpaceOnUse" x="0" y="0" width="' + M.w + '" height="' + M.h + '">' +
+              '<circle class="indiamap__glow" cx="-200" cy="-200" r="58" fill="url(#im-glowgrad)"/></mask>' +
+          '</defs>' +
           '<g class="indiamap__zoomer">' +
-            '<g class="indiamap__fill">' +
-              '<path d="' + M.country + '"/>' +
-              M.extra.map(function (d) { return '<path d="' + d + '"/>'; }).join('') +
-            '</g>' +
-            '<g class="indiamap__states">' +
-              M.states.map(function (d) { return '<path d="' + d + '"/>'; }).join('') +
-            '</g>' +
-            '<path class="indiamap__edge" d="' + M.country + '"/>' +
+            '<path class="indiamap__dots"/>' +                                      // dot-matrix India (built below)
+            '<path class="indiamap__dots indiamap__dots--lit" mask="url(#im-glow)"/>' + // the same dots, lit green around the focused city
             pins +
           '</g>' +
         '</svg>' +
+        '<div class="indiamap__ticker" aria-hidden="true"><b data-map-year></b><span data-map-count></span></div>' +
         '<button class="indiamap__reset" type="button" aria-label="Reset zoom">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
             '<path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/>' +
@@ -808,6 +824,7 @@
       '</div>');
 
     function hot(city, on) {
+      glowAt(on ? city : selected);
       $$('.pin').forEach(function (p) { if (p.dataset.city === city) p.classList.toggle('is-hot', on); });
       $$('.hubx__city').forEach(function (t) { if (t.dataset.city === city) t.classList.toggle('is-hot', on); });
     }
@@ -817,6 +834,80 @@
       el.addEventListener('focus', function () { hot(city, true); });
       el.addEventListener('blur', function () { hot(city, false); });
     }
+
+    /* --- dot-matrix land: a hex grid sampled from the land mask (same outline as the political map) --- */
+    var selected = null;
+    function glowAt(city) {
+      var g = $('.indiamap__glow'), p = city && pinData[city];
+      if (!g) return;
+      g.setAttribute('cx', p ? p.x.toFixed(1) : -200);
+      g.setAttribute('cy', p ? p.y.toFixed(1) : -200);
+    }
+    (function () {
+      var img = new Image();
+      img.onload = function () {
+        var K = 2, cw = Math.round(M.w * K), ch = Math.round(M.h * K);
+        var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+        var ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, cw, ch);
+        var px; try { px = ctx.getImageData(0, 0, cw, ch).data; } catch (e) { return; }
+        var S = 4.4, r = 1.05, d = '', row = 0;
+        for (var y = S / 2; y < M.h; y += S * 0.866, row++) {
+          for (var x = row % 2 ? S : S / 2; x < M.w; x += S) {
+            if (px[(Math.round(y * K) * cw + Math.round(x * K)) * 4] > 110) {
+              d += 'M' + (x - r).toFixed(1) + ' ' + y.toFixed(1) + 'a' + r + ' ' + r + ' 0 1 0 ' + 2 * r + ' 0a' + r + ' ' + r + ' 0 1 0 ' + -2 * r + ' 0';
+            }
+          }
+        }
+        $$('.indiamap__dots').forEach(function (p) { p.setAttribute('d', d); });
+        $('.indiamap__wrap').classList.add('has-dots');
+      };
+      img.src = M.img + 'land.png';
+    })();
+
+    /* --- launch sequence: cities light up in the order RIDEV opened them, once, on first view --- */
+    (function () {
+      var mapWrap = $('.indiamap__wrap'), year = $('[data-map-year]'), count = $('[data-map-count]');
+      var order = D.cities.filter(function (c) { return pinData[c.city]; })
+        .map(function (c, i) { return { c: c, i: i }; })
+        .sort(function (a, b) {
+          return (a.c.status === 'live' ? 0 : 1) - (b.c.status === 'live' ? 0 : 1) ||
+                 (+a.c.since || 9999) - (+b.c.since || 9999) || a.i - b.i;
+        }).map(function (o) { return o.c; });
+      var liveAll = order.filter(function (c) { return c.status === 'live'; });
+      function tally(list) {
+        var live = list.filter(function (c) { return c.status === 'live'; });
+        var hubs = live.reduce(function (s, c) { return s + c.hubs.length; }, 0);
+        var soon = list.length - live.length;
+        return live.length + (live.length === 1 ? ' city · ' : ' cities · ') + hubs + (hubs === 1 ? ' hub' : ' hubs') +
+               (soon ? '<br>' + soon + ' opening soon' : '');  // own line, so it never wraps mid-phrase
+      }
+      function final() {
+        if (year) year.textContent = 'Today';
+        if (count) count.innerHTML = tally(order);
+        selected = selected || (D.cities[0] && D.cities[0].city);
+        glowAt(selected);
+      }
+      var pinsEls = $$('.pin');
+      var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion || !('IntersectionObserver' in window) || !mapWrap) { final(); return; }
+      pinsEls.forEach(function (p) { p.classList.add('is-pending'); });
+      if (year) year.textContent = liveAll[0] ? liveAll[0].since : '';
+      var io = new IntersectionObserver(function (es) {
+        if (!es[0].isIntersecting) return;
+        io.disconnect();
+        order.forEach(function (c, i) {
+          setTimeout(function () {
+            var pin = pinsEls.filter(function (p) { return p.dataset.city === c.city; })[0];
+            if (pin) { pin.classList.remove('is-pending'); pin.classList.add('is-arriving'); }
+            if (year) year.textContent = c.status === 'live' ? c.since : year.textContent;
+            if (count) count.innerHTML = tally(order.slice(0, i + 1));
+            glowAt(c.city);
+            if (i === order.length - 1) setTimeout(final, 900);
+          }, 300 + i * 420);
+        });
+      }, { threshold: 0.4 });
+      io.observe(mapWrap);
+    })();
 
     /* --- viewBox zoom (smooth tween) --- */
     var svg = $('.indiamap');
@@ -883,8 +974,10 @@
     // city picker ↔ map: hovering a city lights its pin; picking one zooms the map to it
     $$('.hubx__city').forEach(function (t) { wire(t, t.dataset.city); });
     document.addEventListener('ridev:city', function (e) {
+      selected = e.detail.city; glowAt(selected);
       if (pinData[e.detail.city]) zoomTo(e.detail.city);
     });
+    document.addEventListener('ridev:pin', function (e) { selected = e.detail.city; glowAt(selected); });
 
     if (resetBtn) resetBtn.addEventListener('click', zoomReset);
     // click on empty map area → reset

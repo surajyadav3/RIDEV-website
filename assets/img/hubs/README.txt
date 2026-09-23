@@ -7,9 +7,13 @@ Expected file names — city-hub, all lowercase, hyphenated:
   delhi-lado-sarai.jpg
   hyderabad-nagole.jpg
   hyderabad-raidurg.jpg
-  chennai-kk-nagar.jpg
+  hyderabad-bowenpally.jpg
+  chennai-perungudi.jpg
+  chennai-nesapakkam.jpg
+  chennai-arumbakkam.jpg
   gurugram-sector-52-wazirabad.jpg
   mumbai-mira-road.jpg
+  bengaluru-koramangala.jpg
 
 Optimal size: 1280 x 800 (16:10, landscape), < 250 KB, sRGB.
 PNG, WebP or JPG all work — the site tries .png, .webp, .jpg, .jpeg in that order.

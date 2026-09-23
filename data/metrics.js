@@ -13,7 +13,7 @@ window.RIDEV_DATA = {
     "fleet": 12000,
     "cities_live": 15,
     "cities_provisioned": 7,
-    "hubs": 8,
+    "hubs": "15+",
     "on_road": 5766,
     "active_subscriptions": 5671,
     "registered_riders": 50000,
@@ -65,12 +65,19 @@ window.RIDEV_DATA = {
         {
           "name": "Nagole",
           "fleet": 1201,
-          "area": "East Hyderabad"
+          "area": "East Hyderabad",
+          "address": "Main Road, 2-4 639/88, Uppal Frontage Road, beside NEXA Showroom, Nagole, Hyderabad, Telangana 500068"
         },
         {
           "name": "Raidurg",
           "fleet": 801,
-          "area": "HITEC City"
+          "area": "HITEC City",
+          "address": "C9CP+869, LIG Chitrapuri Colony, Radhe Nagar, Rai Durg, Hyderabad, Telangana 500104"
+        },
+        {
+          "name": "Bowenpally",
+          "area": "Secunderabad",
+          "address": "FFGG+P6, Bowenpally, Secunderabad, Telangana"
         }
       ],
       "lat": 17.39,
@@ -87,9 +94,19 @@ window.RIDEV_DATA = {
       "lifetime_bookings": 3554,
       "hubs": [
         {
-          "name": "KK Nagar",
-          "fleet": 1258,
-          "area": "West Chennai"
+          "name": "Perungudi",
+          "area": "Thiruvengadam Nagar",
+          "address": "Thiruvengadam Nagar, Perungudi, Chennai, Tamil Nadu 600041"
+        },
+        {
+          "name": "Nesapakkam",
+          "area": "Bharathi Nagar",
+          "address": "No. 30/1, Bharathi Nagar Main Street, Nesapakkam, Chennai, Tamil Nadu 600078"
+        },
+        {
+          "name": "Arumbakkam",
+          "area": "Choolaimedu",
+          "address": "No. 19-A, Periyar Pathai, Choolaimedu, Chennai, Tamil Nadu 600094"
         }
       ],
       "lat": 13.08,
@@ -153,6 +170,25 @@ window.RIDEV_DATA = {
     {
       "city": "Bengaluru",
       "state": "Karnataka",
+      "status": "live",
+      "since": "2026",
+      "fleet": 0,
+      "on_road": 0,
+      "active_subscriptions": 0,
+      "lifetime_bookings": 0,
+      "hubs": [
+        {
+          "name": "Koramangala",
+          "area": "South-east Bengaluru",
+          "address": "WJQG+2H4, Koramangala, Bengaluru, Karnataka"
+        }
+      ],
+      "lat": 12.97,
+      "lon": 77.59
+    },
+    {
+      "city": "Jaipur",
+      "state": "Rajasthan",
       "status": "provisioned",
       "since": "2026",
       "fleet": 0,
@@ -160,8 +196,8 @@ window.RIDEV_DATA = {
       "active_subscriptions": 0,
       "lifetime_bookings": 0,
       "hubs": [],
-      "lat": 12.97,
-      "lon": 77.59
+      "lat": 26.91,
+      "lon": 75.79
     }
   ],
   "fleet_status": [
@@ -361,175 +397,46 @@ window.RIDEV_DATA = {
   ],
   "plans": {
     "Delhi": [
-      {
-        "brand": "BGauss",
-        "model": "Oowah Zomato",
-        "batteries": 2,
-        "range_km": 70,
-        "week": 1800,
-        "month": 7200,
-        "rate_from": "Chennai"
-      },
-      {
-        "brand": "BGauss",
-        "model": "Oowah Unlimited",
-        "batteries": 2,
-        "range_km": 70,
-        "week": 2000,
-        "month": 8000,
-        "rate_from": "Gurugram"
-      },
-      {
-        "brand": "Ampere",
-        "model": "Magnus",
-        "batteries": 2,
-        "range_km": 60,
-        "week": 2000,
-        "month": 8000,
-        "rate_from": "Gurugram"
-      }
+      {"brand": "BGauss", "model": "Oowah Goodwheels", "batteries": 2, "range_km": 70, "week": 2000, "month": 8000},
+      {"brand": "BGauss", "model": "RUV Zomato", "batteries": 2, "range_km": 100, "week": 1400, "month": 5600},
+      {"brand": "Ampere", "model": "Magnus", "batteries": 2, "range_km": 60, "week": 2000, "month": 8000},
+      {"brand": "BGauss", "model": "Oowah Zomato", "batteries": 2, "range_km": 70, "week": 1750, "month": 7000},
+      {"brand": "BGauss", "model": "Oowah Unlimited", "batteries": 2, "range_km": 70, "week": 2000, "month": 8000},
+      {"brand": "Motovolt", "model": "M7", "batteries": 2, "range_km": 100, "week": 1540, "month": 6160}
     ],
     "Hyderabad": [
-      {
-        "brand": "TVS",
-        "model": "iQube 75",
-        "batteries": 2,
-        "range_km": 75,
-        "week": 1400,
-        "month": 6000
-      },
-      {
-        "brand": "TVS",
-        "model": "iQube",
-        "batteries": 3,
-        "range_km": 105,
-        "week": 1800,
-        "month": 7200
-      },
-      {
-        "brand": "Ather",
-        "model": "Rizta",
-        "batteries": 4,
-        "range_km": 125,
-        "week": 2200,
-        "month": 8800
-      },
-      {
-        "brand": "BGauss",
-        "model": "Oowah Unlimited",
-        "batteries": 2,
-        "range_km": 50,
-        "week": 2200,
-        "month": 8800
-      },
-      {
-        "brand": "e-Sprinto",
-        "model": "Roamy SL",
-        "batteries": 2,
-        "range_km": 70,
-        "week": 2200,
-        "month": 8800
-      },
-      {
-        "brand": "RIDEV",
-        "model": "LS",
-        "batteries": 2,
-        "range_km": 70,
-        "week": 2200,
-        "month": 8800
-      }
+      {"brand": "RIDEV", "model": "LS", "batteries": 2, "range_km": 70, "week": 2200, "month": 8800},
+      {"brand": "e-Sprinto", "model": "Roamy SL", "batteries": 2, "range_km": 70, "week": 2200, "month": 8800},
+      {"brand": "TVS", "model": "iQube 75", "batteries": 2, "range_km": 75, "week": 1400, "month": 5600},
+      {"brand": "BGauss", "model": "Oowah Unlimited", "batteries": 2, "range_km": 50, "week": 2300, "month": 9200},
+      {"brand": "Ather", "model": "Rizta", "batteries": 4, "range_km": 125, "week": 2200, "month": 8800},
+      {"brand": "TVS", "model": "iQube", "batteries": 3, "range_km": 105, "week": 1800, "month": 7200}
     ],
     "Chennai": [
-      {
-        "brand": "BGauss",
-        "model": "Oowah Zomato",
-        "batteries": 2,
-        "range_km": 70,
-        "week": 1800,
-        "month": 7200
-      },
-      {
-        "brand": "Ampere",
-        "model": "Magnus",
-        "batteries": 2,
-        "range_km": 60,
-        "week": 2200,
-        "month": 8800
-      },
-      {
-        "brand": "BGauss",
-        "model": "Oowah Unlimited",
-        "batteries": 2,
-        "range_km": 70,
-        "week": 2200,
-        "month": 8800
-      },
-      {
-        "brand": "Ather",
-        "model": "Rizta",
-        "batteries": 4,
-        "range_km": 125,
-        "week": 2200,
-        "month": 8800
-      }
+      {"brand": "Ampere", "model": "Magnus", "batteries": 2, "range_km": 60, "week": 2200, "month": 8800},
+      {"brand": "BGauss", "model": "Oowah Unlimited", "batteries": 2, "range_km": 70, "week": 2200, "month": 8800},
+      {"brand": "Ather", "model": "Rizta", "batteries": 4, "range_km": 125, "week": 2200, "month": 8800},
+      {"brand": "BGauss", "model": "Oowah Zomato", "batteries": 2, "range_km": 70, "week": 1800, "month": 7200}
     ],
     "Gurugram": [
-      {
-        "brand": "BGauss",
-        "model": "RUV Zomato",
-        "batteries": 2,
-        "range_km": 100,
-        "week": 1400,
-        "month": 5600
-      },
-      {
-        "brand": "BGauss",
-        "model": "Oowah Unlimited",
-        "batteries": 2,
-        "range_km": 70,
-        "week": 2000,
-        "month": 8000
-      },
-      {
-        "brand": "Ampere",
-        "model": "Magnus",
-        "batteries": 2,
-        "range_km": 60,
-        "week": 2000,
-        "month": 8000
-      }
+      {"brand": "BGauss", "model": "Oowah Goodwheels", "batteries": 2, "range_km": 70, "week": 2000, "month": 8000},
+      {"brand": "BGauss", "model": "Oowah Unlimited", "batteries": 2, "range_km": 70, "week": 2000, "month": 8000},
+      {"brand": "BGauss", "model": "RUV Zomato", "batteries": 2, "range_km": 100, "week": 1400, "month": 5600},
+      {"brand": "Ampere", "model": "Magnus", "batteries": 2, "range_km": 60, "week": 2000, "month": 8000}
     ],
     "Mumbai": [
-      {
-        "brand": "TVS",
-        "model": "iQube 75",
-        "batteries": 2,
-        "range_km": 75,
-        "week": 1400,
-        "month": 6000,
-        "rate_from": "Hyderabad"
-      },
-      {
-        "brand": "BGauss",
-        "model": "Oowah Zomato",
-        "batteries": 2,
-        "range_km": 70,
-        "week": 1800,
-        "month": 7200,
-        "rate_from": "Chennai"
-      },
-      {
-        "brand": "Ampere",
-        "model": "Magnus",
-        "batteries": 2,
-        "range_km": 60,
-        "week": 2200,
-        "month": 8800,
-        "rate_from": "Chennai"
-      }
+      {"brand": "BGauss", "model": "Oowah Unlimited", "batteries": 2, "range_km": 70, "week": 2200, "month": 8800},
+      {"brand": "TVS", "model": "iQube 75", "batteries": 2, "range_km": 75, "week": 1600, "month": 6400},
+      {"brand": "TVS", "model": "iQube 105", "batteries": 3, "range_km": 105, "week": 1800, "month": 7200},
+      {"brand": "Ampere", "model": "Magnus", "batteries": 2, "range_km": 60, "week": 2200, "month": 8800},
+      {"brand": "BGauss", "model": "Oowah Max", "batteries": 3, "range_km": 115, "week": 1600, "month": 6400},
+      {"brand": "BGauss", "model": "C12iMax SM", "batteries": 2, "range_km": 70, "week": 1500, "month": 6000}
+    ],
+    "Bengaluru": [
+      {"brand": "BGauss", "model": "Oowah Unlimited", "batteries": 2, "range_km": 50, "week": 2200, "month": 8800}
     ]
   },
-  "plans_note": "Live rate card from the RIDEV operations console, 25 Aug 2026. Delhi and Mumbai are not yet configured in EV Master — those cards carry the same model's published rate from the nearest configured city and are marked indicative. All rates include maintenance, battery swaps, replacement vehicle and insurance cover.",
+  "plans_note": "Live rate card from the RIDEV operations console, 23 Sep 2026. All rates include maintenance, battery swaps, replacement vehicle and insurance cover.",
   "growth": [
     {
       "date": "2024-04",
@@ -686,8 +593,8 @@ window.RIDEV_DATA = {
     "stats": [
       { "n": 4260,   "u": "kg", "l": "CO₂ avoided",    "s": "In the Delhivery Delhi + Bengaluru pilot alone (ET Auto, Feb 2026)." },
       { "n": 10000,  "u": "+",  "l": "Bikes on road",  "s": "Each one replaces a 110cc scooter running 80–120 km every day." },
-      { "n": 15000,  "u": "+",  "l": "Battery swaps",  "s": "Logged in RIDEV's own console since launch — no rider paid a rupee for energy." },
-      { "n": 50,     "u": "+",  "l": "Daily Riders enabled", "s": "Registered on the platform across five cities. Every one is a delivery earner." }
+      { "n": 15000,  "u": "+",  "l": "Battery swaps / day",  "s": "Swapped across RIDEV hubs every day — no rider pays a rupee for energy." },
+      { "n": 500,    "u": "+",  "l": "Daily riders", "s": "Delivery riders on RIDEV bikes every day. Every one is a delivery earner." }
     ]
   },
   "testimonials": [
@@ -951,16 +858,21 @@ window.RIDEV_DATA = {
     }
   ],
   "vehicle_images": {
-    "_note": "Drop real product shots into assets/img/vehicles/ and name them here. Any model without an entry falls back to the line-art mark automatically.",
+    "_note": "Official manufacturer product shots (transparent PNG) in assets/img/vehicles/. Models without an entry use _default, then fall back to the line-art scooter.",
     "_default": "assets/img/vehicles/ridev-scooter.png",
-    "Oowah Zomato": "assets/img/vehicles/oowah-zomato.png",
-    "Oowah Unlimited": "assets/img/vehicles/oowah-unlimited.png",
-    "Rizta": "assets/img/vehicles/ather-rizta.png",
+    "Oowah Goodwheels": "assets/img/vehicles/bgauss-oowah.png",
+    "Oowah Unlimited": "assets/img/vehicles/bgauss-oowah.png",
+    "Oowah Zomato": "assets/img/vehicles/bgauss-oowah.png",
+    "Oowah Max": "assets/img/vehicles/bgauss-oowah.png",
+    "RUV Zomato": "assets/img/vehicles/bgauss-ruv.png",
+    "C12iMax SM": "assets/img/vehicles/bgauss-c12.png",
     "Magnus": "assets/img/vehicles/ampere-magnus.png",
+    "M7": "assets/img/vehicles/motovolt-m7.png",
+    "Rizta": "assets/img/vehicles/ather-rizta.png",
     "iQube": "assets/img/vehicles/tvs-iqube.png",
-    "iQube 75": "assets/img/vehicles/tvs-iqube-75.png",
-    "Roamy SL": "assets/img/vehicles/esprinto-roamy-sl.png",
-    "RUV Zomato": "assets/img/vehicles/bgauss-ruv.png"
+    "iQube 75": "assets/img/vehicles/tvs-iqube.png",
+    "iQube 105": "assets/img/vehicles/tvs-iqube.png",
+    "Roamy SL": "assets/img/vehicles/esprinto-roamy-sl.png"
   },
   "onboarding": [
     {

@@ -1,18 +1,18 @@
-Drop real RIDEV product photos here.
+Vehicle photos for the rate card (Bikes & pricing section).
 
-Expected filenames (see data/metrics.js -> vehicle_images):
-  ridev-scooter.png        <- the main hero / fallback shot
-  oowah-zomato.png
-  oowah-unlimited.png
-  ather-rizta.png
-  ampere-magnus.png
-  tvs-iqube.png
-  tvs-iqube-75.png
-  esprinto-roamy-sl.png
-  bgauss-ruv.png
+Current files (official manufacturer product shots, background removed, transparent PNG):
 
-Format: PNG or WebP with a transparent or plain light background,
-roughly 1200px on the long edge. Three-quarter front view works best.
+  bgauss-oowah.png        Oowah Goodwheels / Unlimited / Zomato / Max
+  bgauss-ruv.png          RUV Zomato            (BGauss RUV 350)
+  bgauss-c12.png          C12iMax SM            (BGauss Max C12)
+  ampere-magnus.png       Magnus
+  motovolt-m7.png         M7
+  ather-rizta.png         Rizta
+  tvs-iqube.png           iQube / iQube 75 / iQube 105
+  esprinto-roamy-sl.png   Roamy SL
 
-Any model without a file here falls back to the line-art mark
-automatically — nothing breaks, so add them as they become available.
+Which model uses which file is set in data/metrics.js -> vehicle_images.
+A model with no entry (e.g. RIDEV LS) shows the line-art scooter.
+
+To replace a photo: keep the same file name (PNG, WebP or JPG all work),
+transparent background, trimmed tight, ~480 px on the long side.
