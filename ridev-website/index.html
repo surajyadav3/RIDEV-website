@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/ridev.css?v=20260921-hero-equal2">
+<link rel="stylesheet" href="assets/css/ridev.css?v=20260923-mobile-5">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230A0D0A'/><path d='M18.5 4.5 8.5 18.5h6l-2 9 10-14h-6.5z' fill='%2395DB67'/></svg>">
 
 <script type="application/ld+json">
@@ -99,29 +99,33 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
         </article>
 
         <article class="hero__slide hero__slide--cities">
-          <div class="hero__panel-copy">
-            <div class="brandslide__eyebrow">Bengaluru hub launch</div>
-            <h2 class="h-xl">A new hub is live.<br><span class="hl">More are opening soon.</span></h2>
+          <div class="hubs__copy">
+            <p class="hubs__eyebrow"><i aria-hidden="true"></i>Bengaluru hub launch</p>
+            <h2 class="hubs__title">A new hub is live.<br><span>More are opening soon.</span></h2>
             <p class="hero__sub">Choose a city to watch its opening story and see what is coming next for RIDEV riders.</p>
-          </div>
-          <div class="hub-preview" data-hub-preview>
-            <div class="hub-preview__card">
-              <div class="hub-preview__stage" data-hub-stage>
-                <iframe
-                  src="https://www.instagram.com/reel/DdEemdujAxd/embed?autoplay=1"
-                  title="RIDEV Bengaluru hub opening"
-                  loading="eager"
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  allowfullscreen></iframe>
-                <div class="hub-preview__media" aria-hidden="true"></div>
-                <div class="hub-preview__placeholder" aria-hidden="true"><span class="hub-preview__pulse"></span><b>Opening soon</b></div>
-              </div>
+            <div class="hubs__route" role="tablist" aria-label="Hub openings" data-hub-route>
+              <button class="hubstop is-active" type="button" role="tab" aria-selected="true" data-hub-state="bengaluru" data-hub-video="https://www.instagram.com/reel/DdEemdujAxd/embed/"><i></i><span>Bengaluru</span><small>Now open</small></button>
+              <button class="hubstop" type="button" role="tab" aria-selected="false" data-hub-state="pune"><i></i><span>Pune</span><small>Opening soon</small></button>
+              <button class="hubstop" type="button" role="tab" aria-selected="false" data-hub-state="hyderabad"><i></i><span>Hyderabad</span><small>Next hub</small></button>
+              <button class="hubstop" type="button" role="tab" aria-selected="false" data-hub-state="chennai"><i></i><span>Chennai</span><small>Next hub</small></button>
             </div>
-            <div class="hub-preview__states" role="tablist" aria-label="Hub openings">
-              <button class="hub-state is-active" type="button" role="tab" aria-selected="true" data-hub-state="bengaluru" data-hub-video="https://www.instagram.com/reel/DdEemdujAxd/embed?autoplay=1"><i></i><span>Bengaluru</span><small>Now open</small></button>
-              <button class="hub-state" type="button" role="tab" aria-selected="false" data-hub-state="pune"><i></i><span>Pune</span><small>Opening soon</small></button>
-              <button class="hub-state" type="button" role="tab" aria-selected="false" data-hub-state="hyderabad"><i></i><span>Hyderabad</span><small>Next hub</small></button>
-              <button class="hub-state" type="button" role="tab" aria-selected="false" data-hub-state="chennai"><i></i><span>Chennai</span><small>Next hub</small></button>
+          </div>
+          <div class="hubs__visual" data-hub-preview>
+            <svg class="hubs__map" data-hub-map role="img" aria-label="Route map from the Bengaluru hub to upcoming RIDEV cities"></svg>
+            <div class="hubs__reel" data-hub-stage>
+              <iframe
+                src="https://www.instagram.com/reel/DdEemdujAxd/embed/"
+                title="RIDEV Bengaluru hub opening"
+                loading="lazy"
+                scrolling="no"
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+              <div class="hubs__soon">
+                <span class="hubs__pulse" aria-hidden="true"></span>
+                <small data-hub-status>Opening soon</small>
+                <b data-hub-name>Pune</b>
+                <a href="https://www.instagram.com/ridevofficial/" target="_blank" rel="noopener noreferrer">Follow @ridevofficial for the launch <span aria-hidden="true">&rarr;</span></a>
+              </div>
             </div>
           </div>
         </article>
@@ -164,15 +168,27 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
       </div>
     </section>
 
-    <div class="hstrip" data-r="heroStrip"></div>
-    <div class="oemline">
-      <span class="oemline__lbl">Vehicles from</span>
-      <span class="oemline__row" data-r="oemChips"></span>
+    <div class="hstrip" data-r="heroStrip">
+      <div class="hstat"><i class="hstat__rule"></i><b>12,000+</b><span>Electric vehicles</span></div>
+      <div class="hstat"><i class="hstat__rule"></i><b>15+</b><span>Cities live</span></div>
+      <div class="hstat"><i class="hstat__rule"></i><b>8</b><span>Operating hubs</span></div>
+      <div class="hstat"><i class="hstat__rule"></i><b>50,000+</b><span>Riders registered</span></div>
     </div>
-    <div class="oemline oemline--delivery">
-      <span class="oemline__lbl">Powering deliveries for</span>
-      <span class="oemline__row" data-r="deliveryChips"></span>
-    </div>
+    <section class="logowall" aria-label="Vehicle manufacturers">
+      <div class="logowall__hd">
+        <h2 class="logowall__title">Vehicles from</h2>
+        <span class="logowall__meta" data-r="oemCount"></span>
+      </div>
+      <div class="logowall__row" data-r="oemLogos"></div>
+    </section>
+
+    <section class="logowall" aria-label="Delivery partners">
+      <div class="logowall__hd">
+        <h2 class="logowall__title">Powering deliveries for</h2>
+        <span class="logowall__meta" data-r="deliveryCount"></span>
+      </div>
+      <div class="logowall__row logowall__row--rev" data-r="deliveryLogos"></div>
+    </section>
 
   </div>
 </section>
@@ -297,30 +313,7 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
       <div class="citymap__map" data-r="cityMap"></div>
       <div class="citylist" data-r="cityList"></div>
     </div>
-    <p class="muted mt-m">Hover a pin to see that city's hubs. Pune and Bengaluru are configured on the platform and open as vehicles land.</p>
-  </div>
-</section>
-
-<!-- ══════════ 6b · the fleet ══════════ -->
-<section class="sec sec--paper2" id="fleet">
-  <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">The fleet</div>
-      <h2 class="h-lg"><span data-fill="headline.fleet">6,702</span> electric vehicles, from six manufacturers.</h2>
-      <p class="lede mt-s">
-        RIDEV is manufacturer-agnostic by design. Riders get the vehicle that suits their route and their
-        earnings — RIDEV keeps the leverage to buy the right vehicle at the right price.
-      </p>
-    </div>
-
-    <h3 class="h-sm" style="margin-bottom:16px;color:var(--text-2);letter-spacing:.02em">Who builds them</h3>
-    <div class="brandrow" data-r="brandChips"></div>
-
-    <h3 class="h-sm mt-l" style="margin-bottom:16px;color:var(--text-2);letter-spacing:.02em">Every model on the road</h3>
-    <div class="tbl-wrap" data-r="modelTable"></div>
-    <p class="muted mt-m">
-      Fleet counts read live from RIDEV's operations console, <span data-fill="_meta.snapshot_label"></span>. Availability varies by hub.
-    </p>
+    <p class="muted mt-m">Pick a city or tap a pin — the map follows. Pune and Bengaluru are configured on the platform and open as vehicles land.</p>
   </div>
 </section>
 
@@ -354,7 +347,7 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
         <div class="eyebrow">The rider app</div>
         <h2 class="h-lg">Your subscription, in your pocket.</h2>
         <p class="lede mt-s" data-fill="app.blurb"></p>
-        <ul class="plan__inc mt-m inline-ticks" data-r="appFeatures"></ul>
+        <ul class="mt-m inline-ticks" data-r="appFeatures"></ul>
         <div class="btn-row mt-m" data-r="appCta"></div>
       </div>
       <div class="appband__visual" data-app-transition>
@@ -531,8 +524,19 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
   <span class="stickycta__act">Get a bike <span class="arw" aria-hidden="true"></span></span>
 </a>
 
-<script src="data/metrics.js"></script>
-<script src="assets/js/india-map.js"></script>
-<script src="assets/js/ridev.js?v=20260921-hero-bg"></script>
+<script src="data/metrics.js?v=20260923-growth"></script>
+<script src="assets/js/india-map.js?v=20260923-kpi-fix-2"></script>
+<script src="assets/js/ridev.js?v=20260923-mobile"></script>
+<script>
+(function(){
+  try {
+    var nodes = document.querySelectorAll('.hstrip .hstat b');
+    var values = ['12,000+', '15+', '8', '50,000+'];
+    values.forEach(function (value, index) {
+      if (nodes[index]) nodes[index].textContent = value;
+    });
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

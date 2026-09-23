@@ -566,32 +566,33 @@ window.RIDEV_DATA = {
     {
       "date": "2026-01",
       "label": "Jan 2026",
-      "fleet": 2600,
+      "fleet": 2700,
       "event": "Shark Tank India S5 — backed by Kunal Bahl",
       "estimated": true
     },
     {
       "date": "2026-02",
       "label": "Feb 2026",
-      "fleet": 3400,
+      "fleet": 3300,
       "event": "Delhivery partnership — 150 EVs for last-mile",
       "estimated": true
     },
     {
       "date": "2026-05",
       "label": "May 2026",
-      "fleet": 5100,
+      "fleet": 6300,
       "event": "Chennai and Mumbai live",
       "estimated": true
     },
     {
       "date": "2026-08",
       "label": "Aug 2026",
-      "fleet": 6702,
-      "event": "6,702 EVs, 5 cities, 8 hubs"
+      "fleet": 12000,
+      "display": "12,000+",
+      "event": "12,000+ EVs, 5 cities, 8 hubs"
     }
   ],
-  "growth_note": "Points marked as interpolated are directional ramp estimates between two verified data points. Verified points: Jul 2024 (10 vehicles) and Oct 2025 (1,400+) as presented by the founders on Shark Tank India Season 5; Aug 2026 (6,702) from the live RIDEV operations console on 25 Aug 2026.",
+  "growth_note": "Points marked as interpolated are directional ramp estimates between two verified data points. Verified points: Jul 2024 (10 vehicles) and Oct 2025 (1,400+) as presented by the founders on Shark Tank India Season 5; Aug 2026 (12,000+) is the company-reported fleet figure.",
   "milestones": [
     {
       "date": "Apr 2024",
@@ -625,9 +626,9 @@ window.RIDEV_DATA = {
     },
     {
       "date": "Aug 2026",
-      "title": "6,702 EVs across 5 cities",
+      "title": "12,000+ EVs across 5 cities",
       "body": "Fleet operating from 8 hubs in Delhi, Gurugram, Hyderabad, Chennai and Mumbai. Pune and Bengaluru provisioned on the platform.",
-      "source": "RIDEV operations console"
+      "source": "RIDEV"
     }
   ],
   "backing": {
@@ -684,9 +685,9 @@ window.RIDEV_DATA = {
     "intro": "Every bike that leaves a hub takes a petrol scooter off a delivery route. Here is what that has cost the atmosphere so far.",
     "stats": [
       { "n": 4260,   "u": "kg", "l": "CO₂ avoided",    "s": "In the Delhivery Delhi + Bengaluru pilot alone (ET Auto, Feb 2026)." },
-      { "n": 5766,   "u": "",   "l": "Bikes on road",  "s": "Each one replaces a 110cc scooter running 80–120 km every day." },
-      { "n": 230,    "u": "",   "l": "Battery swaps",  "s": "Logged in RIDEV's own console since launch — no rider paid a rupee for energy." },
-      { "n": 45907,  "u": "",   "l": "Riders enabled", "s": "Registered on the platform across five cities. Every one is a delivery earner." }
+      { "n": 10000,  "u": "+",  "l": "Bikes on road",  "s": "Each one replaces a 110cc scooter running 80–120 km every day." },
+      { "n": 15000,  "u": "+",  "l": "Battery swaps",  "s": "Logged in RIDEV's own console since launch — no rider paid a rupee for energy." },
+      { "n": 50,     "u": "+",  "l": "Daily Riders enabled", "s": "Registered on the platform across five cities. Every one is a delivery earner." }
     ]
   },
   "testimonials": [
@@ -924,7 +925,7 @@ window.RIDEV_DATA = {
   "model_cards": [
     {
       "t": "Demand is structural",
-      "b": "Quick-commerce and food delivery add riders faster than riders can finance vehicles. RIDEV has 45,907 registered riders against 6,702 bikes — the constraint is supply, not interest."
+      "b": "Quick-commerce and food delivery add riders faster than riders can finance vehicles. RIDEV has 50,000+ registered riders against 12,000+ bikes — the constraint is supply, not interest."
     },
     {
       "t": "Assets, not apps",
@@ -937,11 +938,11 @@ window.RIDEV_DATA = {
   ],
   "growth_stats": [
     {
-      "n": "670×",
+      "n": "1,200×",
       "b": "Fleet growth from the July 2024 pilot of 10 vehicles."
     },
     {
-      "n": "4.8×",
+      "n": "8.6×",
       "b": "Fleet growth in the ten months since October 2025."
     },
     {

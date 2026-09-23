@@ -5,38 +5,29 @@ Drop the folder on any host (Netlify, S3, nginx, the existing ridev.in server) a
 
 ```
 ridev-website/
-├── ridev-test.html     # ⭐ THE TEST FILE — whole site in one file, open it directly
-├── versions/version-1/ # checkpoint saved before the compact pass (see VERSION.md)
 ├── index.html          # rider + fleet-customer site
+├── business.html       # business partnerships page
 ├── investors.html      # INVESTOR tab — every granular metric + growth trajectory
-├── build_single.py     # regenerates ridev-test.html from the two pages
 ├── data/
-│   ├── metrics.json    # human-readable source of truth
-│   └── metrics.js      # SAME data as `window.RIDEV_DATA` — this is what the pages load
+│   └── metrics.js      # SOURCE OF TRUTH — every number and block of copy, as `window.RIDEV_DATA`
 ├── assets/
-│   ├── css/ridev.css      # whole design system (brand palette + embedded logo)
-│   ├── js/ridev.js        # renders every data-driven section
-│   ├── js/india-map.js    # real India boundary geometry (generated, see below)
-│   └── img/            # official logo + generated light/dark variants
-└── README.md
+│   ├── css/ridev.css   # whole design system (brand palette, dark mode, embedded logo)
+│   ├── js/ridev.js     # renders every data-driven section
+│   ├── js/india-map.js # real India boundary geometry (generated)
+│   └── img/            # logo sources, OEM/delivery/press logos, photo drop-folders (README in each)
+├── README.md           # full technical documentation
+└── HANDOFF.md          # project handoff notes
 ```
 
 ---
 
-## 1. Just open this one file
-
-**`ridev-test.html`** — double-click it. 150 KB, one file, no server needed. It contains both
-pages; a floating switch at the bottom moves between the rider site and the investor tab.
-Everything is inlined: CSS, JavaScript, all data, and the logo as a data URI. The only external
-request is Google Fonts, and it falls back to system fonts cleanly without a network.
-
-Send it to anyone — investors, the dev team, WhatsApp — and it renders identically.
-
-To regenerate it after editing the real pages:
+## 1. Run it locally
 
 ```bash
-cd ridev-website && python3 build_single.py
+cd ridev-website && python3 -m http.server 8787
 ```
+→ http://localhost:8787/ — the pages need to be served (not opened as files) so the data and map scripts load.
+Hard-reload (⌘⇧R) after edits; asset URLs carry a `?v=` version to bust caches, bump it when you change CSS/JS.
 
 ---
 
@@ -139,7 +130,7 @@ I could not pull them from your admin: the images live in a private S3 bucket an
 served through presigned URLs (a plain request returns 403). Those URLs carry credentials, so
 they are not something to copy around.
 
-The filename map lives in `data/metrics.json` → `vehicle_images`.
+The filename map lives in `data/metrics.js` → `vehicle_images`.
 
 ---
 
@@ -152,7 +143,7 @@ Hyderabad for Mumbai — and shows an amber **Indicative** badge, with the rule 
 note under the rate card.
 
 **The clean fix is to add Delhi and Mumbai rows to EV Master.** The moment you do, replace those
-entries in `data/metrics.json` → `plans` and delete their `rate_from` key; the badge disappears
+entries in `data/metrics.js` → `plans` and delete their `rate_from` key; the badge disappears
 on its own.
 
 The highlighted card in each city is **not** an unverifiable "most rented" claim — it is computed
@@ -168,7 +159,7 @@ Ladakh — plus a public state-boundary set, simplified with Douglas-Peucker dow
 points (14 KB total).
 
 The pins are projected with the **same equirectangular projection** as the outline
-(`proj` in that file), from real lat/long stored per city in `data/metrics.json`, so every
+(`proj` in that file), from real lat/long stored per city in `data/metrics.js`, so every
 hub lands where it actually is. Two cities carry a small `dx`/`dy` nudge purely so
 overlapping pins (Delhi/Gurugram, Mumbai/Pune) stay readable.
 
@@ -216,17 +207,14 @@ current build** — the note under the section says so.
 Change a value there and it updates the hero panel, the vehicle cards, the rate card, the city
 cards, the hub tables, the charts, the growth line, the press wall and the footer at once.
 
-`data/metrics.json` is the readable/editable copy. After editing it, regenerate the JS:
-
-```bash
-cd ridev-website && python3 -c "print('window.RIDEV_DATA = ' + open('data/metrics.json').read().rstrip() + ';')" > data/metrics.js
-```
+Edit `data/metrics.js` directly — it is plain JSON wrapped in `window.RIDEV_DATA = …;`, so keep
+quotes and commas valid. There is no separate JSON copy to keep in sync.
 
 Update `_meta.snapshot_label` every time you refresh the numbers — the date is printed on both
-pages so nobody has to guess how current the data is. Then re-run `build_single.py`.
+pages so nobody has to guess how current the data is.
 
 Render targets are addressed by `data-r="name"`, never by `id`, which is why the same section
-can appear on both pages and in the combined test file without collisions.
+can appear on more than one page without collisions.
 
 ---
 
@@ -290,14 +278,14 @@ RIDEV can't out-scale Zypp today, so the page competes on specificity instead.
 
 1. **The Play Store listing.** `play.google.com/store/apps/details?id=com.ride.ev` returns
    **"Not Found"** when fetched — worth checking the listing is published and public, or the
-   app section's button will dead-end. The URL is in `metrics.json` → `app.play_url`.
+   app section's button will dead-end. The URL is in `metrics.js` → `app.play_url`.
 2. **Real photography.** No stock photos anywhere, deliberately. Best slots: the hero right
    column, "Under the bonnet", and the partner cards. Real hub, rider and swap photos.
 3. **Vehicle images.** Your admin already holds product PNGs (`oowah_unlimited.png`,
    `bgauss_ruv_*.png`, `ampere_magnus_*.png`). Drop them in `assets/img/` and add an `image`
-   key per model in `metrics.json` to replace the line-art scooter on the vehicle cards.
+   key per model in `metrics.js` to replace the line-art scooter on the vehicle cards.
 4. **A phone number.** There is none on the site — I did not invent one. Add hub phone numbers
-   as `cities[].hubs[].phone` in `metrics.json` and I'll wire click-to-call.
+   as `cities[].hubs[].phone` in `metrics.js` and I'll wire click-to-call.
 5. **Confirm the email address.** Every contact link points at `info@ridev.in`. Verify or
    search-replace.
 6. **The official Google Play badge**, if you want the exact Google-supplied artwork instead of
@@ -315,7 +303,7 @@ RIDEV can't out-scale Zypp today, so the page competes on specificity instead.
 - **Security deposit amount** is referenced but not quantified.
 - **Delhi and Mumbai rate cards** are not configured in EV Master, so the pricing tab shows only
   Hyderabad, Chennai and Gurugram. Add them in the admin, or add them to `plans` in
-  `metrics.json`.
+  `metrics.js`.
 - **Zomato** is named as an enterprise relationship because Zomato-configured vehicles are a
   large share of the fleet. Confirm it's direct before publishing the name.
 - **The Hindi tagline** — confirm the exact wording you want to standardise on.

@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RIDEV — Investors</title>
-<meta name="description" content="RIDEV's investor page: from 10 electric vehicles in July 2024 to 6,702 across five Indian cities. Growth trajectory, market position, milestones, backing and team.">
+<meta name="description" content="RIDEV's investor page: from 10 electric vehicles in July 2024 to 12,000 across five Indian cities. Growth trajectory, market position, milestones, backing and team.">
 <meta property="og:title" content="RIDEV — Investors">
-<meta property="og:description" content="From 10 EVs to 6,702 in twenty-five months. The company behind India's all-inclusive EV subscription for gig riders.">
+<meta property="og:description" content="From 10 EVs to 12,000 in twenty-five months. The company behind India's all-inclusive EV subscription for gig riders.">
 <meta name="theme-color" content="#FFFFFF">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/ridev.css">
+<link rel="stylesheet" href="assets/css/ridev.css?v=20260923-mobile-5">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230A0D0A'/><path d='M18.5 4.5 8.5 18.5h6l-2 9 10-14h-6.5z' fill='%2395DB67'/></svg>">
 <script>
 /* set the theme before first paint so there is no flash */
@@ -55,7 +55,7 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
   <div class="wrap">
     <div style="max-width:880px">
       <div class="eyebrow">Investors · <span data-fill="_meta.snapshot_label"></span></div>
-      <h1 class="h-xl">From <span class="hl">10 vehicles</span> to <span class="hl">6,702</span> in twenty-five months.</h1>
+      <h1 class="h-xl">From <span class="hl">10 vehicles</span> to <span class="hl">12,000</span> in twenty-five months.</h1>
       <p class="hero__sub" style="max-width:62ch">
         RIDEV owns an electric two-wheeler fleet and rents it, week by week, to India's delivery
         riders — with energy, maintenance, replacement vehicles and insurance bundled into one price.
@@ -65,7 +65,14 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
         <a class="btn btn--ghost" href="#growth">See the trajectory</a>
       </div>
     </div>
-    <div class="hstrip" data-r="invStrip"></div>
+    <div class="hstrip" data-r="invStrip">
+      <div class="hstat"><i class="hstat__rule"></i><b>12,000+</b><span>Vehicles owned</span></div>
+      <div class="hstat"><i class="hstat__rule"></i><b>88%</b><span>Fleet utilisation</span></div>
+      <div class="hstat"><i class="hstat__rule"></i><b>10,000+</b><span>Active subscriptions</span></div>
+      <div class="hstat"><i class="hstat__rule"></i><b>15</b><span>Cities live</span></div>
+      <div class="hstat"><i class="hstat__rule"></i><b>8</b><span>Operating hubs</span></div>
+      <div class="hstat"><i class="hstat__rule"></i><b>6</b><span>OEM partners</span></div>
+    </div>
   </div>
 </section>
 
@@ -91,10 +98,10 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
     <div class="sec-head">
       <div class="eyebrow">Growth trajectory</div>
       <h2 class="h-lg">Fleet on road, July 2024 to August 2026.</h2>
-      <p class="lede mt-s">Ten vehicles at launch. 1,400 by the Shark Tank pitch. 6,702 today, across five cities.</p>
+      <p class="lede mt-s">Ten vehicles at launch. 1,400 by the Shark Tank pitch. 12,000+ today, across five cities.</p>
     </div>
     <div data-r="growthChart"></div>
-    <div class="grid g3 mt-m" data-r="growthStats"></div>
+    <div class="gstats mt-m" data-r="growthStats"></div>
     <p class="muted mt-m" data-fill="growth_note"></p>
   </div>
 </section>
@@ -271,8 +278,19 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
   </div>
 </footer>
 
-<script src="data/metrics.js"></script>
-<script src="assets/js/india-map.js"></script>
-<script src="assets/js/ridev.js"></script>
+<script src="data/metrics.js?v=20260923-growth"></script>
+<script src="assets/js/india-map.js?v=20260923-kpi-fix-2"></script>
+<script src="assets/js/ridev.js?v=20260923-mobile"></script>
+<script>
+(function(){
+  try {
+    var nodes = document.querySelectorAll('.hstrip .hstat b');
+    var values = ['12,000+', '88%', '10,000+', '15', '8', '6'];
+    values.forEach(function (value, index) {
+      if (nodes[index]) nodes[index].textContent = value;
+    });
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

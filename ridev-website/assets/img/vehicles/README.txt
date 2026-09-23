@@ -1,6 +1,6 @@
 Drop real RIDEV product photos here.
 
-Expected filenames (see data/metrics.json -> vehicle_images):
+Expected filenames (see data/metrics.js -> vehicle_images):
   ridev-scooter.png        <- the main hero / fallback shot
   oowah-zomato.png
   oowah-unlimited.png

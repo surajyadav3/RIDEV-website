@@ -167,52 +167,59 @@
            '<b>' + v + '</b><span>' + l + '</span></div>';
   }
 
-  fill('heroStrip',
-    stat('12000+', 'Electric vehicles') +
-    stat('15+', 'Cities live') +
-    stat(H.hubs, 'Operating hubs') +
-    stat('50000+', 'Riders registered')
-  );
-
-  fill('invStrip',
-    stat(n(H.fleet), 'Vehicles owned') +
-    stat(H.utilisation_pct + '%', 'Fleet utilisation') +
-    stat(n(H.active_subscriptions), 'Active subscriptions') +
-    stat(H.cities_live + '<em>+2 opening</em>', 'Cities live') +
-    stat(H.hubs, 'Operating hubs') +
-    stat(H.oem_partners, 'OEM partners')
-  );
+  // KPI strips are rendered directly in the HTML to avoid stale/duplicated number formatting.
 
   (function(){
     // slug: lowercase, hyphenated — matches filenames in assets/img/oem/ and /delivery/
     function slugName(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 
-    // OEM row — try assets/img/oem/{slug}.png; if it errors, drop the img and let the text show
-    // (eager loading — these are above-the-fold in the hero, defer would leave chips blank on mobile)
-    var chips = D.partners.oem.map(function (b) {
+    // Logo wall: container-free logos on an endless marquee. Each item stacks a one-colour
+    // silhouette (mono/{slug}.png) over a dark-background colour version (ondark/{slug}.png);
+    // CSS crossfades to colour on hover. If the silhouette is missing the brand name shows instead.
+    function logoItem(dir, b, copy) {
       var slug = slugName(b);
-      return '<span class="oemchip oemchip--logo" data-slug="' + slug + '">' +
-               '<img class="oemchip__logo" src="assets/img/oem/' + slug + '.png" alt="' + b + '" ' +
-                    'onload="this.parentNode.classList.add(\'is-loaded\')" ' +
+      return '<li class="logowall__item" title="' + b + '"' + (copy ? ' aria-hidden="true"' : '') + '>' +
+               '<img class="logowall__mono" src="assets/img/' + dir + '/mono/' + slug + '.png" alt="' + (copy ? '' : b) + '" ' +
+                    'onerror="this.parentNode.classList.add(\'is-text\')">' +
+               '<img class="logowall__color" src="assets/img/' + dir + '/ondark/' + slug + '.png" alt="" aria-hidden="true" ' +
                     'onerror="this.remove()">' +
-               '<span class="oemchip__name">' + b + '</span>' +
-             '</span>';
-    }).join('');
-    fill('oemChips',
-      '<div class="oemline__track" aria-hidden="false">' + chips + chips + '</div>');
+               '<span class="logowall__name">' + b + '</span>' +
+             '</li>';
+    }
+    function logoWall(name, dir, brands) {
+      // repeat the brands until one set is wider than the row, then render the set twice
+      // so the track can loop seamlessly at -50%
+      var reps = Math.max(1, Math.ceil(12 / brands.length)), set = '', copy = '';
+      for (var r = 0; r < reps; r++) {
+        set  += brands.map(function (b) { return logoItem(dir, b, r > 0); }).join('');
+        copy += brands.map(function (b) { return logoItem(dir, b, true); }).join('');
+      }
+      fill(name, '<div class="logowall__track" style="--dur:' + (brands.length * reps * 4) + 's">' +
+                   '<ul class="logowall__set">' + set + '</ul>' +
+                   '<ul class="logowall__set" aria-hidden="true">' + copy + '</ul>' +
+                 '</div>');
+      each(name, function (el) {
+        el.querySelectorAll('img').forEach(function (img) {
+          if (img.complete && img.naturalWidth) fitLogo(img);
+          else img.addEventListener('load', function () { fitLogo(img); });
+        });
+      });
+    }
 
-    // Delivery row — same pattern; text fallback keeps the category subtitle
-    var delivery = (D.partners.delivery || []).map(function (b) {
-      var slug = slugName(b.name);
-      return '<span class="oemchip oemchip--delivery oemchip--logo" data-slug="' + slug + '">' +
-               '<img class="oemchip__logo" src="assets/img/delivery/' + slug + '.png" alt="' + b.name + '" ' +
-                    'onload="this.parentNode.classList.add(\'is-loaded\')" ' +
-                    'onerror="this.remove()">' +
-               '<span class="oemchip__name">' + b.name + '<small>' + b.cat + '</small></span>' +
-             '</span>';
-    }).join('');
-    if (delivery) fill('deliveryChips',
-      '<div class="oemline__track oemline__track--rev" aria-hidden="false">' + delivery + delivery + '</div>');
+    // Optical sizing: give every mark roughly the same visual area, so long wordmarks
+    // (Ather, Motovolt) sit lower and compact marks (Ampere, Swiggy) grow, instead of all
+    // sharing one height. A 3:1 logo gets the base height.
+    function fitLogo(img) {
+      var ratio = img.naturalWidth / img.naturalHeight;
+      var k = Math.min(1.45, Math.max(0.55, Math.sqrt(3 / ratio)));
+      img.style.setProperty('--k', k.toFixed(3));
+    }
+
+    var delivery = (D.partners.delivery || []).map(function (b) { return b.name; });
+    logoWall('oemLogos', 'oem', D.partners.oem);
+    logoWall('deliveryLogos', 'delivery', delivery);
+    fill('oemCount', D.partners.oem.length + ' manufacturers');
+    fill('deliveryCount', delivery.length + ' platforms');
   })();
 
   /* ============================================================
@@ -295,48 +302,98 @@
       var hubStage = hubPreview.querySelector('[data-hub-stage]');
       var hubName = hubPreview.querySelector('[data-hub-name]');
       var hubStatus = hubPreview.querySelector('[data-hub-status]');
-      var hubStates = Array.prototype.slice.call(hubPreview.querySelectorAll('[data-hub-state]'));
-      var hubDetails = {
-        bengaluru: { name: 'Bengaluru', status: 'Now open' },
-        pune: { name: 'Pune', status: 'Opening soon' },
-        hyderabad: { name: 'Hyderabad', status: 'Next hub' },
-        chennai: { name: 'Chennai', status: 'Next hub' }
-      };
+      var hubMap = hubPreview.querySelector('[data-hub-map]');
+      var hubRoute = slider.querySelector('[data-hub-route]');
+      var hubStops = Array.prototype.slice.call(slider.querySelectorAll('[data-hub-state]'));
 
-      function showHub(state) {
-        var detail = hubDetails[state] || hubDetails.bengaluru;
-        hubStates.forEach(function (button) {
-          var active = button.dataset.hubState === state;
-          button.classList.toggle('is-active', active);
-          button.setAttribute('aria-selected', active ? 'true' : 'false');
+      // Route map: real India geometry, cropped to the hub cities, with a curved route
+      // from the launch hub (first stop) out to every upcoming city.
+      var M = window.RIDEV_INDIA;
+      if (hubMap && M) {
+        var pr = M.proj;
+        var hubPts = hubStops.map(function (stop) {
+          var name = stop.querySelector('span').textContent;
+          var c = (D.cities || []).filter(function (x) { return x.city === name; })[0];
+          return c && c.lat ? { key: stop.dataset.hubState, name: name,
+            x: pr.padx + (c.lon - pr.lon0) * pr.sx, y: pr.pady + (pr.latTop - c.lat) * pr.sy } : null;
         });
-        hubName.textContent = detail.name;
-        hubStatus.textContent = detail.status;
-        hubPreview.classList.remove('is-changing');
-        void hubPreview.offsetWidth;
-        hubPreview.classList.add('is-changing');
-
-        var video = hubStage.querySelector('iframe');
-        var source = hubStates.filter(function (button) { return button.dataset.hubState === state; })[0];
-        if (source && source.dataset.hubVideo) {
-          if (!video) {
-            video = document.createElement('iframe');
-            video.title = detail.name + ' hub opening';
-            video.allow = 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share';
-            video.allowFullscreen = true;
-            hubStage.appendChild(video);
-          }
-          video.src = source.dataset.hubVideo;
-          video.style.display = 'block';
-        } else if (video) {
-          video.style.display = 'none';
-          video.src = 'about:blank';
+        if (hubPts.every(Boolean)) {
+          var o = hubPts[0];
+          var xs = hubPts.map(function (p) { return p.x; }), ys = hubPts.map(function (p) { return p.y; });
+          var minX = Math.min.apply(null, xs) - 26, minY = Math.min.apply(null, ys) - 22;
+          var vbW = Math.max.apply(null, xs) + 30 - minX, vbH = Math.max.apply(null, ys) + 22 - minY;
+          hubMap.setAttribute('viewBox', [minX, minY, vbW, vbH].map(function (n) { return n.toFixed(1); }).join(' '));
+          var routes = hubPts.slice(1).map(function (p) {
+            // bow each route sideways so the lines read as journeys, not straight rulers
+            var mx = (o.x + p.x) / 2, my = (o.y + p.y) / 2, dx = p.x - o.x, dy = p.y - o.y;
+            var cx = mx - dy * 0.22, cy = my + dx * 0.22;
+            return '<path class="hubs__path" id="hubroute-' + p.key + '" data-route="' + p.key + '" d="M' +
+              o.x.toFixed(1) + ',' + o.y.toFixed(1) + ' Q' + cx.toFixed(1) + ',' + cy.toFixed(1) + ' ' +
+              p.x.toFixed(1) + ',' + p.y.toFixed(1) + '"/>';
+          }).join('');
+          var pins = hubPts.map(function (p, i) {
+            // launch hub labelled underneath (Chennai shares its latitude), the rest to the right
+            var label = i === 0 ? '<text x="0" y="9" text-anchor="middle">' : '<text x="5" y="1.8">';
+            return '<g class="hubs__pin' + (i === 0 ? ' is-live' : '') + '" data-pin="' + p.key + '" transform="translate(' +
+              p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')">' +
+              (i === 0 ? '<circle class="hubs__ring" r="3"/>' : '') +
+              '<circle class="hubs__dot" r="' + (i === 0 ? 2.4 : 2) + '"/>' +
+              label + p.name + '</text></g>';
+          }).join('');
+          hubMap.innerHTML =
+            '<path class="hubs__land" d="' + M.country + '"/>' +
+            M.states.map(function (d) { return '<path class="hubs__state" d="' + d + '"/>'; }).join('') +
+            routes + '<g data-hub-rider></g>' + pins;
+          hubMap.addEventListener('click', function (e) {
+            var pin = e.target.closest('[data-pin]');
+            if (pin) showHub(pin.getAttribute('data-pin'));
+          });
         }
       }
 
-      hubStates.forEach(function (button) {
-        button.addEventListener('click', function () { showHub(button.dataset.hubState); });
+      function showHub(state) {
+        var active = 0;
+        hubStops.forEach(function (stop, i) {
+          var on = stop.dataset.hubState === state;
+          if (on) active = i;
+          stop.classList.toggle('is-active', on);
+          stop.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        hubStops.forEach(function (stop, i) { stop.classList.toggle('is-passed', i < active); });
+        if (hubRoute) hubRoute.style.setProperty('--p', active);
+        var stop = hubStops[active];
+
+        // map: light the selected route and send a rider dot along it
+        if (hubMap) {
+          $$('[data-route]', hubMap).forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-route') === state); });
+          $$('[data-pin]', hubMap).forEach(function (g) { g.classList.toggle('is-active', g.getAttribute('data-pin') === state); });
+          var rider = $('[data-hub-rider]', hubMap);
+          if (rider) rider.innerHTML = active && !reduce
+            ? '<circle class="hubs__rider" r="1.5"><animateMotion dur="2.6s" repeatCount="indefinite">' +
+              '<mpath href="#hubroute-' + state + '"/></animateMotion></circle>'
+            : '';
+        }
+
+        // reel: cities with a launch video play it; the rest show an "opening soon" card
+        var video = hubStage.querySelector('iframe');
+        if (stop.dataset.hubVideo) {
+          if (video && video.getAttribute('src') !== stop.dataset.hubVideo) video.setAttribute('src', stop.dataset.hubVideo);
+          hubStage.classList.remove('is-soon');
+        } else {
+          if (video) video.setAttribute('src', 'about:blank');  // stop playback while hidden
+          if (hubName) hubName.textContent = stop.querySelector('span').textContent;
+          if (hubStatus) hubStatus.textContent = stop.querySelector('small').textContent;
+          hubStage.classList.add('is-soon');
+        }
+        hubPreview.classList.remove('is-changing');
+        void hubPreview.offsetWidth;
+        hubPreview.classList.add('is-changing');
+      }
+
+      hubStops.forEach(function (stop) {
+        stop.addEventListener('click', function () { showHub(stop.dataset.hubState); });
       });
+      if (hubStops.length) showHub(hubStops[0].dataset.hubState);
     }
 
     render();
@@ -506,31 +563,35 @@
         var rest = set.slice(1);
         var src = IMG[lead.model] || IMG._default;
         var pic = shot(src, 'plan__img', lead.brand + ' ' + lead.model, '.plan__ph');
-        return '<article class="plan' + (i === star ? ' plan--best' : '') + '" data-badge="Best range per ₹">' +
-          '<div class="plan__ph">' + pic + MARK + '</div>' +
-          (lead.rate_from ? '<span class="plan__ind" title="Not yet configured in EV Master for this city">Indicative</span>' : '') +
-          '<div class="plan__brand">' + lead.brand + '</div>' +
-          '<div class="plan__model">' + lead.model + '</div>' +
-          '<div class="plan__price"><b>₹' + n(wk) + '</b><span>/ week</span></div>' +
-          '<div class="plan__mo">' + inr(lead.month) + ' for 4 weeks</div>' +
-          '<div class="plan__specs">' +
-            '<div><b>' + lead.range_km + ' km</b>range</div>' +
-            '<div><b>' + lead.batteries + '</b>batteries</div>' +
+        var best = i === star;
+        return '<article class="plan' + (best ? ' plan--best' : '') + '">' +
+          '<div class="plan__head"><span class="plan__brand">' + lead.brand + '</span>' +
+            (best ? '<span class="plan__badge">Best range per ₹</span>' : '') + '</div>' +
+          '<h3 class="plan__model">' + lead.model + '</h3>' +
+          '<div class="plan__pricing">' +
+            '<div>' +
+              '<div class="plan__price"><b>₹' + n(wk) + '</b><span>/ week</span></div>' +
+              '<div class="plan__mo">' + inr(lead.month) + ' for 4 weeks' +
+                (lead.rate_from ? ' · <span class="plan__ind" title="Not yet configured in EV Master for this city">indicative</span>' : '') +
+              '</div>' +
+            '</div>' +
+            '<div class="plan__ph">' + pic + MARK + '</div>' +
           '</div>' +
-          '<ul class="plan__inc">' +
-            '<li>' + CHK + 'Free unlimited battery swaps</li>' +
-            '<li>' + CHK + 'Repairs &amp; maintenance covered</li>' +
-            '<li>' + CHK + 'Replacement bike + insurance</li>' +
-          '</ul>' +
+          '<dl class="plan__specs">' +
+            '<div><dt>Range</dt><dd>' + lead.range_km + ' km</dd></div>' +
+            '<div><dt>Batteries</dt><dd>' + lead.batteries + '</dd></div>' +
+          '</dl>' +
           (rest.length
-            ? '<p class="plan__also">Also at this price: ' +
-                rest.map(function (r) { return r.brand + ' ' + r.model; }).join(', ') + '</p>'
+            ? '<div class="plan__also"><span>Also at this price</span>' +
+                rest.map(function (r) { return '<span class="plan__chip">' + r.brand + ' ' + r.model + '</span>'; }).join('') +
+              '</div>'
             : '') +
-          '<a class="btn ' + (i === star ? 'btn--primary' : 'btn--ghost') + '" href="#get">Reserve</a>' +
+          '<div class="plan__cta"><a class="btn ' + (best ? 'btn--primary' : 'btn--ghost') + '" href="#get">Reserve</a></div>' +
         '</article>';
       }).join('');
       function paint() {
         planWrap.innerHTML = html;
+        planWrap.style.setProperty('--count', prices.length);  // grid always fills the row
         planWrap.classList.remove('is-switching');
         planWrap.classList.add('has-switched');
         window.setTimeout(function () { planWrap.classList.remove('has-switched'); }, 620);
@@ -566,90 +627,94 @@
   var ZOOM_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>' +
     '<line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>';
-  (function () {
-    var live = D.cities.filter(function (c) { return c.status === 'live'; });
-    var soon = D.cities.filter(function (c) { return c.status !== 'live'; });
-    var rows = live.map(function (c) {
-      var citySlug = slugify(c.city);
-      return '<div class="cityrow rv" data-city="' + c.city + '">' +
-        '<div class="cityrow__city">' +
-          '<b>' + c.city + '</b><span>' + c.state + '</span>' +
-        '</div>' +
-        '<div class="cityrow__hubs"><div class="hubcards">' + c.hubs.map(function (h) {
-            var hubSlug = citySlug + '-' + slugify(h.name);
-            var label = h.name + ' — RIDEV hub';
-            var url = mapsUrl(h.name + ', ' + c.city + ', ' + c.state);
-            return '<a class="hubtag" href="' + url + '" target="_blank" rel="noopener noreferrer" ' +
-                   'data-hub="' + hubSlug + '" data-hubname="' + h.name +
-                   '" data-hubarea="' + (h.area || c.city) + '"' +
-                   ' title="Open ' + h.name + ' on Google Maps" aria-label="' + label + ' — open on Google Maps">' +
-                   '<span class="hubtag__media">' +
-                     '<img class="hubtag__img" src="assets/img/hubs/' + hubSlug + '.jpg" alt="" loading="lazy" ' +
-                       'onload="this.parentNode.classList.add(\'is-loaded\')" onerror="this.remove()">' +
-                     '<svg class="hubtag__fallback" viewBox="0 0 160 100" aria-hidden="true">' +
-                       '<rect width="160" height="100" fill="url(#hub-' + hubSlug + ')"/>' +
-                       '<defs><linearGradient id="hub-' + hubSlug + '" x1="0" y1="0" x2="0" y2="1">' +
-                         '<stop offset="0%" stop-color="#EEFAE0"/><stop offset="100%" stop-color="#95DB67"/>' +
-                       '</linearGradient></defs>' +
-                       '<path d="M22 82h116M34 82V52l46-23 46 23v30M56 82V60h18v22M100 82V60h18v22" ' +
-                         'fill="none" stroke="#34691C" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>' +
-                       '<circle cx="80" cy="22" r="7" fill="#4E9130"/>' +
-                     '</svg>' +
-                   '</span>' +
-                   '<span class="hubtag__body">' + PIN + '<span>' + h.name + '</span></span>' +
-                   '</a>';
-                 }).join('') + '</div><div class="hubprogress" aria-hidden="true"><span></span></div></div>' +
-        '<div class="cityrow__tag">' +
-          '<button class="zoombtn" type="button" data-zoom-city="' + c.city +
-            '" title="Zoom map to ' + c.city + '" aria-label="Zoom map to ' + c.city + '">' +
-            ZOOM_ICO + '<span>Zoom</span></button>' +
-          '<span class="pill">' + c.hubs.length + (c.hubs.length === 1 ? ' hub' : ' hubs') + '</span>' +
-        '</div>' +
-      '</div>';
-    });
-    if (soon.length) {
-      rows.push('<div class="cityrow cityrow--soon rv" data-city="' + soon[0].city + '">' +
-        '<div class="cityrow__city"><b>' +
-          soon.map(function (c) { return c.city; }).join(' &amp; ') +
-        '</b><span>Opening next</span></div>' +
-        '<div class="cityrow__hubs"><span class="muted">' +
-          'Configured on the platform — riders can register now and are allocated as vehicles land.' +
-        '</span></div>' +
-        '<div class="cityrow__tag"><span class="pill pill--soon">Opening</span></div>' +
-      '</div>');
-    }
-    fill('cityList',
-      '<div class="cityslider__nav" aria-label="Browse operating cities">' +
-        '<button class="cityslider__arrow" type="button" data-city-prev aria-label="Previous city">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>' +
-        '</button>' +
-        '<span class="cityslider__count" data-city-count aria-live="polite"></span>' +
-        '<button class="cityslider__arrow" type="button" data-city-next aria-label="Next city">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>' +
-        '</button>' +
-      '</div>' +
-      '<div class="cityslider__viewport">' + rows.join('') + '</div>'
-    );
+  var HUB_ICO = '<svg viewBox="0 0 160 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">' +
+    '<path d="M22 82h116M34 82V52l46-23 46 23v30M56 82V60h18v22M100 82V60h18v22"/><circle cx="80" cy="22" r="6"/></svg>';
 
-    var citySlider = $('[data-r="cityList"]');
-    var cityRows = citySlider ? $$('.cityrow', citySlider) : [];
-    var cityCount = citySlider ? $('[data-city-count]', citySlider) : null;
-    var cityIndex = 0;
-    function showCity(index) {
-      if (!cityRows.length) return;
-      cityIndex = (index + cityRows.length) % cityRows.length;
-      cityRows.forEach(function (row, i) {
-        row.classList.toggle('is-current', i === cityIndex);
-        row.setAttribute('aria-hidden', i === cityIndex ? 'false' : 'true');
+  /* Hub explorer: pick a city → its hubs, one large photo preview at a time.
+     Photos: assets/img/hubs/{city}-{hub}.png|webp|jpg (see the README there); until one
+     exists the preview shows a quiet placeholder. The map zooms to whichever city is picked. */
+  each('cityList', function (host) {
+    host.innerHTML =
+      '<div class="hubx">' +
+        '<div class="hubx__cities" role="tablist" aria-label="Choose a city">' +
+          D.cities.map(function (c) {
+            var live = c.status === 'live';
+            return '<button class="hubx__city' + (live ? '' : ' is-soon') + '" type="button" role="tab" aria-selected="false" data-city="' + c.city + '">' +
+              c.city + '<sup>' + (live ? c.hubs.length : 'soon') + '</sup></button>';
+          }).join('') +
+        '</div>' +
+        '<div class="hubx__panel" data-hubx-panel aria-live="polite"></div>' +
+      '</div>';
+    var panel = $('[data-hubx-panel]', host);
+    var tabs = $$('.hubx__city', host);
+
+    function preview(c, h) {
+      var slug = slugify(c.city) + '-' + slugify(h.name);
+      return '<figure class="hubx__preview">' +
+          '<div class="hubx__ph" aria-hidden="true">' + HUB_ICO + '<span>Hub photo coming soon</span></div>' +
+          shot('assets/img/hubs/' + slug + '.jpg', 'hubx__img', h.name + ' — RIDEV hub, ' + c.city, '.hubx__preview') +
+          '<figcaption class="hubx__cap">' +
+            '<span><b>' + h.name + '</b><small>' + (h.area || c.city) + '</small></span>' +
+            '<a href="' + mapsUrl(h.name + ', ' + c.city + ', ' + c.state) + '" target="_blank" rel="noopener noreferrer">' +
+              'Directions <span aria-hidden="true">↗</span></a>' +
+          '</figcaption>' +
+        '</figure>';
+    }
+    function soonPreview(c) {
+      return '<figure class="hubx__preview is-soon">' +
+          '<div class="hubx__ph" aria-hidden="true">' + HUB_ICO + '<span>Opening next</span></div>' +
+          '<figcaption class="hubx__cap">' +
+            '<span><b>' + c.city + ' is next</b><small>Riders can register now — bikes are allocated as vehicles land.</small></span>' +
+            '<a href="#get">Register <span aria-hidden="true">→</span></a>' +
+          '</figcaption>' +
+        '</figure>';
+    }
+    function showHub(c, i) {
+      var fig = $('.hubx__preview', panel);
+      if (fig) fig.outerHTML = preview(c, c.hubs[i]);
+      $$('[data-hub-i]', panel).forEach(function (b) {
+        var on = +b.dataset.hubI === i;
+        b.classList.toggle('is-active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
       });
-      if (cityCount) cityCount.textContent = String(cityIndex + 1).padStart(2, '0') + ' / ' + String(cityRows.length).padStart(2, '0');
     }
-    if (citySlider) {
-      $('[data-city-prev]', citySlider).addEventListener('click', function () { showCity(cityIndex - 1); });
-      $('[data-city-next]', citySlider).addEventListener('click', function () { showCity(cityIndex + 1); });
-      showCity(0);
+    function select(city, fromMap) {
+      var c = D.cities.filter(function (x) { return x.city === city; })[0];
+      if (!c) return;
+      var live = c.status === 'live';
+      tabs.forEach(function (t) {
+        var on = t.dataset.city === city;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      panel.innerHTML =
+        '<div class="hubx__head">' +
+          '<div><h3 class="hubx__name">' + c.city + '</h3>' +
+            '<p class="hubx__meta">' + c.state + (live ? '' : ' · opening next') + '</p></div>' +
+          (live ? '<dl class="hubx__stats">' +
+              '<div><dt>Hubs</dt><dd>' + c.hubs.length + '</dd></div>' +
+              (c.since ? '<div><dt>Since</dt><dd>' + c.since + '</dd></div>' : '') +
+            '</dl>' : '') +
+        '</div>' +
+        (live ? preview(c, c.hubs[0]) : soonPreview(c)) +
+        (live && c.hubs.length > 1
+          ? '<div class="hubx__hubs">' + c.hubs.map(function (h, i) {
+              return '<button type="button" class="hubx__hub' + (i ? '' : ' is-active') + '" data-hub-i="' + i + '" aria-pressed="' + (i ? 'false' : 'true') + '">' +
+                '<b>' + h.name + '</b><small>' + (h.area || c.city) + '</small></button>';
+            }).join('') + '</div>'
+          : '');
+      $$('[data-hub-i]', panel).forEach(function (b) {
+        b.addEventListener('click', function () { showHub(c, +b.dataset.hubI); });
+      });
+      panel.classList.remove('is-in');
+      void panel.offsetWidth;
+      panel.classList.add('is-in');
+      if (!fromMap) document.dispatchEvent(new CustomEvent('ridev:city', { detail: { city: city } }));
     }
-  })();
+    tabs.forEach(function (t) { t.addEventListener('click', function () { select(t.dataset.city); }); });
+    document.addEventListener('ridev:pin', function (e) { select(e.detail.city, true); });
+    select(D.cities[0].city, true);  // first city, map left at the full-India view
+  });
 
   fill('footerCities', D.cities.map(function (c) {
     var live = c.status === 'live';
@@ -683,6 +748,7 @@
       return '<g class="pin' + (live ? '' : ' pin--soon') + '" data-city="' + c.city +
              '" transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')" tabindex="0" role="button" ' +
              'aria-label="' + c.city + ' — ' + hubs + ' — click to zoom, then open on maps">' +
+        '<g class="pin__body">' +  // counter-scaled by CSS so pins stay the same size while zoomed
         (live ? '<circle class="pin__pulse" r="14"/>' : '') +
         '<circle class="pin__hit" r="20" fill="transparent"/>' +
         '<circle class="pin__dot" r="' + (live ? 5.5 : 4.5) + '"/>' +
@@ -692,6 +758,7 @@
           (live ? '<text class="pin__tiphub" y="34" text-anchor="middle">' + hubs + '</text>' : '') +
           (live ? '<a class="pin__tipcta" href="' + mapsHref + '" target="_blank" rel="noopener noreferrer">' +
                     '<text y="52" text-anchor="middle">Open on Google Maps ↗</text></a>' : '') +
+        '</g>' +
         '</g>' +
       '</g>';
     }).join('');
@@ -721,7 +788,7 @@
 
     function hot(city, on) {
       $$('.pin').forEach(function (p) { if (p.dataset.city === city) p.classList.toggle('is-hot', on); });
-      $$('.cityrow').forEach(function (r) { if (r.dataset.city === city) r.classList.toggle('is-hot', on); });
+      $$('.hubx__city').forEach(function (t) { if (t.dataset.city === city) t.classList.toggle('is-hot', on); });
     }
     function wire(el, city) {
       el.addEventListener('mouseenter', function () { hot(city, true); });
@@ -749,6 +816,7 @@
         var e = 1 - Math.pow(1 - k, 3);
         var vb = start.map(function (s, i) { return s + (target[i] - s) * e; });
         svg.setAttribute('viewBox', vb.map(function (v) { return v.toFixed(2); }).join(' '));
+        if (wrap) wrap.style.setProperty('--zoom', (M.w / vb[2]).toFixed(3));
         if (k < 1) raf = requestAnimationFrame(tick); else raf = null;
       }
       raf = requestAnimationFrame(tick);
@@ -784,33 +852,17 @@
           if (d) window.open(mapsUrl(city + ', ' + d.state + ', India'), '_blank', 'noopener');
         } else {
           zoomTo(city);
+          document.dispatchEvent(new CustomEvent('ridev:pin', { detail: { city: city } }));
         }
       });
       p.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); p.click(); }
       });
     });
-    $$('.cityrow').forEach(function (r) {
-      if (!r.dataset.city) return;
-      wire(r, r.dataset.city);
-      // clicking anywhere on a live cityrow (outside hub link / zoom btn) zooms the map
-      r.addEventListener('click', function (e) {
-        if (e.target.closest('a,.zoombtn')) return;
-        if (pinData[r.dataset.city]) zoomTo(r.dataset.city);
-      });
-    });
-
-    // dedicated zoom-in button per city row → same behavior, more discoverable
-    $$('.zoombtn[data-zoom-city]').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var city = btn.dataset.zoomCity;
-        if (pinData[city]) {
-          zoomTo(city);
-          // smooth-scroll the map into view so the effect is visible
-          if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      });
+    // city picker ↔ map: hovering a city lights its pin; picking one zooms the map to it
+    $$('.hubx__city').forEach(function (t) { wire(t, t.dataset.city); });
+    document.addEventListener('ridev:city', function (e) {
+      if (pinData[e.detail.city]) zoomTo(e.detail.city);
     });
 
     if (resetBtn) resetBtn.addEventListener('click', zoomReset);
@@ -823,71 +875,6 @@
       if (e.key === 'Escape' && zoomedCity) zoomReset();
     });
 
-    /* --- hub image popover: hover a hubtag → floating card with photo + label --- */
-    var pop = document.createElement('div');
-    pop.className = 'hubpop'; pop.setAttribute('role', 'tooltip'); pop.setAttribute('aria-hidden', 'true');
-    pop.innerHTML =
-      '<div class="hubpop__ph">' +
-        '<img class="hubpop__img" alt="" onload="this.parentNode.classList.add(\'is-loaded\')" onerror="this.style.display=\'none\'">' +
-        '<svg class="hubpop__fallback" viewBox="0 0 160 100" aria-hidden="true">' +
-          '<defs><linearGradient id="hpg" x1="0" y1="0" x2="0" y2="1">' +
-            '<stop offset="0%" stop-color="#E2F5D5"/><stop offset="100%" stop-color="#95DB67"/></linearGradient></defs>' +
-          '<rect width="160" height="100" fill="url(#hpg)"/>' +
-          '<path d="M20 82h120M32 82V52l48-24 48 24v30M56 82V60h20v22M100 82V60h20v22" ' +
-            'fill="none" stroke="#1E4A18" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
-          '<circle cx="80" cy="18" r="6" fill="#4E9130"/>' +
-        '</svg>' +
-      '</div>' +
-      '<div class="hubpop__body">' +
-        '<b class="hubpop__name"></b>' +
-        '<span class="hubpop__area"></span>' +
-        '<span class="hubpop__cta">Click to open on Google Maps ↗</span>' +
-      '</div>';
-    document.body.appendChild(pop);
-    var popImg = pop.querySelector('.hubpop__img');
-    var popPh  = pop.querySelector('.hubpop__ph');
-    var popName= pop.querySelector('.hubpop__name');
-    var popArea= pop.querySelector('.hubpop__area');
-    function positionPop(hostRect) {
-      var pw = pop.offsetWidth, ph = pop.offsetHeight;
-      var vw = window.innerWidth;
-      var x = hostRect.left + hostRect.width / 2 - pw / 2;
-      x = Math.max(12, Math.min(vw - pw - 12, x));
-      var y = hostRect.top - ph - 12 + window.scrollY;
-      // if there is no room above, drop it below
-      if (hostRect.top - ph - 12 < 8) y = hostRect.bottom + 12 + window.scrollY;
-      pop.style.left = x + 'px';
-      pop.style.top  = y + 'px';
-    }
-    function showPop(a) {
-      var hub  = a.dataset.hub;
-      var name = a.dataset.hubname || a.textContent.trim();
-      var area = a.dataset.hubarea || '';
-      popName.textContent = name;
-      popArea.textContent = area;
-      popPh.classList.remove('is-loaded');
-      popImg.style.display = '';
-      popImg.alt = name + ' — RIDEV hub';
-      // try to load the real photo; if missing, the SVG fallback stays visible
-      popImg.src = 'assets/img/hubs/' + hub + '.jpg';
-      pop.classList.add('is-show');
-      pop.setAttribute('aria-hidden', 'false');
-      positionPop(a.getBoundingClientRect());
-    }
-    function hidePop() {
-      pop.classList.remove('is-show');
-      pop.setAttribute('aria-hidden', 'true');
-    }
-    // desktop hover only (mobile lacks a hover state → skip cleanly)
-    if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      $$('.hubtag[data-hub]').forEach(function (a) {
-        a.addEventListener('pointerenter', function () { showPop(a); });
-        a.addEventListener('pointerleave', hidePop);
-        a.addEventListener('focus', function () { showPop(a); });
-        a.addEventListener('blur', hidePop);
-      });
-      window.addEventListener('scroll', hidePop, { passive: true });
-    }
   })();
 
   /* ============================================================
@@ -993,47 +980,104 @@
      growth chart + stats (investor)
      ============================================================ */
   each('growthChart', function (box) {
-    var g = D.growth, W = 960, Hh = 360, pl = 58, pr = 26, pt = 34, pb = 52;
+    var small = null;
+    // phones get a narrower drawing so the type stays readable once the SVG is scaled down
+    function draw() {
+    var sm = box.clientWidth > 0 && box.clientWidth < 600;
+    if (sm === small) return;
+    var redraw = small !== null;
+    small = sm;
+    var g = D.growth, W = small ? 440 : 960, Hh = small ? 320 : 380, pl = 8, pr = 8, pt = 56, pb = 40;
+    // true time scale (months), so uneven gaps between data points read honestly
+    var mo = function (p) { var d = p.date.split('-'); return +d[0] * 12 + (+d[1] - 1); };
+    var m0 = mo(g[0]), span = mo(g[g.length - 1]) - m0;
     var maxF = Math.max.apply(null, g.map(function (p) { return p.fleet; }));
-    var step = Math.ceil(maxF / 4 / 500) * 500, top = step * 4;
-    var X = function (i) { return pl + i * (W - pl - pr) / (g.length - 1); };
+    var step = Math.ceil(maxF * 1.08 / 3 / 1000) * 1000, top = step * 3;
+    var X = function (p) { return pl + (mo(p) - m0) / span * (W - pl - pr); };
     var Y = function (v) { return pt + (1 - v / top) * (Hh - pt - pb); };
+    var pts = g.map(function (p) { return [X(p), Y(p.fleet)]; });
 
-    var line = 'M' + g.map(function (p, i) { return X(i) + ',' + Y(p.fleet); }).join(' L');
-    var area = line + ' L' + X(g.length - 1) + ',' + Y(0) + ' L' + X(0) + ',' + Y(0) + ' Z';
-    var grid = '', ylab = '';
-    for (var k = 0; k <= 4; k++) {
-      var yv = step * k, yy = Y(yv);
-      grid += '<line x1="' + pl + '" y1="' + yy + '" x2="' + (W - pr) + '" y2="' + yy + '"/>';
-      ylab += '<text class="lbl" x="' + (pl - 13) + '" y="' + (yy + 4) + '" text-anchor="end">' + n(yv) + '</text>';
+    // monotone cubic (Fritsch–Carlson): a smooth curve that never overshoots the data
+    function smooth(P) {
+      var n = P.length, d = [], s = [], t = [], i;
+      for (i = 0; i < n - 1; i++) { d[i] = P[i + 1][0] - P[i][0]; s[i] = (P[i + 1][1] - P[i][1]) / d[i]; }
+      t[0] = s[0]; t[n - 1] = s[n - 2];
+      for (i = 1; i < n - 1; i++) t[i] = s[i - 1] * s[i] <= 0 ? 0 : (s[i - 1] + s[i]) / 2;
+      for (i = 0; i < n - 1; i++) {
+        if (!s[i]) { t[i] = t[i + 1] = 0; continue; }
+        var a = t[i] / s[i], b = t[i + 1] / s[i], h = a * a + b * b;
+        if (h > 9) { var k = 3 / Math.sqrt(h); t[i] = k * a * s[i]; t[i + 1] = k * b * s[i]; }
+      }
+      var out = 'M' + P[0][0].toFixed(1) + ',' + P[0][1].toFixed(1);
+      for (i = 0; i < n - 1; i++) {
+        out += ' C' + (P[i][0] + d[i] / 3).toFixed(1) + ',' + (P[i][1] + t[i] * d[i] / 3).toFixed(1) +
+               ' ' + (P[i + 1][0] - d[i] / 3).toFixed(1) + ',' + (P[i + 1][1] - t[i + 1] * d[i] / 3).toFixed(1) +
+               ' ' + P[i + 1][0].toFixed(1) + ',' + P[i + 1][1].toFixed(1);
+      }
+      return out;
     }
-    var dots = g.map(function (p, i) {
-      return '<circle class="dot' + (p.estimated ? ' dot--est' : '') + '" cx="' + X(i) + '" cy="' + Y(p.fleet) +
-        '" r="' + (p.estimated ? 4 : 5.5) + '"><title>' + p.label + ' — ' + n(p.fleet) + ' vehicles. ' + p.event + '</title></circle>';
+    var line = smooth(pts);
+    var last = pts[pts.length - 1], base = Y(0);
+    var area = line + ' L' + last[0].toFixed(1) + ',' + base + ' L' + pts[0][0].toFixed(1) + ',' + base + ' Z';
+
+    var grid = '';
+    for (var k = 1; k <= 3; k++) {
+      var yy = Y(step * k);
+      grid += '<line x1="' + pl + '" y1="' + yy + '" x2="' + (W - pr) + '" y2="' + yy + '"/>' +
+              '<text class="ylbl" x="' + pl + '" y="' + (yy - 8) + '">' + n(step * k) + '</text>';
+    }
+    var marks = g.map(function (p, i) {
+      var x = pts[i][0], y = pts[i][1], now = i === g.length - 1;
+      var tip = '<title>' + p.label + ' — ' + (p.display || n(p.fleet)) + ' vehicles' + (p.estimated ? ' (estimate)' : '') + '. ' + p.event + '</title>';
+      if (now) {
+        return '<g class="mk">' + tip + '<circle class="now-ring" cx="' + x + '" cy="' + y + '" r="6"/>' +
+          '<circle class="now" cx="' + x + '" cy="' + y + '" r="6"/>' +
+          '<text class="val val--now" x="' + (x - 2) + '" y="' + (y - 20) + '" text-anchor="end">' + (p.display || n(p.fleet)) + '</text></g>';
+      }
+      if (p.estimated) return '<g class="mk">' + tip + '<circle class="dot--est" cx="' + x + '" cy="' + y + '" r="2.5"/><circle class="hit" cx="' + x + '" cy="' + y + '" r="12"/></g>';
+      return '<g class="mk">' + tip + '<circle class="dot" cx="' + x + '" cy="' + y + '" r="4"/>' +
+        (p.fleet > 0 ? '<text class="val" x="' + x + '" y="' + (y - 14) + '" text-anchor="middle">' + (p.display || n(p.fleet)) + '</text>' : '') + '</g>';
     }).join('');
-    var xlab = g.map(function (p, i) {
-      return '<text class="lbl" x="' + X(i) + '" y="' + (Hh - pb + 25) + '" text-anchor="middle">' + p.label + '</text>';
-    }).join('');
-    var callouts = g.filter(function (p) { return !p.estimated && p.fleet > 0; }).map(function (p) {
-      var i = g.indexOf(p);
-      var anchor = i === g.length - 1 ? 'end' : (i === 0 ? 'start' : 'middle');
-      return '<text class="val" x="' + X(i) + '" y="' + (Y(p.fleet) - 15) + '" text-anchor="' + anchor + '">' + n(p.fleet) + '</text>';
-    }).join('');
+    // date labels for verified points only, skipping any that would collide with a neighbour
+    var lastX = -1e9, endX = pts[pts.length - 1][0];
+    var xlab = '<line class="axis" x1="' + pl + '" y1="' + base + '" x2="' + (W - pr) + '" y2="' + base + '"/>' +
+      g.map(function (p, i) {
+        if (p.estimated) return '';
+        var x = pts[i][0], end = i === g.length - 1;
+        if (!end && (x - lastX < 70 || endX - x < 70)) return '';
+        lastX = x;
+        var anchor = i === 0 ? 'start' : (i === g.length - 1 ? 'end' : 'middle');
+        return '<text class="lbl" x="' + pts[i][0] + '" y="' + (base + 26) + '" text-anchor="' + anchor + '">' + p.label + '</text>';
+      }).join('');
 
     box.innerHTML =
-      '<svg class="chart" viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="RIDEV fleet growth from 10 vehicles in July 2024 to ' + n(H.fleet) + ' in August 2026">' +
+      '<svg class="chart' + (small ? ' chart--sm' : '') + '" viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="RIDEV fleet growth from 10 vehicles in July 2024 to ' +
+        (g[g.length - 1].display || n(g[g.length - 1].fleet)) + ' in ' + g[g.length - 1].label + '">' +
       '<defs><linearGradient id="gGrad" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#95DB67" stop-opacity=".38"/>' +
+      '<stop offset="0%" stop-color="#95DB67" stop-opacity=".28"/>' +
       '<stop offset="100%" stop-color="#95DB67" stop-opacity="0"/></linearGradient></defs>' +
-      '<g class="grid">' + grid + '</g>' + ylab +
-      '<path class="area" d="' + area + '"/><path class="line" d="' + line + '"/>' + dots + callouts + xlab +
+      '<g class="grid">' + grid + '</g>' +
+      '<path class="area" d="' + area + '"/><path class="line" pathLength="1" d="' + line + '"/>' + xlab + marks +
       '</svg>';
+
+    // draw the line once, when the chart scrolls into view (a resize redraw appears straight away)
+    var svg = box.firstChild;
+    if (redraw || !('IntersectionObserver' in window)) { svg.classList.add('is-drawn'); return; }
+    var gio = new IntersectionObserver(function (es) {
+      if (es[0].isIntersecting) { svg.classList.add('is-drawn'); gio.disconnect(); }
+    }, { threshold: 0.35 });
+    gio.observe(svg);
+    }
+    draw();
+    var rt;
+    window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(draw, 150); });
   });
 
+  // "1,200×" → big figure with the unit in brand green
   fill('growthStats', (D.growth_stats || []).map(function (s) {
-    return '<article class="card rv" style="border-top:3px solid var(--brand)">' +
-      '<div class="h-md" style="color:var(--brand-deep)">' + s.n + '</div>' +
-      '<p class="mt-s">' + s.b + '</p></article>';
+    var m = String(s.n).match(/^([\d.,]+)(.*)$/);
+    return '<div class="gstat rv"><b>' + (m ? m[1] + '<span>' + m[2] + '</span>' : s.n) + '</b>' +
+      '<p>' + s.b + '</p></div>';
   }).join(''));
 
   /* ============================================================
@@ -1750,10 +1794,13 @@
           if (!e.isIntersecting || seen.has(e.target)) return;
           seen.add(e.target);
           $$('b', e.target).forEach(function (b) {
-            var m = b.textContent.replace(/,/g, '').match(/^([\d.]+)/);
+            // match the number as written (commas included) so the suffix ("+", "%", "<em>…")
+            // is cut from the right place — stripping commas first mis-sliced "12,000+" into "00+"
+            var m = b.textContent.trim().match(/^\d[\d,]*(?:\.\d+)?/);
             if (!m) return;
-            var end = parseFloat(m[1]), dec = (m[1].split('.')[1] || '').length;
-            var rest = b.innerHTML.slice(b.textContent.indexOf(m[1]) + m[1].length);
+            var num = m[0].replace(/,/g, '');
+            var end = parseFloat(num), dec = (num.split('.')[1] || '').length;
+            var rest = b.innerHTML.slice(b.innerHTML.indexOf(m[0]) + m[0].length);
             var t0 = null, dur = 1100;
             function tick(t) {
               if (!t0) t0 = t;

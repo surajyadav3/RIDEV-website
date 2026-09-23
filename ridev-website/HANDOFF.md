@@ -15,24 +15,18 @@ Two pages, one design system, zero dependencies.
 
 ```
 ridev-website/
-├── ridev-test.html        # ⭐ built artefact — the whole site in ONE file. Open it directly.
-├── index.html             # rider + fleet-customer page (11 sections)
-├── investors.html         # Investors tab (8 sections)
-├── build_single.py        # regenerates ridev-test.html from the two pages
+├── index.html          # rider + fleet-customer site
+├── business.html       # business partnerships page
+├── investors.html      # INVESTOR tab — every granular metric + growth trajectory
 ├── data/
-│   ├── metrics.json       # SOURCE OF TRUTH for every number and every block of copy
-│   └── metrics.js         # same JSON wrapped as `window.RIDEV_DATA` — this is what pages load
+│   └── metrics.js      # SOURCE OF TRUTH — every number and block of copy, as `window.RIDEV_DATA`
 ├── assets/
-│   ├── css/ridev.css      # entire design system incl. dark mode + embedded logo
-│   ├── js/ridev.js        # renders every data-driven section
-│   ├── js/india-map.js    # GENERATED real India boundary geometry
-│   └── img/
-│       ├── ridev-logo*.png      # official mark + generated light/dark variants
-│       ├── vehicles/            # EMPTY — product photos go here (README inside)
-│       └── team/                # EMPTY — founder headshots go here (README inside)
-├── versions/version-1/    # checkpoint before the "compact" pass (has its own VERSION.md)
-├── README.md              # full technical documentation
-└── HANDOFF.md             # this file
+│   ├── css/ridev.css   # whole design system (brand palette, dark mode, embedded logo)
+│   ├── js/ridev.js     # renders every data-driven section
+│   ├── js/india-map.js # real India boundary geometry (generated)
+│   └── img/            # logo sources, OEM/delivery/press logos, photo drop-folders (README in each)
+├── README.md           # full technical documentation
+└── HANDOFF.md          # project handoff notes
 ```
 
 ### Run it
@@ -41,9 +35,6 @@ ridev-website/
 cd ridev-website && python3 -m http.server 8787
 ```
 → http://localhost:8787/
-
-`ridev-test.html` also works by double-clicking it — everything is inlined. Rebuild it after any
-edit with `python3 build_single.py`.
 
 **Gotcha:** if the page comes up blank and the tab title is just "localhost", the http.server has
 died. Restart it before debugging anything else. Also hard-reload (⌘⇧R) — this project has bitten
@@ -77,18 +68,13 @@ These came from the client directly. Do not relax them without asking.
 
 **You almost never edit HTML to change content.** Both pages read from `data/metrics.js`.
 
-1. Edit `data/metrics.json`
-2. Regenerate the JS:
-   ```bash
-   python3 -c "print('window.RIDEV_DATA = ' + open('data/metrics.json').read().rstrip() + ';')" > data/metrics.js
-   ```
-3. `python3 build_single.py`
+1. Edit `data/metrics.js` (plain JSON inside `window.RIDEV_DATA = …;` — it is the only copy of the data).
+2. Hard-reload the page (⌘⇧R).
 
 Update `_meta.snapshot_label` whenever the numbers are refreshed — it is printed on both pages.
 
 **Architecture note:** render targets are addressed by `data-r="name"`, never by `id`, so the same
-section can appear on both pages and twice in the combined build. In `build_single.py` the
-investor page's ids are namespaced `c-` to avoid collisions.
+section can appear on more than one page without collisions.
 
 ---
 
@@ -155,7 +141,7 @@ than the page so they still read as bands.
 
 3. **Delhi and Mumbai rate cards are marked "Indicative."** Neither city is configured in admin
    **EV Master**, so those cards carry the same model's real rate from the nearest configured city
-   (via a `rate_from` key). Once EV Master has real rows, update `plans` in `metrics.json` and
+   (via a `rate_from` key). Once EV Master has real rows, update `plans` in `metrics.js` and
    delete `rate_from` — the amber badge disappears on its own.
 
 4. **The onboarding flow wording needs confirming.** The six steps were derived from the admin
