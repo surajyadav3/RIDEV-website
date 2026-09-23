@@ -239,6 +239,7 @@
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     var autoTimer = null;
     var AUTO_MS = 6000;
+    var watching = false;  // viewer is playing an embedded video — autoplay stays off until they change slide
     var primarySlide = slider.querySelector('.hero__slide--primary');
     if (primarySlide) {
       var heroBackground = new Image();
@@ -246,7 +247,18 @@
       heroBackground.src = 'assets/img/image.png';
     }
 
+    // stop any embedded video on a slide that's being left (re-setting src resets the player)
+    function stopMedia(slide) {
+      if (!slide) return;
+      slide.querySelectorAll('iframe').forEach(function (f) {
+        var src = f.getAttribute('src');
+        if (src && src !== 'about:blank') f.setAttribute('src', src);
+      });
+    }
+    function pause() { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); }
+
     function render() {
+      if (slider.dataset.activeSlide && +slider.dataset.activeSlide !== index) stopMedia(slides[+slider.dataset.activeSlide]);
       track.style.transform = 'translateX(-' + (index * 100) + '%)';
       slider.dataset.activeSlide = String(index);
       if (hero) hero.dataset.activeSlide = String(index);
@@ -254,7 +266,7 @@
     }
 
     function schedule() {
-      if (reduce || slides.length < 2) return;
+      if (reduce || slides.length < 2 || watching) return;
       clearTimeout(autoTimer);
       slider.classList.remove('is-autoplaying');
       void slider.offsetWidth;
@@ -267,6 +279,7 @@
     }
 
     function moveTo(nextIndex) {
+      watching = false;  // the viewer moved on themselves, so autoplay may resume
       index = (nextIndex + slides.length) % slides.length;
       render();
       schedule();
@@ -295,6 +308,14 @@
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); }
       else schedule();
+    });
+    // Clicks and taps inside the Instagram / YouTube players never reach this page, but focus
+    // moving into the player blurs the window — that's the signal someone pressed play.
+    window.addEventListener('blur', function () {
+      setTimeout(function () {
+        var a = document.activeElement;
+        if (a && a.tagName === 'IFRAME' && slider.contains(a)) { watching = true; pause(); }
+      }, 0);
     });
 
     var hubPreview = slider.querySelector('[data-hub-preview]');

@@ -1,2 +1,13 @@
+# macOS
+.DS_Store
+
+# local tooling / test dependencies (the site itself has none)
 node_modules/
-.dev-server.pid
+package.json
+package-lock.json
+
+# scratch output: dev screenshots, server pids, backups, exports
+/.*.png
+*.pid
+*.bak
+*.zip
