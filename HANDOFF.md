@@ -14,7 +14,7 @@ subscription. Battery swaps, repairs, a replacement bike and insurance are all i
 Two pages, one design system, zero dependencies.
 
 ```
-(repo root)/
+(website root)/
 ├── index.html          # rider + fleet-customer site
 ├── business.html       # business partnerships page
 ├── investors.html      # INVESTOR tab — every granular metric + growth trajectory
@@ -32,6 +32,7 @@ Two pages, one design system, zero dependencies.
 ### Run it
 
 ```bash
+# From the folder containing index.html
 python3 -m http.server 8787
 ```
 → http://localhost:8787/

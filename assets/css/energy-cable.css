@@ -1,0 +1,41 @@
+/* A continuous cable lives in the page margins, beneath the actual content. */
+.has-energy-cable { position:relative; isolation:isolate; }
+.has-energy-cable .sec > .wrap { position:relative; z-index:3; }
+.has-energy-cable .footer { position:relative; z-index:3; }
+.energy-cable {
+  --cable-color:#8c9590;
+  --cable-rail:#b7beb9;
+  --cable-surface:#f7f8f5;
+  position:absolute; left:0; width:100%; z-index:2; pointer-events:none;
+  overflow:hidden; opacity:0; contain:layout style; user-select:none;
+}
+.energy-cable.is-ready { opacity:1; }
+.energy-cable svg { display:block; width:100%; height:100%; overflow:visible; }
+.energy-cable svg > path { stroke-linecap:round; stroke-linejoin:round; }
+.energy-cable__rail { stroke:var(--cable-rail); stroke-width:1.5; opacity:.36; }
+.energy-cable__glow { stroke:#95db67; stroke-width:16; opacity:0; transition:opacity .6s ease; }
+.energy-cable__wire,.energy-cable__shine { stroke-dasharray:var(--cable-length); stroke-dashoffset:var(--cable-offset,var(--cable-length)); }
+.energy-cable__wire { stroke:var(--cable-color); stroke-width:6; transition:stroke .6s ease; }
+.energy-cable__shine { stroke:#fff; stroke-width:1.2; opacity:.48; }
+.energy-cable__battery { color:var(--cable-color); transition:color .6s ease; }
+.energy-cable__case { fill:var(--cable-surface); stroke:currentColor; stroke-width:2; }
+.energy-cable__terminal,.energy-cable__cell { fill:currentColor; }
+.energy-cable__cell { opacity:.65; transition:opacity .6s ease; }
+.energy-cable__battery--destination .energy-cable__cell { opacity:.12; }
+.energy-cable__plug { fill:var(--cable-surface); stroke:var(--cable-color); stroke-width:2; opacity:0; }
+.energy-cable.is-connected { --cable-color:#95db67; }
+.energy-cable.is-connected .energy-cable__glow { opacity:.14; }
+.energy-cable.is-connected .energy-cable__cell { opacity:1; }
+:root[data-theme="dark"] .energy-cable { --cable-rail:#69746d; --cable-surface:#172018; }
+@media (max-width:779px) {
+  .energy-cable__wire { stroke-width:3; }
+  .energy-cable__shine { stroke-width:.65; }
+  .energy-cable__glow { stroke-width:8; }
+  .energy-cable__plug { display:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .energy-cable * { transition:none; }
+}
+@media print {
+  .energy-cable { display:none; }
+}

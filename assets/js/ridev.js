@@ -19,6 +19,31 @@
   function each(name, fn) { $$('[data-r="' + name + '"]').forEach(fn); }
   function fill(name, html) { each(name, function (el) { el.innerHTML = html; }); }
 
+  // Scroll only the tab row, so choosing a city never shifts the whole page.
+  function revealTab(tab) {
+    var row = tab.parentElement;
+    if (row.scrollWidth <= row.clientWidth) return;
+    var bounds = row.getBoundingClientRect();
+    var rect = tab.getBoundingClientRect();
+    if (rect.left < bounds.left) row.scrollLeft += rect.left - bounds.left - 4;
+    else if (rect.right > bounds.right) row.scrollLeft += rect.right - bounds.right + 4;
+  }
+  function wireTabKeys(tabs, select) {
+    tabs.forEach(function (tab, index) {
+      tab.addEventListener('keydown', function (event) {
+        var next;
+        if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        tabs[next].focus({ preventScroll: true });
+        select(tabs[next]);
+      });
+    });
+  }
+
   /* Product shots: the line mark shows by default and is only hidden once a real
      image actually loads, so there is never an empty box. A few extensions are
      tried in turn, so whatever the team exports (.png / .webp / .jpg) just works. */
@@ -139,9 +164,32 @@
       window.addEventListener('scroll', onScroll, { passive: true });
       window.addEventListener('ridev:view', onScroll);
       var burger = nav.querySelector('.nav__burger');
-      if (burger) burger.addEventListener('click', function () { nav.classList.toggle('open'); });
+      function setMenu(open) {
+        nav.classList.toggle('open', open);
+        if (burger) {
+          burger.setAttribute('aria-expanded', String(open));
+          burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        }
+        if (open) {
+          var firstLink = nav.querySelector('.nav__links a');
+          if (firstLink) firstLink.focus({ preventScroll: true });
+        }
+      }
+      if (burger) burger.addEventListener('click', function () { setMenu(!nav.classList.contains('open')); });
       $$('.nav__links a', nav).forEach(function (a) {
-        a.addEventListener('click', function () { nav.classList.remove('open'); });
+        a.addEventListener('click', function () { setMenu(false); });
+      });
+      nav.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && nav.classList.contains('open')) { setMenu(false); if (burger) burger.focus(); }
+      });
+      document.addEventListener('pointerdown', function (event) {
+        if (!nav.contains(event.target)) setMenu(false);
+      });
+      nav.addEventListener('focusout', function (event) {
+        if (event.relatedTarget && !nav.contains(event.relatedTarget)) setMenu(false);
+      });
+      matchMedia('(min-width:1101px)').addEventListener('change', function (event) {
+        if (event.matches) setMenu(false);
       });
     });
   }
@@ -173,16 +221,15 @@
     // slug: lowercase, hyphenated — matches filenames in assets/img/oem/ and /delivery/
     function slugName(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 
-    // Logo wall: container-free logos on an endless marquee. Each item stacks a one-colour
-    // silhouette (mono/{slug}.png) over a dark-background colour version (ondark/{slug}.png);
-    // CSS crossfades to colour on hover. If the silhouette is missing the brand name shows instead.
+    // Full-colour logos on an endless marquee, with artwork for each background.
+    // CSS displays one theme variant; a missing image falls back to the brand name.
     function logoItem(dir, b, copy) {
       var slug = slugName(b);
-      return '<li class="logowall__item" title="' + b + '"' + (copy ? ' aria-hidden="true"' : '') + '>' +
-               '<img class="logowall__mono" src="assets/img/' + dir + '/mono/' + slug + '.png" alt="' + (copy ? '' : b) + '" ' +
+      return '<li class="logowall__item"' + (copy ? ' aria-hidden="true"' : '') + '>' +
+               '<img class="logowall__color logowall__color--light" src="assets/img/' + (dir === 'delivery' ? 'delivery/onlight' : dir) + '/' + slug + '.png" alt="' + (copy ? '' : b) + '" ' +
                     'onerror="this.parentNode.classList.add(\'is-text\')">' +
-               '<img class="logowall__color" src="assets/img/' + dir + '/ondark/' + slug + '.png" alt="" aria-hidden="true" ' +
-                    'onerror="this.remove()">' +
+               '<img class="logowall__color logowall__color--dark" src="assets/img/' + dir + '/ondark/' + slug + '.png" alt="' + (copy ? '' : b) + '" ' +
+                    'onerror="this.parentNode.classList.add(\'is-text\')">' +
                '<span class="logowall__name">' + b + '</span>' +
              '</li>';
     }
@@ -222,206 +269,86 @@
     fill('deliveryCount', delivery.length + ' platforms');
   })();
 
-  /* ============================================================
-     Impact band + rider testimonials
-     ============================================================ */
+  /* Rental showcase: three-second rotation, manual controls and deferred video. */
   (function () {
-    var slider = document.querySelector('[data-hero-slider]');
-    if (!slider) return;
+    var showcase = $('[data-mobility-showcase]');
+    if (!showcase) return;
+    var panels = $$('[data-ride-panel]', showcase);
+    var tabs = $$('[data-ride-tab]', showcase);
+    var motion = matchMedia('(prefers-reduced-motion: reduce)');
+    var current = 0;
+    var timer = null;
+    var hovered = false;
+    var inView = true;
 
-    var track = slider.querySelector('.hero__track');
-    var slides = Array.prototype.slice.call(slider.querySelectorAll('.hero__slide'));
-    var dots = Array.prototype.slice.call(slider.querySelectorAll('.hero__dot'));
-    var prev = slider.querySelector('[data-hero-prev]');
-    var next = slider.querySelector('[data-hero-next]');
-    var index = 0;
-    var hero = slider.closest('.hero');
-    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var autoTimer = null;
-    var AUTO_MS = 6000;
-    var watching = false;  // viewer is playing an embedded video — autoplay stays off until they change slide
-    var primarySlide = slider.querySelector('.hero__slide--primary');
-    if (primarySlide) {
-      var heroBackground = new Image();
-      heroBackground.onload = function () { primarySlide.classList.add('has-hero-bg'); };
-      heroBackground.src = 'assets/img/image.png';
+    function canRotate() {
+      var focused = document.activeElement;
+      return !motion.matches && !hovered && inView && !document.hidden &&
+        !showcase.contains(focused);
     }
-
-    // stop any embedded video on a slide that's being left (re-setting src resets the player)
-    function stopMedia(slide) {
-      if (!slide) return;
-      slide.querySelectorAll('iframe').forEach(function (f) {
-        var src = f.getAttribute('src');
-        if (src && src !== 'about:blank') f.setAttribute('src', src);
-      });
-    }
-    function pause() { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); }
-
-    function render() {
-      if (slider.dataset.activeSlide && +slider.dataset.activeSlide !== index) stopMedia(slides[+slider.dataset.activeSlide]);
-      track.style.transform = 'translateX(-' + (index * 100) + '%)';
-      slider.dataset.activeSlide = String(index);
-      if (hero) hero.dataset.activeSlide = String(index);
-      dots.forEach(function (dot, i) { dot.classList.toggle('is-active', i === index); });
-    }
-
     function schedule() {
-      if (reduce || slides.length < 2 || watching) return;
-      clearTimeout(autoTimer);
-      slider.classList.remove('is-autoplaying');
-      void slider.offsetWidth;
-      slider.classList.add('is-autoplaying');
-      autoTimer = setTimeout(function () {
-        index = (index + 1) % slides.length;
-        render();
-        schedule();
-      }, AUTO_MS);
+      clearTimeout(timer);
+      timer = null;
+      if (!canRotate()) return;
+      timer = setTimeout(function () {
+        if (canRotate()) show(current + 1, false);
+        else schedule();
+      }, 3000);
     }
-
-    function moveTo(nextIndex) {
-      watching = false;  // the viewer moved on themselves, so autoplay may resume
-      index = (nextIndex + slides.length) % slides.length;
-      render();
+    function show(index, focus) {
+      var next = (index + panels.length) % panels.length;
+      var changed = next !== current;
+      current = next;
+      panels.forEach(function (panel, i) {
+        var active = i === current;
+        panel.hidden = !active;
+        panel.classList.remove('is-entering');
+        if (active && changed && !motion.matches) {
+          void panel.offsetWidth;
+          panel.classList.add('is-entering');
+        }
+        $$('iframe[data-src]', panel).forEach(function (video) {
+          if (active && !video.hasAttribute('src')) video.src = video.dataset.src;
+          if (!active && video.hasAttribute('src')) video.removeAttribute('src');
+        });
+        tabs[i].setAttribute('aria-selected', String(active));
+        tabs[i].tabIndex = active ? 0 : -1;
+      });
+      if (focus) tabs[current].focus();
       schedule();
     }
-
-    prev && prev.addEventListener('click', function () {
-      moveTo(index - 1);
-    });
-
-    next && next.addEventListener('click', function () {
-      moveTo(index + 1);
-    });
-
-    dots.forEach(function (dot) {
-      dot.addEventListener('click', function () {
-        moveTo(Number(dot.dataset.heroDot || 0));
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener('click', function () { show(i, false); });
+      tab.addEventListener('keydown', function (event) {
+        var next = event.key === 'ArrowRight' ? current + 1 :
+          event.key === 'ArrowLeft' ? current - 1 :
+          event.key === 'Home' ? 0 : event.key === 'End' ? panels.length - 1 : null;
+        if (next !== null) { event.preventDefault(); show(next, true); }
       });
     });
-
-    slider.addEventListener('mouseenter', function () { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); });
-    slider.addEventListener('mouseleave', schedule);
-    slider.addEventListener('focusin', function () { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); });
-    slider.addEventListener('focusout', function (event) {
-      if (!slider.contains(event.relatedTarget)) schedule();
-    });
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { clearTimeout(autoTimer); slider.classList.remove('is-autoplaying'); }
-      else schedule();
-    });
-    // Clicks and taps inside the Instagram / YouTube players never reach this page, but focus
-    // moving into the player blurs the window — that's the signal someone pressed play.
-    window.addEventListener('blur', function () {
-      setTimeout(function () {
-        var a = document.activeElement;
-        if (a && a.tagName === 'IFRAME' && slider.contains(a)) { watching = true; pause(); }
-      }, 0);
-    });
-
-    var hubPreview = slider.querySelector('[data-hub-preview]');
-    if (hubPreview) {
-      var hubStage = hubPreview.querySelector('[data-hub-stage]');
-      var hubName = hubPreview.querySelector('[data-hub-name]');
-      var hubStatus = hubPreview.querySelector('[data-hub-status]');
-      var hubMap = hubPreview.querySelector('[data-hub-map]');
-      var hubRoute = slider.querySelector('[data-hub-route]');
-      var hubStops = Array.prototype.slice.call(slider.querySelectorAll('[data-hub-state]'));
-      if (hubRoute) hubRoute.style.setProperty('--n', hubStops.length);
-
-      // Route map: real India geometry, cropped to the hub cities, with a curved route
-      // from the launch hub (first stop) out to every upcoming city.
-      var M = window.RIDEV_INDIA;
-      if (hubMap && M) {
-        var pr = M.proj;
-        var hubPts = hubStops.map(function (stop) {
-          var name = stop.querySelector('span').textContent;
-          var c = (D.cities || []).filter(function (x) { return x.city === name; })[0];
-          return c && c.lat ? { key: stop.dataset.hubState, name: name,
-            x: pr.padx + (c.lon - pr.lon0) * pr.sx, y: pr.pady + (pr.latTop - c.lat) * pr.sy } : null;
-        });
-        if (hubPts.every(Boolean)) {
-          var o = hubPts[0];
-          var xs = hubPts.map(function (p) { return p.x; }), ys = hubPts.map(function (p) { return p.y; });
-          var minX = Math.min.apply(null, xs) - 26, minY = Math.min.apply(null, ys) - 22;
-          var vbW = Math.max.apply(null, xs) + 30 - minX, vbH = Math.max.apply(null, ys) + 22 - minY;
-          hubMap.setAttribute('viewBox', [minX, minY, vbW, vbH].map(function (n) { return n.toFixed(1); }).join(' '));
-          var routes = hubPts.slice(1).map(function (p) {
-            // bow each route sideways so the lines read as journeys, not straight rulers
-            var mx = (o.x + p.x) / 2, my = (o.y + p.y) / 2, dx = p.x - o.x, dy = p.y - o.y;
-            var cx = mx - dy * 0.22, cy = my + dx * 0.22;
-            return '<path class="hubs__path" id="hubroute-' + p.key + '" data-route="' + p.key + '" d="M' +
-              o.x.toFixed(1) + ',' + o.y.toFixed(1) + ' Q' + cx.toFixed(1) + ',' + cy.toFixed(1) + ' ' +
-              p.x.toFixed(1) + ',' + p.y.toFixed(1) + '"/>';
-          }).join('');
-          var pins = hubPts.map(function (p, i) {
-            // launch hub labelled underneath (Chennai shares its latitude), the rest to the right
-            var nearRight = p.x > minX + vbW * 0.72;  // keep labels near the right edge out of the fade
-            var label = i === 0 ? '<text x="0" y="9" text-anchor="middle">'
-              : nearRight ? '<text x="-5" y="1.8" text-anchor="end">' : '<text x="5" y="1.8">';
-            return '<g class="hubs__pin' + (i === 0 ? ' is-live' : '') + '" data-pin="' + p.key + '" transform="translate(' +
-              p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')">' +
-              (i === 0 ? '<circle class="hubs__ring" r="3"/>' : '') +
-              '<circle class="hubs__dot" r="' + (i === 0 ? 2.4 : 2) + '"/>' +
-              label + p.name + '</text></g>';
-          }).join('');
-          hubMap.innerHTML =
-            '<path class="hubs__land" d="' + M.country + '"/>' +
-            M.states.map(function (d) { return '<path class="hubs__state" d="' + d + '"/>'; }).join('') +
-            routes + '<g data-hub-rider></g>' + pins;
-          hubMap.addEventListener('click', function (e) {
-            var pin = e.target.closest('[data-pin]');
-            if (pin) showHub(pin.getAttribute('data-pin'));
-          });
-        }
-      }
-
-      function showHub(state) {
-        var active = 0;
-        hubStops.forEach(function (stop, i) {
-          var on = stop.dataset.hubState === state;
-          if (on) active = i;
-          stop.classList.toggle('is-active', on);
-          stop.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
-        hubStops.forEach(function (stop, i) { stop.classList.toggle('is-passed', i < active); });
-        if (hubRoute) hubRoute.style.setProperty('--p', active);
-        var stop = hubStops[active];
-
-        // map: light the selected route and send a rider dot along it
-        if (hubMap) {
-          $$('[data-route]', hubMap).forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-route') === state); });
-          $$('[data-pin]', hubMap).forEach(function (g) { g.classList.toggle('is-active', g.getAttribute('data-pin') === state); });
-          var rider = $('[data-hub-rider]', hubMap);
-          if (rider) rider.innerHTML = active && !reduce
-            ? '<circle class="hubs__rider" r="1.5"><animateMotion dur="2.6s" repeatCount="indefinite">' +
-              '<mpath href="#hubroute-' + state + '"/></animateMotion></circle>'
-            : '';
-        }
-
-        // reel: cities with a launch video play it; the rest show an "opening soon" card
-        var video = hubStage.querySelector('iframe');
-        if (stop.dataset.hubVideo) {
-          if (video && video.getAttribute('src') !== stop.dataset.hubVideo) video.setAttribute('src', stop.dataset.hubVideo);
-          hubStage.classList.remove('is-soon');
-        } else {
-          if (video) video.setAttribute('src', 'about:blank');  // stop playback while hidden
-          if (hubName) hubName.textContent = stop.querySelector('span').textContent;
-          if (hubStatus) hubStatus.textContent = stop.querySelector('small').textContent;
-          hubStage.classList.add('is-soon');
-        }
-        hubPreview.classList.remove('is-changing');
-        void hubPreview.offsetWidth;
-        hubPreview.classList.add('is-changing');
-      }
-
-      hubStops.forEach(function (stop) {
-        stop.addEventListener('click', function () { showHub(stop.dataset.hubState); });
+    $('[data-ride-prev]', showcase).addEventListener('click', function () { show(current - 1, false); });
+    $('[data-ride-next]', showcase).addEventListener('click', function () { show(current + 1, false); });
+    panels.forEach(function (panel) {
+      panel.addEventListener('pointerenter', function (event) {
+        if (event.pointerType === 'touch') return;
+        hovered = true;
+        schedule();
       });
-      if (hubStops.length) showHub(hubStops[0].dataset.hubState);
+      panel.addEventListener('pointerleave', function () { hovered = false; schedule(); });
+    });
+    showcase.addEventListener('focusin', schedule);
+    showcase.addEventListener('focusout', function () { setTimeout(schedule, 0); });
+    window.addEventListener('blur', schedule);
+    window.addEventListener('focus', schedule);
+    document.addEventListener('visibilitychange', schedule);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        inView = entries[0].isIntersecting;
+        schedule();
+      }, { threshold:0 }).observe(showcase);
     }
-
-    render();
-    schedule();
+    motion.addEventListener('change', schedule);
+    show(0, false);
   })();
 
   (function(){
@@ -498,6 +425,39 @@
       '<h3 class="h-sm">' + c.t + '</h3><p class="mt-s">' + c.b + '</p></article>';
   }).join(''));
 
+  /* ============================================================
+     calm & clear layouts: everything visible, no sliders
+     ============================================================ */
+  // how it works — six numbered steps in a grid
+  fill('howSteps', (D.onboarding || []).map(function (s, i) {
+    return '<li class="step6 rv">' +
+      '<div class="step6__ph"><img src="assets/img/steps/' + s.k + '.jpg" alt="" loading="lazy" onerror="this.parentNode.remove()"></div>' +
+      '<div class="step6__body"><span class="step6__n">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<h3 class="step6__t">' + s.t + '</h3><p class="step6__b">' + s.b + '</p></div></li>';
+  }).join(''));
+
+  // riders — every quote on screen at once
+  fill('riderQuotes', (D.testimonials || []).map(function (q) {
+    return '<figure class="rquote rv">' +
+      '<svg class="rquote__mark" viewBox="0 0 42 32" aria-hidden="true"><path fill="currentColor" d="M0 20c0-8 4-15 12-20l4 6c-5 3-8 7-8 12h8v14H0V20zm22 0c0-8 4-15 12-20l4 6c-5 3-8 7-8 12h8v14H22V20z"/></svg>' +
+      '<blockquote>' + q.quote + '</blockquote>' +
+      '<figcaption><b>' + q.name + '</b><span>' + q.role + '</span></figcaption>' +
+    '</figure>';
+  }).join(''));
+
+  // impact — environmental / social / governance side by side
+  fill('impactColumns', ((D.esg || {}).pillars || []).map(function (p) {
+    return '<article class="pillar3 rv">' +
+      (p.image ? '<div class="pillar3__ph"><img src="' + p.image + '" alt="" loading="lazy" onerror="this.parentNode.remove()"></div>' : '') +
+      '<div class="pillar3__body">' +
+      '<div class="pillar3__hd"><span class="pillar3__k">' + p.k + '</span><h3>' + p.title + '</h3></div>' +
+      '<p class="pillar3__lead">' + p.lead + '</p>' +
+      (p.stat ? '<div class="pillar3__stat"><b>' + p.stat.n + '</b><span>' + p.stat.l + '</span></div>' : '') +
+      '<ul class="pillar3__pts">' + (p.points || []).slice(0, 3).map(function (x) { return '<li>' + CHK + '<span>' + x + '</span></li>'; }).join('') + '</ul>' +
+      '</div>' +
+    '</article>';
+  }).join(''));
+
   /* --- Included slider: horizontal snap-scroll + progress bar + in-view fade --- */
   (function () {
     var viewport = $('.includedslider__viewport');
@@ -550,14 +510,68 @@
   /* ============================================================
      pricing — city tabs
      ============================================================ */
-  each('planGrid', function (planWrap) {
-    var tabsBox = (planWrap.closest('.wrap') || document).querySelector('[data-r="planTabs"]');
+  each('planGrid', function (planWrap, gridIndex) {
+    var section = planWrap.closest('.wrap') || document;
+    var tabsBox = section.querySelector('[data-r="planTabs"]');
+    var summary = section.querySelector('[data-plan-summary]');
+    var controls = section.querySelector('[data-plan-nav]');
+    var previousButton = section.querySelector('[data-plan-prev]');
+    var nextButton = section.querySelector('[data-plan-next]');
+    var position = section.querySelector('[data-plan-position]');
+    var renderTimer = 0, settleTimer = 0, scrollFrame = 0;
+    var panelId = 'plan-options-' + gridIndex;
+    planWrap.id = panelId;
+    planWrap.setAttribute('role', 'tabpanel');
+    planWrap.tabIndex = 0;
     var cityKeys = Object.keys(D.plans);
     if (tabsBox) tabsBox.innerHTML = cityKeys.map(function (c, i) {
-      return '<button class="tab" role="tab" data-city="' + c + '" aria-selected="' + (i === 0) + '">' + c + '</button>';
+      return '<button class="tab" type="button" role="tab" id="' + panelId + '-tab-' + i + '" aria-controls="' + panelId + '" tabindex="' + (i === 0 ? '0' : '-1') + '" data-city="' + c + '" aria-selected="' + (i === 0) + '">' + c + '</button>';
     }).join('');
 
+    function currentCard() {
+      var cards = $$('.plan', planWrap);
+      var first = cards[0];
+      if (!first) return 0;
+      var width = first.getBoundingClientRect().width + (parseFloat(getComputedStyle(planWrap).columnGap) || 0);
+      return Math.min(cards.length - 1, Math.max(0, Math.round(planWrap.scrollLeft / width)));
+    }
+    function updateControls() {
+      if (!controls) return;
+      var count = planWrap.children.length;
+      var overflowing = planWrap.scrollWidth > planWrap.clientWidth + 2;
+      var index = currentCard();
+      controls.hidden = !overflowing || count < 2;
+      previousButton.disabled = planWrap.scrollLeft <= 2;
+      nextButton.disabled = planWrap.scrollLeft >= planWrap.scrollWidth - planWrap.clientWidth - 2;
+      position.textContent = (index + 1) + ' / ' + count;
+      position.setAttribute('aria-label', 'Plan ' + (index + 1) + ' of ' + count);
+    }
+    function scrollPlan(direction) {
+      var cards = $$('.plan', planWrap);
+      var index = Math.max(0, Math.min(cards.length - 1, currentCard() + direction));
+      if (!cards[index]) return;
+      var firstRect = cards[0].getBoundingClientRect();
+      var targetRect = cards[index].getBoundingClientRect();
+      planWrap.scrollTo({ left: targetRect.left - firstRect.left, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    }
+    if (controls) {
+      previousButton.setAttribute('aria-controls', panelId);
+      nextButton.setAttribute('aria-controls', panelId);
+      previousButton.addEventListener('click', function () { scrollPlan(-1); });
+      nextButton.addEventListener('click', function () { scrollPlan(1); });
+      planWrap.addEventListener('scroll', function () {
+        if (scrollFrame) return;
+        scrollFrame = requestAnimationFrame(function () { scrollFrame = 0; updateControls(); });
+      }, { passive: true });
+      if ('ResizeObserver' in window) new ResizeObserver(updateControls).observe(planWrap);
+      else window.addEventListener('resize', updateControls);
+    }
+
     function render(city, direction) {
+      clearTimeout(renderTimer);
+      clearTimeout(settleTimer);
+      planWrap.classList.remove('has-switched');
+      planWrap.setAttribute('aria-busy', 'true');
       var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!reduce && planWrap.children.length) {
         planWrap.classList.add('is-switching');
@@ -593,14 +607,14 @@
           '<div class="plan__head"><span class="plan__brand">' + lead.brand + '</span>' +
             (best ? '<span class="plan__badge">Best range per ₹</span>' : '') + '</div>' +
           '<h3 class="plan__model">' + lead.model + '</h3>' +
+          '<div class="plan__ph">' + pic + MARK + '</div>' +
           '<div class="plan__pricing">' +
             '<div>' +
               '<div class="plan__price"><b>₹' + n(wk) + '</b><span>/ week</span></div>' +
               '<div class="plan__mo">' + inr(lead.month) + ' for 4 weeks' +
-                (lead.rate_from ? ' · <span class="plan__ind" title="Not yet configured in EV Master for this city">indicative</span>' : '') +
+                (lead.rate_from ? ' · <span class="plan__ind" title="Estimated rate. Confirm current pricing in the RIDEV app.">indicative</span>' : '') +
               '</div>' +
             '</div>' +
-            '<div class="plan__ph">' + pic + MARK + '</div>' +
           '</div>' +
           '<dl class="plan__specs">' +
             '<div><dt>Range</dt><dd>' + lead.range_km + ' km</dd></div>' +
@@ -611,36 +625,48 @@
                 rest.map(function (r) { return '<span class="plan__chip">' + r.brand + ' ' + r.model + '</span>'; }).join('') +
               '</div>'
             : '') +
-          '<div class="plan__cta"><a class="btn ' + (best ? 'btn--primary' : 'btn--ghost') + '" href="#get">Reserve</a></div>' +
+          '<div class="plan__included">Battery swaps · Maintenance · Insurance</div>' +
+          '<div class="plan__cta"><a class="btn ' + (best ? 'btn--primary' : 'btn--ghost') + '" href="' + D.app.play_url + '" target="_blank" rel="noopener noreferrer">Book in the app <span aria-hidden="true">↗</span></a></div>' +
         '</article>';
       }).join('');
       function paint() {
         planWrap.innerHTML = html;
         planWrap.style.setProperty('--count', prices.length);  // grid always fills the row
         planWrap.dataset.count = prices.length;                  // lets CSS compact 4-up rows / cap a lone card
+        planWrap.setAttribute('aria-labelledby', panelId + '-tab-' + cityKeys.indexOf(city));
+        planWrap.setAttribute('aria-busy', 'false');
+        planWrap.scrollLeft = 0;
+        if (summary) summary.textContent = prices.length + (prices.length === 1 ? ' weekly plan in ' : ' weekly plans in ') + city;
         planWrap.classList.remove('is-switching');
         planWrap.classList.add('has-switched');
-        window.setTimeout(function () { planWrap.classList.remove('has-switched'); }, 620);
+        settleTimer = window.setTimeout(function () { planWrap.classList.remove('has-switched'); }, 620);
+        updateControls();
         observeAll();
       }
       if (!reduce && planWrap.classList.contains('is-switching')) {
-        window.setTimeout(paint, 180);
+        renderTimer = window.setTimeout(paint, 180);
       } else {
         paint();
       }
     }
 
     render(cityKeys[0]);
-    if (tabsBox) $$('.tab', tabsBox).forEach(function (t) {
-        t.addEventListener('click', function () {
-          var previous = cityKeys.indexOf(tabsBox.querySelector('[aria-selected="true"]').dataset.city);
-          var next = cityKeys.indexOf(t.dataset.city);
-          var direction = next >= previous ? 'next' : 'prev';
-        $$('.tab', tabsBox).forEach(function (x) { x.setAttribute('aria-selected', 'false'); });
-        t.setAttribute('aria-selected', 'true');
-          render(t.dataset.city, direction);
-      });
-    });
+    if (tabsBox) {
+      var tabs = $$('.tab', tabsBox);
+      function selectTab(tab) {
+        revealTab(tab);
+        if (tab.getAttribute('aria-selected') === 'true') return;
+        var previous = cityKeys.indexOf(tabsBox.querySelector('[aria-selected="true"]').dataset.city);
+        var next = cityKeys.indexOf(tab.dataset.city);
+        tabs.forEach(function (t) {
+          t.setAttribute('aria-selected', String(t === tab));
+          t.tabIndex = t === tab ? 0 : -1;
+        });
+        render(tab.dataset.city, next >= previous ? 'next' : 'prev');
+      }
+      tabs.forEach(function (tab) { tab.addEventListener('click', function () { selectTab(tab); }); });
+      wireTabKeys(tabs, selectTab);
+    }
   });
 
   /* ============================================================
@@ -656,29 +682,28 @@
   var HUB_ICO = '<svg viewBox="0 0 160 100" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">' +
     '<path d="M22 82h116M34 82V52l46-23 46 23v30M56 82V60h18v22M100 82V60h18v22"/><circle cx="80" cy="22" r="6"/></svg>';
 
-  /* Hub explorer: pick a city → its hubs, one large photo preview at a time.
-     Photos: assets/img/hubs/{city}-{hub}.png|webp|jpg (see the README there); until one
-     exists the preview shows a quiet placeholder. The map zooms to whichever city is picked. */
-  each('cityList', function (host) {
+  /* Hub explorer: configure cities[].hubs[].image for real hub photography.
+     Hubs without an image use the location illustration without probing missing files. */
+  each('cityList', function (host, hostIndex) {
+    var panelId = 'hub-options-' + hostIndex;
     host.innerHTML =
       '<div class="hubx">' +
         '<div class="hubx__cities" role="tablist" aria-label="Choose a city">' +
-          D.cities.map(function (c) {
+          D.cities.map(function (c, i) {
             var live = c.status === 'live';
-            return '<button class="hubx__city' + (live ? '' : ' is-soon') + '" type="button" role="tab" aria-selected="false" data-city="' + c.city + '">' +
+            return '<button class="hubx__city' + (live ? '' : ' is-soon') + '" type="button" role="tab" id="' + panelId + '-tab-' + i + '" aria-controls="' + panelId + '" tabindex="-1" aria-selected="false" data-city="' + c.city + '">' +
               c.city + '<sup>' + (live ? c.hubs.length : 'soon') + '</sup></button>';
           }).join('') +
         '</div>' +
-        '<div class="hubx__panel" data-hubx-panel aria-live="polite"></div>' +
+        '<div class="hubx__panel" id="' + panelId + '" role="tabpanel" tabindex="0" data-hubx-panel aria-live="polite"></div>' +
       '</div>';
     var panel = $('[data-hubx-panel]', host);
     var tabs = $$('.hubx__city', host);
 
     function preview(c, h) {
-      var slug = slugify(c.city) + '-' + slugify(h.name);
       return '<figure class="hubx__preview">' +
-          '<div class="hubx__ph" aria-hidden="true">' + HUB_ICO + '<span>Hub photo coming soon</span></div>' +
-          shot('assets/img/hubs/' + slug + '.jpg', 'hubx__img', h.name + ' — RIDEV hub, ' + c.city, '.hubx__preview') +
+          '<div class="hubx__ph" aria-hidden="true">' + HUB_ICO + '<span>Your local RIDEV hub</span></div>' +
+          (h.image ? '<img class="hubx__img" src="' + h.image + '" alt="' + h.name + ' — RIDEV hub, ' + c.city + '" loading="lazy" onload="this.closest(\'.hubx__preview\').classList.add(\'is-loaded\')" onerror="this.remove()">' : '') +
           '<figcaption class="hubx__cap">' +
             '<span><b>' + h.name + '</b><small>' + (h.area || c.city) + '</small></span>' +
             '<a href="' + mapsUrl(h.address || (h.name + ', ' + c.city + ', ' + c.state)) + '" target="_blank" rel="noopener noreferrer">' +
@@ -712,6 +737,8 @@
         var on = t.dataset.city === city;
         t.classList.toggle('is-active', on);
         t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        if (on) { panel.setAttribute('aria-labelledby', t.id); revealTab(t); }
       });
       panel.innerHTML =
         '<div class="hubx__head">' +
@@ -738,8 +765,35 @@
       if (!fromMap) document.dispatchEvent(new CustomEvent('ridev:city', { detail: { city: city } }));
     }
     tabs.forEach(function (t) { t.addEventListener('click', function () { select(t.dataset.city); }); });
+    wireTabKeys(tabs, function (tab) { select(tab.dataset.city); });
     document.addEventListener('ridev:pin', function (e) { select(e.detail.city, true); });
     select(D.cities[0].city, true);  // first city, map left at the full-India view
+  });
+
+  // Featured hub cards share the directory's city names and opening status.
+  each('heroHubCards', function (host) {
+    var featured = [
+      { city: 'Delhi', label: 'Delhi' },
+      { city: 'Bengaluru', label: 'Bangalore' },
+      { city: 'Chennai', label: 'Chennai' },
+      { city: 'Jaipur', label: 'Jaipur' }
+    ];
+    var pin = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+    host.innerHTML = featured.map(function (item) {
+      var city = D.cities.find(function (c) { return c.city === item.city; });
+      if (!city) return '';
+      var status = city.hero_badge || (city.status === 'live' ? 'Hubs open' : 'Coming soon');
+      return '<a class="hub-city-card' + (city.status === 'live' ? '' : ' is-soon') + '" href="#cities" data-hub-city="' + city.city + '" aria-label="Explore ' + item.label + ' hubs — ' + status + '">' +
+        pin + '<span class="hub-city-card__name">' + item.label + '</span>' +
+        '<span class="hub-city-card__arrow" aria-hidden="true">↗</span>' +
+        '<span class="hub-city-card__status">' + status + '</span></a>';
+    }).join('');
+    $$('[data-hub-city]', host).forEach(function (link) {
+      link.addEventListener('click', function () {
+        document.dispatchEvent(new CustomEvent('ridev:pin', { detail: { city: link.dataset.hubCity } }));
+        document.dispatchEvent(new CustomEvent('ridev:city', { detail: { city: link.dataset.hubCity } }));
+      });
+    });
   });
 
   fill('footerCities', D.cities.map(function (c) {
@@ -750,8 +804,8 @@
 
   /* ============================================================
      India map — political map (MapChart base) split into three greyscale
-     masks in assets/img/map/: land, state borders, coastline. CSS paints them
-     with theme colours, so the map follows light/dark mode. Pins use a
+     masks in assets/img/map/: land, state borders, coastline. The forest
+     panel keeps labels and city markers legible in both themes. Pins use a
      projection fitted to the image (lon/lat → map units, ~1–2 px accurate).
      ============================================================ */
   (function () {
@@ -772,55 +826,80 @@
       // true position; the optional dx/dy nudge (keeps close pins like Delhi/Gurugram apart)
       // is applied inside the counter-scaled body, so it stays a few screen px at any zoom
       var x = xy[0], y = xy[1], nudge = (c.dx || c.dy) ? ' transform="translate(' + (c.dx || 0) + ',' + (c.dy || 0) + ')"' : '';
-      var hubs = live ? c.hubs.map(function (h) { return h.name; }).join(' · ') : 'Opening next';
-      var w = Math.max(120, hubs.length * 5.4 + 40);
-      var flip = y > M.h * 0.66;
-      var tipH = live ? 60 : 32;
-      var ty = flip ? -(tipH + 8) : 16;
-      pinData[c.city] = { x: x, y: y, live: live, lat: c.lat, lon: c.lon, state: c.state };
-      var mapsHref = mapsUrl(c.city + ', ' + c.state + ', India');
+      var hubs = live ? c.hubs.length + (c.hubs.length === 1 ? ' live hub' : ' live hubs') : 'Opening soon';
+      pinData[c.city] = { x: x, y: y, live: live, lat: c.lat, lon: c.lon, state: c.state, hubs: c.hubs.length };
       return '<g class="pin' + (live ? '' : ' pin--soon') + '" data-city="' + c.city +
              '" transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')" tabindex="0" role="button" ' +
-             'aria-label="' + c.city + ' — ' + hubs + ' — click to zoom, then open on maps">' +
+             'aria-pressed="false" aria-label="' + c.city + ' — ' + hubs + ' — select to explore">' +
         '<g class="pin__body">' +  // counter-scaled by CSS so pins stay the same size while zoomed
         '<g' + nudge + '>' +
-        (live ? '<circle class="pin__pulse" r="14"/>' : '') +
-        '<circle class="pin__burst" r="8"/>' +
+        '<circle class="pin__ring" r="8"/>' +
         '<circle class="pin__hit" r="20" fill="transparent"/>' +
-        '<circle class="pin__dot" r="' + (live ? (4.2 + Math.min(c.hubs.length, 4) * 0.8).toFixed(1) : 4) + '"/>' +  // bigger dot = more hubs
-        '<g class="pin__tip" transform="translate(0,' + ty + ')">' +
-          '<rect x="' + (-w / 2) + '" y="0" width="' + w + '" height="' + tipH + '" rx="10"/>' +
-          '<text class="pin__tipname" y="19" text-anchor="middle">' + c.city + '</text>' +
-          (live ? '<text class="pin__tiphub" y="34" text-anchor="middle">' + hubs + '</text>' : '') +
-          (live ? '<a class="pin__tipcta" href="' + mapsHref + '" target="_blank" rel="noopener noreferrer">' +
-                    '<text y="52" text-anchor="middle">Open on Google Maps ↗</text></a>' : '') +
-        '</g>' +
+        '<circle class="pin__dot" r="3.8"/>' +
+        (function () {  // A single city label; hub details live in the selection card.
+          var side = { Gurugram: 'left', Mumbai: 'left', Pune: 'left', Bengaluru: 'left', Jaipur: 'below' }[c.city] || 'right';
+          var lx = side === 'left' ? -11 : side === 'below' ? 0 : 11, ly = side === 'below' ? 17 : 3;
+          var anchor = side === 'left' ? 'end' : side === 'below' ? 'middle' : 'start';
+          return '<g class="pin__label"><text class="pin__lname" x="' + lx + '" y="' + ly + '" text-anchor="' + anchor + '">' + c.city + '</text></g>';
+        })() +
         '</g>' +
         '</g>' +
       '</g>';
     }).join('');
 
+    // curved links from the first hub city (where RIDEV started) to every other city
+    function netArcs() {
+      var live = D.cities.filter(function (c) { return pinData[c.city]; });
+      var origin = live.slice().sort(function (a, b) { return (+a.since || 9999) - (+b.since || 9999); })[0];
+      if (!origin) return '';
+      var o = pinData[origin.city];
+      return live.filter(function (c) { return c !== origin; }).map(function (c, i) {
+        var p = pinData[c.city], mx = (o.x + p.x) / 2, my = (o.y + p.y) / 2, dx = p.x - o.x, dy = p.y - o.y;
+        var cx = mx - dy * 0.2, cy = my + dx * 0.2;
+        return '<path class="net' + (c.status === 'live' ? '' : ' net--soon') + '" data-net="' + c.city + '" style="--i:' + i + '" d="M' +
+          o.x.toFixed(1) + ',' + o.y.toFixed(1) + ' Q' + cx.toFixed(1) + ',' + cy.toFixed(1) + ' ' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + '"/>';
+      }).join('');
+    }
+
+    var liveCities = D.cities.filter(function (c) { return c.status === 'live' && pinData[c.city]; });
+    var hubCount = liveCities.reduce(function (total, c) { return total + c.hubs.length; }, 0);
     fill('cityMap',
       '<div class="indiamap__wrap">' +
-        '<svg class="indiamap" viewBox="0 0 ' + M.w + ' ' + M.h + '" role="img" ' +
-          'aria-label="RIDEV operating cities across India">' +
+        '<div class="indiamap__head"><div><h3>Our hub network</h3><p>' + liveCities.length + ' live cities <span aria-hidden="true">·</span> ' + hubCount + ' hubs to keep you moving</p></div><span class="indiamap__country">India</span></div>' +
+        '<div class="indiamap__stage">' +
+        '<svg class="indiamap" viewBox="0 0 ' + M.w + ' ' + M.h + '" role="group" ' +
+          'aria-label="Explore RIDEV hubs across India. Select a city marker for details.">' +
           '<defs>' +
+            '<linearGradient id="im-terrain" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#638c62"/><stop offset="50%" stop-color="#3b6948"/><stop offset="100%" stop-color="#234a35"/></linearGradient>' +
+            '<mask id="im-land" maskUnits="userSpaceOnUse" x="0" y="0" width="' + M.w + '" height="' + M.h + '"><image href="' + M.img + 'land.png" width="' + M.w + '" height="' + M.h + '" preserveAspectRatio="none"/></mask>' +
+            '<mask id="im-coast" maskUnits="userSpaceOnUse" x="0" y="0" width="' + M.w + '" height="' + M.h + '"><image href="' + M.img + 'coast.png" width="' + M.w + '" height="' + M.h + '" preserveAspectRatio="none"/></mask>' +
             '<radialGradient id="im-glowgrad"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></radialGradient>' +
             '<mask id="im-glow" maskUnits="userSpaceOnUse" x="0" y="0" width="' + M.w + '" height="' + M.h + '">' +
               '<circle class="indiamap__glow" cx="-200" cy="-200" r="58" fill="url(#im-glowgrad)"/></mask>' +
+            '<mask id="im-states" maskUnits="userSpaceOnUse" x="0" y="0" width="' + M.w + '" height="' + M.h + '">' +
+              '<image href="' + M.img + 'states.png" width="' + M.w + '" height="' + M.h + '" preserveAspectRatio="none"/></mask>' +
           '</defs>' +
           '<g class="indiamap__zoomer">' +
+            '<rect class="indiamap__relief" width="' + M.w + '" height="' + M.h + '" transform="translate(0 4)" mask="url(#im-land)"/>' +
+            '<rect class="indiamap__terrain" width="' + M.w + '" height="' + M.h + '" fill="url(#im-terrain)" mask="url(#im-land)"/>' +
             '<path class="indiamap__dots"/>' +                                      // dot-matrix India (built below)
+            '<path class="indiamap__dots indiamap__heat indiamap__heat--1"/>' +    // coverage: dots near hub cities, tinted by distance
+            '<path class="indiamap__dots indiamap__heat indiamap__heat--2"/>' +
+            '<path class="indiamap__dots indiamap__heat indiamap__heat--3"/>' +
             '<path class="indiamap__dots indiamap__dots--lit" mask="url(#im-glow)"/>' + // the same dots, lit green around the focused city
+            '<rect class="indiamap__states" width="' + M.w + '" height="' + M.h + '" mask="url(#im-states)"/>' +   // hairline state borders
+            '<rect class="indiamap__coast" width="' + M.w + '" height="' + M.h + '" mask="url(#im-coast)"/>' +
+            '<g class="indiamap__net">' + netArcs() + '</g>' +                        // the network: first hub → every city
             pins +
           '</g>' +
         '</svg>' +
-        '<div class="indiamap__ticker" aria-hidden="true"><b data-map-year></b><span data-map-count></span></div>' +
-        '<button class="indiamap__reset" type="button" aria-label="Reset zoom">' +
+        '<button class="indiamap__reset" type="button" hidden aria-label="Show the full India map">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
             '<path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/>' +
-          '</svg><span>Reset view</span></button>' +
-        '<div class="indiamap__hint" role="status">Click a pin to zoom in · click again for Google Maps</div>' +
+          '</svg><span>All cities</span></button></div>' +
+        '<div class="indiamap__legend"><span><i class="lg-live" aria-hidden="true"></i>Live hubs</span><span><i class="lg-soon" aria-hidden="true"></i>Opening soon</span><span><i class="lg-net" aria-hidden="true"></i>Network</span></div>' +
+        '<div class="indiamap__selection"><div role="status" aria-live="polite" aria-atomic="true"><b data-map-city></b><span data-map-detail></span></div><button class="indiamap__explore" type="button">View hubs <span aria-hidden="true">↗</span></button></div>' +
+        '<p class="indiamap__hint">Select a city on the map to explore.</p>' +
       '</div>');
 
     function hot(city, on) {
@@ -836,8 +915,23 @@
     }
 
     /* --- dot-matrix land: a hex grid sampled from the land mask (same outline as the political map) --- */
-    var selected = null;
+    var selected = D.cities[0] && D.cities[0].city;
+    function selectCity(city) {
+      var p = pinData[city]; if (!p) return;
+      selected = city;
+      $$('.pin').forEach(function (pin) {
+        var active = pin.dataset.city === city;
+        pin.classList.toggle('is-selected', active);
+        pin.setAttribute('aria-pressed', String(active));
+      });
+      $('[data-map-city]').textContent = city;
+      $('[data-map-detail]').textContent = p.live ? p.hubs + (p.hubs === 1 ? ' hub' : ' hubs') + ' · ' + p.state : 'Opening soon · ' + p.state;
+      $('.indiamap__explore').firstChild.textContent = p.live ? 'View hubs ' : 'View city ';
+      $('.indiamap__explore').setAttribute('aria-label', 'Explore ' + city + (p.live ? ' hubs' : ' opening details'));
+      glowAt(city);
+    }
     function glowAt(city) {
+      $$('.net').forEach(function (n) { n.classList.toggle('is-on', n.getAttribute('data-net') === city); });
       var g = $('.indiamap__glow'), p = city && pinData[city];
       if (!g) return;
       g.setAttribute('cx', p ? p.x.toFixed(1) : -200);
@@ -850,64 +944,27 @@
         var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
         var ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, cw, ch);
         var px; try { px = ctx.getImageData(0, 0, cw, ch).data; } catch (e) { return; }
-        var S = 4.4, r = 1.05, d = '', row = 0;
+        var S = 4.4, r = 1.05, d = '', heat = ['', '', ''], row = 0;
+        var hubsAt = Object.keys(pinData).filter(function (k) { return pinData[k].live; }).map(function (k) { return pinData[k]; });
         for (var y = S / 2; y < M.h; y += S * 0.866, row++) {
           for (var x = row % 2 ? S : S / 2; x < M.w; x += S) {
             if (px[(Math.round(y * K) * cw + Math.round(x * K)) * 4] > 110) {
-              d += 'M' + (x - r).toFixed(1) + ' ' + y.toFixed(1) + 'a' + r + ' ' + r + ' 0 1 0 ' + 2 * r + ' 0a' + r + ' ' + r + ' 0 1 0 ' + -2 * r + ' 0';
+              var dot = 'M' + (x - r).toFixed(1) + ' ' + y.toFixed(1) + 'a' + r + ' ' + r + ' 0 1 0 ' + 2 * r + ' 0a' + r + ' ' + r + ' 0 1 0 ' + -2 * r + ' 0';
+              d += dot;
+              var near = hubsAt.reduce(function (m, h) { return Math.min(m, Math.hypot(h.x - x, h.y - y)); }, 1e9);
+              if (near < 10) heat[0] += dot; else if (near < 19) heat[1] += dot; else if (near < 29) heat[2] += dot;
             }
           }
         }
-        $$('.indiamap__dots').forEach(function (p) { p.setAttribute('d', d); });
+        $$('.indiamap__dots').forEach(function (p) { if (!p.classList.contains('indiamap__heat')) p.setAttribute('d', d); });
+        heat.forEach(function (h, i) { var el = $('.indiamap__heat--' + (i + 1)); if (el) el.setAttribute('d', h); });
         $('.indiamap__wrap').classList.add('has-dots');
       };
       img.src = M.img + 'land.png';
     })();
 
-    /* --- launch sequence: cities light up in the order RIDEV opened them, once, on first view --- */
-    (function () {
-      var mapWrap = $('.indiamap__wrap'), year = $('[data-map-year]'), count = $('[data-map-count]');
-      var order = D.cities.filter(function (c) { return pinData[c.city]; })
-        .map(function (c, i) { return { c: c, i: i }; })
-        .sort(function (a, b) {
-          return (a.c.status === 'live' ? 0 : 1) - (b.c.status === 'live' ? 0 : 1) ||
-                 (+a.c.since || 9999) - (+b.c.since || 9999) || a.i - b.i;
-        }).map(function (o) { return o.c; });
-      var liveAll = order.filter(function (c) { return c.status === 'live'; });
-      function tally(list) {
-        var live = list.filter(function (c) { return c.status === 'live'; });
-        var hubs = live.reduce(function (s, c) { return s + c.hubs.length; }, 0);
-        var soon = list.length - live.length;
-        return live.length + (live.length === 1 ? ' city · ' : ' cities · ') + hubs + (hubs === 1 ? ' hub' : ' hubs') +
-               (soon ? '<br>' + soon + ' opening soon' : '');  // own line, so it never wraps mid-phrase
-      }
-      function final() {
-        if (year) year.textContent = 'Today';
-        if (count) count.innerHTML = tally(order);
-        selected = selected || (D.cities[0] && D.cities[0].city);
-        glowAt(selected);
-      }
-      var pinsEls = $$('.pin');
-      var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduceMotion || !('IntersectionObserver' in window) || !mapWrap) { final(); return; }
-      pinsEls.forEach(function (p) { p.classList.add('is-pending'); });
-      if (year) year.textContent = liveAll[0] ? liveAll[0].since : '';
-      var io = new IntersectionObserver(function (es) {
-        if (!es[0].isIntersecting) return;
-        io.disconnect();
-        order.forEach(function (c, i) {
-          setTimeout(function () {
-            var pin = pinsEls.filter(function (p) { return p.dataset.city === c.city; })[0];
-            if (pin) { pin.classList.remove('is-pending'); pin.classList.add('is-arriving'); }
-            if (year) year.textContent = c.status === 'live' ? c.since : year.textContent;
-            if (count) count.innerHTML = tally(order.slice(0, i + 1));
-            glowAt(c.city);
-            if (i === order.length - 1) setTimeout(final, 900);
-          }, 300 + i * 420);
-        });
-      }, { threshold: 0.4 });
-      io.observe(mapWrap);
-    })();
+    // Keep every city available immediately, with a quiet selected state.
+    selectCity(selected);
 
     /* --- viewBox zoom (smooth tween) --- */
     var svg = $('.indiamap');
@@ -920,6 +977,12 @@
     function tween(target, dur) {
       if (!svg) return;
       if (raf) cancelAnimationFrame(raf);
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        svg.setAttribute('viewBox', target.join(' '));
+        wrap.style.setProperty('--zoom', (M.w / target[2]).toFixed(3));
+        raf = null;
+        return;
+      }
       var start = svg.getAttribute('viewBox').split(/\s+/).map(Number);
       var t0 = null;
       function tick(t) {
@@ -935,51 +998,63 @@
     }
     function zoomTo(city) {
       var p = pinData[city]; if (!p) return;
-      var scale = 3.2;
+      var scale = 2.3;
       var w = M.w / scale, h = M.h / scale;
       var x = Math.max(0, Math.min(M.w - w, p.x - w / 2));
       var y = Math.max(0, Math.min(M.h - h, p.y - h / 2));
       tween([x, y, w, h], 720);
       wrap.classList.add('is-zoomed');
+      if (resetBtn) resetBtn.hidden = false;
       zoomedCity = city;
-      if (hint) hint.textContent = 'Zoomed to ' + city + ' · click the pin again for Google Maps · click outside to reset';
+      if (hint) hint.textContent = city + ' in focus · select All cities to return.';
     }
     function zoomReset() {
       tween(baseVB, 620);
       wrap.classList.remove('is-zoomed');
+      if (resetBtn) resetBtn.hidden = true;
       zoomedCity = null;
-      if (hint) hint.textContent = 'Click a pin to zoom in · click again for Google Maps';
+      if (hint) hint.textContent = 'Select a city on the map to explore.';
     }
 
     $$('.pin').forEach(function (p) {
       wire(p, p.dataset.city);
-      p.addEventListener('click', function (e) {
-        // if the click landed on the tooltip's "Open on Maps" link, let the anchor handle it
-        if (e.target.closest('a')) return;
-        e.stopPropagation();
+      function activate() {
         var city = p.dataset.city;
         if (zoomedCity === city) {
-          // second click on the same pin → open Google Maps
-          var d = pinData[city];
-          if (d) window.open(mapsUrl(city + ', ' + d.state + ', India'), '_blank', 'noopener');
+          zoomReset();
         } else {
           zoomTo(city);
           document.dispatchEvent(new CustomEvent('ridev:pin', { detail: { city: city } }));
         }
+      }
+      p.addEventListener('click', function (e) {
+        e.stopPropagation();
+        activate();
       });
       p.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); p.click(); }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
       });
     });
     // city picker ↔ map: hovering a city lights its pin; picking one zooms the map to it
     $$('.hubx__city').forEach(function (t) { wire(t, t.dataset.city); });
     document.addEventListener('ridev:city', function (e) {
-      selected = e.detail.city; glowAt(selected);
+      selectCity(e.detail.city);
       if (pinData[e.detail.city]) zoomTo(e.detail.city);
     });
-    document.addEventListener('ridev:pin', function (e) { selected = e.detail.city; glowAt(selected); });
+    document.addEventListener('ridev:pin', function (e) { selectCity(e.detail.city); });
 
-    if (resetBtn) resetBtn.addEventListener('click', zoomReset);
+    if (resetBtn) resetBtn.addEventListener('click', function () {
+      zoomReset();
+      var pin = $$('.pin').filter(function (p) { return p.dataset.city === selected; })[0];
+      if (pin) pin.focus({ preventScroll: true });
+    });
+    $('.indiamap__explore').addEventListener('click', function () {
+      var list = $('[data-r="cityList"]');
+      if (!list) return;
+      list.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+      var panel = $('.hubx__panel', list);
+      if (panel) panel.focus({ preventScroll: true });
+    });
     // click on empty map area → reset
     if (svg) svg.addEventListener('click', function (e) {
       if (e.target.closest('.pin,a')) return;
@@ -1414,15 +1489,21 @@
      ============================================================ */
   (function () {
     var root = document.documentElement;
-    function set(t) {
+    function set(t, remember) {
       root.setAttribute('data-theme', t);
-      try { localStorage.setItem('ridev-theme', t); } catch (e) {}
+      if (remember) { try { localStorage.setItem('ridev-theme', t); } catch (e) {} }
       var m = $('meta[name="theme-color"]');
       if (m) m.setAttribute('content', t === 'dark' ? '#0B0F0C' : '#FFFFFF');
+      $$('[data-theme-toggle]').forEach(function (button) {
+        var label = 'Switch to ' + (t === 'dark' ? 'light' : 'dark') + ' mode';
+        button.setAttribute('aria-label', label);
+        button.title = label;
+      });
     }
+    set(root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'), false);
     $$('[data-theme-toggle]').forEach(function (b) {
       b.addEventListener('click', function () {
-        set(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        set(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true);
       });
     });
     if (window.matchMedia) {
@@ -1437,96 +1518,28 @@
      ============================================================ */
   (function () {
     if (!$$('[data-r="flowSteps"]').length) return;
-    var flowVisual = document.querySelector('[data-flow-transition]');
-    if (flowVisual) {
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
-        flowVisual.classList.add('is-ready');
-      } else {
-        var flowObserver = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
-            flowVisual.classList.add('is-ready');
-            flowObserver.disconnect();
-          });
-        }, { threshold: 0.25 });
-        flowObserver.observe(flowVisual);
-      }
-    }
     var steps = D.onboarding || [];
-    var planCity = Object.keys(D.plans)[0];
-    var plan = D.plans[planCity][0];
-    var city = D.cities.filter(function (c) { return c.city === planCity; })[0] || D.cities[0];
-    var hub = (city.hubs || [])[0] || { name: city.city, area: city.state };
-    var wk = n(plan.week), dep = n(2000);
+    var previewPhone = document.querySelector('#how .flow__phone .phone');
 
-    function head() { return '<div class="pb__hd"><span class="pb__logo"></span><span class="pb__dot"></span></div>'; }
-    function row(k, v) { return '<div class="pb__row"><span>' + k + '</span><b>' + v + '</b></div>'; }
-
-    var SCREENS = {
-      app: head() +
-        '<div class="pb__card" style="text-align:center">' +
-          '<div class="pb__lbl">Google Play</div>' +
-          '<div class="pb__model" style="margin-top:8px">RIDEV</div>' +
-          '<p style="font-size:11px;color:var(--text-3);margin-bottom:12px">Rent an electric two-wheeler</p>' +
-          '<div class="pb__pay">Install</div>' +
+    function stepImage(step) { return 'assets/img/steps/' + step.k + '.jpg'; }
+    function preview(step, index) {
+      return '<div class="pb__hd"><span class="pb__logo"></span>' +
+          '<span class="flow-preview__step">Step ' + String(index + 1).padStart(2, '0') + ' / ' + String(steps.length).padStart(2, '0') + '</span></div>' +
+        '<div class="flow-preview__content">' +
+          '<img class="flow-preview__image" src="' + stepImage(step) + '" alt="" onerror="this.remove()">' +
+          '<div class="flow-preview__caption"><h3>' + step.t + '</h3><p>' + step.b + '</p></div>' +
         '</div>' +
-        '<div class="pb__tiles"><div class="pb__tile"><b>4.5&#9733;</b><span>rated</span></div>' +
-          '<div class="pb__tile"><b>Free</b><span>to download</span></div></div>',
-
-      kyc: head() +
-        '<div class="pb__card">' +
-          '<div class="pb__lbl">Verify your number</div>' +
-          '<div class="pb__model">+91 98••• •••21</div>' +
-          '<div class="pb__otp"><i>4</i><i>1</i><i>9</i><i class="on"></i></div>' +
-          '<div class="pb__pay">Verify</div>' +
-        '</div>' +
-        '<div class="pb__doc">' + CHK + 'Driving licence</div>' +
-        '<div class="pb__doc">' + CHK + 'Aadhaar</div>',
-
-      pick: head() +
-        '<div class="pb__lbl" style="margin:2px 0 6px">' + planCity + ' · ' + hub.name + '</div>' +
-        D.plans[planCity].slice(0, 3).map(function (p, i) {
-          return '<div class="pb__pick' + (i === 0 ? ' on' : '') + '">' +
-            '<div><b>' + p.model + '</b><span>' + p.range_km + ' km · ' + p.batteries + ' batteries</span></div>' +
-            '<em>₹' + n(p.week) + '</em></div>';
-        }).join(''),
-
-      book: head() +
-        '<div class="pb__card">' +
-          '<div class="pb__lbl">Reserved for you</div>' +
-          '<div class="pb__model">' + plan.brand + ' ' + plan.model + '</div>' +
-          row('Hub', hub.name) + row('Held until', 'tomorrow, 6 pm') +
-          '<div class="pb__pay">Confirm booking</div>' +
-        '</div>' +
-        '<div class="pb__hub"><span class="pb__pin"></span><div><b>' + hub.name + '</b>' +
-          '<span>' + hub.area + ' · open now</span></div></div>',
-
-      pay: head() +
-        '<div class="pb__card">' +
-          '<div class="pb__lbl">Pay to start</div>' +
-          row('Week 1 rent', '₹' + wk) + row('Refundable deposit', '₹' + dep) +
-          '<div class="pb__tot"><span>Total today</span><b>₹' + n(plan.week + 2000) + '</b></div>' +
-          '<div class="pb__pay">Pay ₹' + n(plan.week + 2000) + '</div>' +
-        '</div>' +
-        '<div class="pb__tiles"><div class="pb__tile"><b>UPI</b><span>instant</span></div>' +
-          '<div class="pb__tile"><b>Card</b><span>or netbanking</span></div></div>',
-
-      ride: head() +
-        '<div class="pb__card">' +
-          '<div class="pb__lbl">Your plan · active</div>' +
-          '<div class="pb__model">' + plan.brand + ' ' + plan.model + '</div>' +
-          row('Weekly rent', '₹' + wk) + row('Next due', 'in 7 days') +
-          '<div class="pb__pay">Pay next week</div>' +
-        '</div>' +
-        '<div class="pb__tiles"><div class="pb__tile"><b>Swap</b><span>battery</span></div>' +
-          '<div class="pb__tile"><b>Service</b><span>request</span></div></div>' +
-        '<div class="pb__hub"><span class="pb__pin"></span><div><b>' + hub.name + '</b>' +
-          '<span>' + hub.area + ' · open now</span></div></div>'
-    };
+        '<div class="flow-preview__progress">' + steps.map(function (_, i) {
+          return '<span' + (i === index ? ' class="is-current"' : '') + '></span>';
+        }).join('') + '</div>';
+    }
 
     fill('flowSteps', steps.map(function (s, i) {
-      return '<li class="flowstep' + (i === 0 ? ' on is-current' : '') + '" data-index="' + i + '" data-screen="' + s.screen + '" tabindex="0" role="button" aria-hidden="' + (i === 0 ? 'false' : 'true') + '">' +
-        '<span class="flowstep__n">' + (i + 1) + '</span>' +
+      return '<li class="flowstep' + (i === 0 ? ' on is-current' : '') + '" data-index="' + i + '" data-screen="' + s.screen + '" tabindex="0" role="button" aria-pressed="' + (i === 0 ? 'true' : 'false') + '">' +
+        '<div class="flowstep__media">' +
+          '<img class="flowstep__image" src="' + stepImage(s) + '" alt="" loading="lazy" onerror="this.remove()">' +
+          '<span class="flowstep__n">' + (i + 1) + '</span>' +
+        '</div>' +
         '<div><b>' + s.t + '</b><p>' + s.b + '</p></div>' +
       '</li>';
     }).join(''));
@@ -1536,13 +1549,14 @@
     function showAt(index) {
       if (!steps.length) return;
       current = (index + steps.length) % steps.length;
-      var key = steps[current].screen;
-      fill('flowScreen', SCREENS[key] || SCREENS.app);
+      var selected = steps[current];
+      fill('flowScreen', preview(selected, current));
+      if (previewPhone) previewPhone.setAttribute('aria-label', selected.t + '. ' + selected.b);
       $$('.flowstep').forEach(function (el, i) {
         var active = i === current;
         el.classList.toggle('on', active);
         el.classList.toggle('is-current', active);
-        el.setAttribute('aria-hidden', active ? 'false' : 'true');
+        el.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
       if (flowNav) {
         var count = $('[data-flow-count]', flowNav);
@@ -1951,8 +1965,9 @@
         es.forEach(function (e) {
           var a = map[e.target.id];
           if (a && e.isIntersecting) {
-            links.forEach(function (x) { x.classList.remove('is-here'); });
+            links.forEach(function (x) { x.classList.remove('is-here'); x.removeAttribute('aria-current'); });
             a.classList.add('is-here');
+            a.setAttribute('aria-current', 'location');
           }
         });
       }, { rootMargin: '-45% 0px -50% 0px' });
@@ -2043,6 +2058,7 @@
       var timer = null, paused = false;
       function tick(){
         if (paused) return;
+        i = steps.findIndex(function(s){ return s.classList.contains('on'); });
         i = (i + 1) % steps.length;
         steps[i].click();
       }
@@ -2100,10 +2116,10 @@
     /* --- sticky mobile CTA: visible after user scrolls past the hero, hide over the CTA band --- */
     (function () {
       var cta = $('.stickycta'); if (!cta) return;
-      var hero = $('.hero');
+      var hero = $('.mobility-hero, .hero');
       var getSec = $('#get');
       function eval$() {
-        var scrolled = hero ? (window.scrollY > hero.offsetHeight * 0.6) : true;
+        var scrolled = hero ? hero.getBoundingClientRect().bottom < 100 : true;
         var atCTA = false;
         if (getSec) {
           var r = getSec.getBoundingClientRect();

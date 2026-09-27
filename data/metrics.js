@@ -85,6 +85,7 @@ window.RIDEV_DATA = {
     },
     {
       "city": "Chennai",
+      "hero_badge": "New hub soon",
       "state": "Tamil Nadu",
       "status": "live",
       "since": "2025",
@@ -130,8 +131,7 @@ window.RIDEV_DATA = {
       ],
       "lat": 28.46,
       "lon": 77.03,
-      "dx": -14,
-      "dy": 16
+      "dx": -4, "dy": 3
     },
     {
       "city": "Mumbai",
@@ -169,6 +169,7 @@ window.RIDEV_DATA = {
     },
     {
       "city": "Bengaluru",
+      "hero_badge": "Just opened",
       "state": "Karnataka",
       "status": "live",
       "since": "2026",

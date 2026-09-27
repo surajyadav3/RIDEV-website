@@ -8,6 +8,7 @@ package-lock.json
 
 # scratch output: dev screenshots, server pids, backups, exports
 /.*.png
+Screenshot *.png
 *.pid
 *.bak
 *.zip

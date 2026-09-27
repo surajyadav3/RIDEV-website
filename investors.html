@@ -12,7 +12,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/ridev.css?v=20260923-dotmap-4">
+<link rel="stylesheet" href="assets/css/ridev.css?v=20260927-mobility23">
+<link rel="stylesheet" href="assets/css/mobility.css?v=20260927-mobility28">
+<link rel="stylesheet" href="assets/css/energy-cable.css?v=20260927-mobility23">
+<link rel="preload" as="image" href="assets/img/image_2.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230A0D0A'/><path d='M18.5 4.5 8.5 18.5h6l-2 9 10-14h-6.5z' fill='%2395DB67'/></svg>">
 <script>
 /* set the theme before first paint so there is no flash */
@@ -21,7 +24,7 @@ if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
 document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 </script>
 </head>
-<body data-audience="investor">
+<body class="mobility-site investor-page" data-audience="investor">
 
 <div class="ticker">
   <div class="wrap">Company overview. Financials, unit economics and the capital plan are shared directly, under NDA — <a href="mailto:info@ridev.in?subject=Investor%20enquiry">info@ridev.in</a></div>
@@ -30,12 +33,12 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 <header class="nav">
   <div class="wrap nav__in">
     <a class="logo" href="index.html" aria-label="RIDEV home"><span class="logo__mark" role="img" aria-label="RIDEV"></span></a>
-    <nav class="nav__links">
-      <a href="#model">The model</a>
-      <a href="#growth">Growth</a>
-      <a href="#markets">Markets</a>
-      <a href="#milestones">Milestones</a>
-      <a href="#team">Team</a>
+    <nav class="nav__links" id="primary-navigation" aria-label="Main navigation">
+      <a href="#model">The model <small class="nav__note">How RIDEV works</small></a>
+      <a href="#growth">Growth <small class="nav__note">Our progress in numbers</small></a>
+      <a href="#markets">Markets <small class="nav__note">Where we operate</small></a>
+      <a href="#milestones">Milestones <small class="nav__note">The journey so far</small></a>
+      <a href="#team">Team <small class="nav__note">People behind RIDEV</small></a>
     </nav>
     <div class="nav__cta">
       <button class="themebtn" data-theme-toggle aria-label="Switch between light and dark">
@@ -46,32 +49,39 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
       <a class="btn btn--ghost btn--sm" href="index.html">Rider site</a>
       <a class="btn btn--primary btn--sm" href="mailto:info@ridev.in?subject=Investor%20enquiry">Get in touch</a>
     </div>
-    <button class="nav__burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <button class="nav__burger" aria-label="Open menu" aria-expanded="false" aria-controls="primary-navigation"><span></span><span></span><span></span></button>
   </div>
 </header>
 
 <!-- ══════════ 1 · hero ══════════ -->
-<section class="hero">
+<section class="hero investor-hero" aria-labelledby="investor-title">
   <div class="wrap">
-    <div style="max-width:880px">
-      <div class="eyebrow">Investors · <span data-fill="_meta.snapshot_label"></span></div>
-      <h1 class="h-xl">From <span class="hl">10 vehicles</span> to <span class="hl">12,000</span> in twenty-five months.</h1>
-      <p class="hero__sub" style="max-width:62ch">
-        RIDEV owns an electric two-wheeler fleet and rents it, week by week, to India's delivery
-        riders — with energy, maintenance, replacement vehicles and insurance bundled into one price.
-      </p>
-      <div class="btn-row">
-        <a class="btn btn--primary" href="mailto:info@ridev.in?subject=Investor%20enquiry">Request the data room</a>
-        <a class="btn btn--ghost" href="#growth">See the trajectory</a>
+    <div class="investor-hero__frame">
+      <div class="investor-hero__lead">
+        <div class="investor-hero__copy">
+          <div class="eyebrow">Investors · <span data-fill="_meta.snapshot_label"></span></div>
+          <h1 id="investor-title"><span>From 10 vehicles to</span><strong>12,000.</strong><span class="investor-hero__period">In twenty-five months.</span></h1>
+          <p class="hero__sub">RIDEV owns an electric two-wheeler fleet and rents it, week by week, to India's delivery riders — with energy, maintenance, replacement vehicles and insurance bundled into one price.</p>
+          <div class="btn-row">
+            <a class="btn btn--primary" href="mailto:info@ridev.in?subject=Investor%20enquiry">Request data room <span aria-hidden="true">↗</span></a>
+            <a class="investor-hero__growth" href="#growth">See growth <span aria-hidden="true">↗</span></a>
+          </div>
+          <p class="investor-hero__foot"><span aria-hidden="true"></span>Electric mobility. Built around the rider.</p>
+        </div>
+        <figure class="investor-hero__visual">
+          <img src="assets/img/image_2.png" width="2048" height="744" alt="RIDEV electric scooter displayed at a branded mobility hub" fetchpriority="high">
+          <span class="investor-hero__tag">RIDEV / Electric fleet</span>
+          <figcaption><span>More than a vehicle.</span><strong>A platform for<br>everyday progress.</strong><p>Vehicles. Energy. Service.<br>One weekly subscription.</p></figcaption>
+        </figure>
       </div>
-    </div>
-    <div class="hstrip" data-r="invStrip">
-      <div class="hstat"><i class="hstat__rule"></i><b>12,000+</b><span>Vehicles owned</span></div>
-      <div class="hstat"><i class="hstat__rule"></i><b>88%</b><span>Fleet utilisation</span></div>
-      <div class="hstat"><i class="hstat__rule"></i><b>10,000+</b><span>Active subscriptions</span></div>
-      <div class="hstat"><i class="hstat__rule"></i><b>15</b><span>Cities live</span></div>
-      <div class="hstat"><i class="hstat__rule"></i><b>15+</b><span>Operating hubs</span></div>
-      <div class="hstat"><i class="hstat__rule"></i><b>6</b><span>OEM partners</span></div>
+      <div class="hstrip" data-r="invStrip" aria-label="RIDEV at a glance">
+        <div class="hstat"><i class="hstat__rule"></i><b>12,000+</b><span>Vehicles owned</span></div>
+        <div class="hstat"><i class="hstat__rule"></i><b>88%</b><span>Fleet utilisation</span></div>
+        <div class="hstat"><i class="hstat__rule"></i><b>10,000+</b><span>Active subscriptions</span></div>
+        <div class="hstat"><i class="hstat__rule"></i><b>15</b><span>Cities live</span></div>
+        <div class="hstat"><i class="hstat__rule"></i><b>15+</b><span>Operating hubs</span></div>
+        <div class="hstat"><i class="hstat__rule"></i><b>6</b><span>OEM partners</span></div>
+      </div>
     </div>
   </div>
 </section>
@@ -79,14 +89,20 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 <!-- ══════════ 2 · the model ══════════ -->
 <section class="sec sec--paper2" id="model">
   <div class="wrap">
-    <div class="sec-head">
-      <div class="eyebrow">The model</div>
-      <h2 class="h-lg">A rider cannot buy a ₹1.2 lakh vehicle. A fleet operator can buy six thousand.</h2>
-      <p class="lede mt-s">
-        India's gig workforce runs on two-wheelers it cannot afford to own, service or replace.
-        RIDEV takes the asset, the energy and the downtime off the rider and prices the whole thing
-        as one weekly number.
-      </p>
+    <div class="investor-model__intro">
+      <div class="sec-head">
+        <div class="eyebrow">The model</div>
+        <h2 class="h-lg">A rider cannot buy a ₹1.2 lakh vehicle. A fleet operator can buy six thousand.</h2>
+        <p class="lede mt-s">
+          India's gig workforce runs on two-wheelers it cannot afford to own, service or replace.
+          RIDEV takes the asset, the energy and the downtime off the rider and prices the whole thing
+          as one weekly number.
+        </p>
+      </div>
+      <figure class="investor-model__photo">
+        <img src="assets/img/image.png" width="1672" height="941" alt="RIDEV delivery riders wearing branded helmets and uniforms" loading="lazy">
+        <figcaption>Behind every vehicle,<br><strong>a rider moving forward.</strong></figcaption>
+      </figure>
     </div>
     <div class="grid g3" data-r="modelCards"></div>
   </div>
@@ -220,7 +236,7 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
         <div>
           <div class="btn-row">
             <a class="btn btn--primary" href="mailto:info@ridev.in?subject=Investor%20enquiry">info@ridev.in</a>
-            <a class="btn btn--ghost" href="https://www.linkedin.com/company/ridev-official/" target="_blank" rel="noopener">RIDEV on LinkedIn</a>
+            <a class="btn btn--linkedin" href="https://www.linkedin.com/company/ridev-official/" target="_blank" rel="noopener noreferrer">RIDEV on LinkedIn</a>
           </div>
           <p class="muted mt-m">ANV Web Ventures Private Limited · incorporated 26 April 2024</p>
         </div>
@@ -278,9 +294,10 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
   </div>
 </footer>
 
-<script src="data/metrics.js?v=20260923-vehicles"></script>
+<script src="data/metrics.js?v=20260927-hublist"></script>
 <script src="assets/js/india-map.js?v=20260923-kpi-fix-2"></script>
-<script src="assets/js/ridev.js?v=20260923-dotmap-4"></script>
+<script src="assets/js/ridev.js?v=20260927-mobility23"></script>
+<script src="assets/js/energy-cable.js?v=20260927-mobility23"></script>
 <script>
 (function(){
   try {

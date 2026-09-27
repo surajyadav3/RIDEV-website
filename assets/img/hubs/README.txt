@@ -16,10 +16,13 @@ Expected file names — city-hub, all lowercase, hyphenated:
   bengaluru-koramangala.jpg
 
 Optimal size: 1280 x 800 (16:10, landscape), < 250 KB, sRGB.
-PNG, WebP or JPG all work — the site tries .png, .webp, .jpg, .jpeg in that order.
+PNG, WebP or JPG all work. After adding a photo, set the corresponding hub's
+"image" field in data/metrics.js, for example:
+"image": "assets/img/hubs/delhi-lawrence-road.jpg"
+The site loads that exact path. Hubs without an image field make no photo request.
 These fill the large 16:10 preview in the "Where we operate" section (home page).
-Until a real photo exists, the preview shows a quiet "Hub photo coming soon"
-placeholder so the layout never breaks. Keep the bottom ~20% free of key detail —
+Until a real photo is configured, the preview shows a location illustration.
+Keep the bottom ~20% free of key detail —
 the hub name and Directions button sit over it.
 
 Any of these can also be swapped for a Google Street View screenshot of that address.

@@ -1,10 +1,13 @@
-﻿Drop real ESG photos here (JPG/PNG/WebP).
-Expected file names (matched by data/metrics.js → esg.pillars[].image):
+Photos for the Environmental / Social / Governance cards (home page, "The work behind the green claims").
+File names are matched by data/metrics.js -> esg.pillars[].image. Shown as a 176 px band across the top of each card.
 
-  environmental.jpg   — clean city street, trees, solar, or an EV on a green route
-  social.jpg          — a rider or team at a hub (portrait or 16:9 crop)
-  governance.jpg      — a workshop bay, tablet dashboard, or clipboard — the "measured" story
+Current photos — all free under the Unsplash License (commercial use allowed, no attribution required):
+  environmental.jpg  "Sunbeams filter through a lush, green forest canopy" — Gaurav Pandit
+                     https://unsplash.com/photos/4ZH0eLMtWJk
+  social.jpg         "A tree-lined road through green fields under blue sky" — Sergej (@skstrannik)
+                     https://unsplash.com/photos/JKB9lSFpayE
+  governance.jpg     "A lone tree in a field of green grass" — Wolfgang Hasselmann
+                     https://unsplash.com/photos/MBCmvjLScEI
 
-Optimal size: 1200 x 675 (16:9), < 200 KB, sRGB.
-Until a real photo is present, the card automatically shows the built-in SVG art
-for that pillar (leaf / people / shield) so nothing looks empty.
+To replace one: keep the file name, landscape ~1200 x 640, < 250 KB, subject in the upper-middle
+(the bottom of the photo fades into the card).

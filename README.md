@@ -1,10 +1,48 @@
 # RIDEV — website
 
+## September 2026 UI refresh
+
+The current UI uses `assets/css/mobility.css` after the original component stylesheet.
+Its product-focused layout adapts ideas from the supplied
+[Eco-Mobility reference](https://dribbble.com/shots/27568657-Eco-Mobility-Landing-Page-Design)
+and [VELOCYN reference](https://dribbble.com/shots/26891576-VELOCYN-Electric-Bike-Hero-Section),
+using RIDEV's own brand colours, product images and rental content.
+
+- The homepage hero rotates through rental, hubs and company story every three seconds,
+  with a short fade transition. Plain, borderless `<` and `>` controls flank the slide
+  tabs inside the bottom of the hero on every screen size; there is no pause button.
+  Rotation pauses while hovering over slide content, focusing its links or tabs, or
+  scrolling the hero out of view. Reduced-motion users have automatic rotation and
+  transitions disabled.
+  Arrow keys, Home and End work on the tabs. Hidden panels are removed from the keyboard
+  order. The hubs tab introduces bike pickup, battery swaps and rider support.
+  Four city cards (Delhi, Bangalore, Chennai and Jaipur) link to the matching hub finder
+  selection and show opening status from `data/metrics.js`. They sit in a two-by-two
+  grid on the left, followed by the Explore our hubs button. The original Bengaluru
+  and Chennai/Jaipur Instagram previews sit on the right on a generated map background;
+  see [asset and generation prompt](assets/img/map/hub-locations-v1.md).
+  Instagram and YouTube embeds load when their panel opens and unload when
+  it closes. The first slide uses the fleet-driver photo (`assets/img/image.png`)
+  as its background, with a dark overlay for readable text. The hero uses compact
+  spacing on desktop and mobile. The story slide restores its original showroom
+  background (`assets/img/image_2.png`) behind the copy and video.
+- Pricing retains city-specific data and now presents larger vehicle photos; booking links
+  open the existing RIDEV app listing.
+- Shared navigation, typography, buttons and surfaces apply to all three pages. Both
+  colour themes and reduced-motion preferences are supported.
+- The mobile app CTA appears after the hero. The navigation button exposes its open state
+  and supports Escape to close.
+- Real hub photos are opt-in through `cities[].hubs[].image` in `data/metrics.js`; see
+  `assets/img/hubs/README.txt`. Otherwise the location illustration remains visible.
+
+These notes describe the current implementation. Older sections below include historical
+details (including previous fonts, hero layout and asset availability).
+
 A self-contained static site. No build step, no framework, no dependencies.
 Drop the folder on any host (Netlify, S3, nginx, the existing ridev.in server) and it works.
 
 ```
-(repo root)/
+(website root)/
 ├── index.html          # rider + fleet-customer site
 ├── business.html       # business partnerships page
 ├── investors.html      # INVESTOR tab — every granular metric + growth trajectory
@@ -24,6 +62,7 @@ Drop the folder on any host (Netlify, S3, nginx, the existing ridev.in server) a
 ## 1. Run it locally
 
 ```bash
+# From the folder containing index.html
 python3 -m http.server 8787
 ```
 → http://localhost:8787/ — the pages need to be served (not opened as files) so the data and map scripts load.
@@ -313,6 +352,7 @@ RIDEV can't out-scale Zypp today, so the page competes on specificity instead.
 ## 8. Local preview
 
 ```bash
+# From the folder containing index.html
 python3 -m http.server 8787
 ```
 
